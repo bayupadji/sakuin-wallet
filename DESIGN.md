@@ -1,78 +1,61 @@
-# Design Direction: Dompet Digital Dollar
+# Design System: Dompet Digital Dollar
 
-Visual foundation and design system rules for Dompet Digital Dollar.
-Created under **antislop** (DURING mode) and **Modern Fintech Minimalist** principles.
-
----
-
-## 1. Brand Identity & Personality
-
-- **Identity**: Secure, friction-free USD digital wallet for Indonesian digital workers, freelancers, and businesses.
-- **Personality**: Precise, trustworthy, calm, and institutional without being bureaucratic.
-- **Core Principle**: Form follows financial clarity. Every element exists to provide clarity on balance, FX exchange rates, fees, and transaction states.
+A modern, minimalist, premium fintech experience inspired by the precision and craftsmanship of **Linear, Revolut, Wise, Ramp, and Apple Wallet**.
 
 ---
 
-## 2. Design Dials
+## 1. Design Direction & Character
 
-| Dial | Level (1-3) | Meaning |
-| --- | --- | --- |
-| **ENERGY** | 2 | Restrained, clean surfaces with crisp typography and intentional accents. No loud or random visual noise. |
-| **RHYTHM** | 2 | Balanced grid rhythm. Clear separation between account overview, quick actions, and data ledger. |
-| **MOTION** | 1 | Functional micro-interactions only (state changes, feedback <= 150ms). Zero looping decorative pulses or gratuitous floating animations. |
-
----
-
-## 3. Color System (Strict Max 2-3 Cores + 1 Primary Accent)
-
-### Neutrals (Base)
-- Light Surface: `#FFFFFF` (pure surface), `#F8FAFC` (slate-50 background)
-- Borders & Dividers: `#E2E8F0` (slate-200), `#CBD5E1` (slate-300)
-- Text Hierarchy:
-  - Primary text: `#0F172A` (slate-900, contrast > 12:1)
-  - Secondary text: `#475569` (slate-600, contrast > 5.5:1, passes WCAG AA 4.5:1)
-  - Muted text: `#64748B` (slate-500, contrast > 4.6:1 against white)
-
-### Dark Mode Parity
-- Dark Surface: `#0B0F17` (deep slate base), `#151D2A` (card surface)
-- Dark Borders: `#1E293B` (slate-800)
-- Dark Text:
-  - Primary text: `#F8FAFC` (slate-50)
-  - Secondary text: `#94A3B8` (slate-400, contrast > 6:1)
-
-### Accents (Purpose-Bound)
-- **Primary Financial Accent**: Emerald / Teal (`#0D9488` / Tailwind `teal-600`, dark mode `#14B8A6` / `teal-500`). Used strictly for primary action CTA, active wallet balance highlights, and success verification badges.
-- **Alert / Destructive**: Crimson (`#E11D48` / `rose-600`). Used strictly for errors, freeze card, and negative ledger adjustments.
-- **Pending / In Review**: Amber (`#D97706` / `amber-600`). Used for pending KYC or awaiting gateway webhook.
-
-*Rules:*
-- No generic blue-to-purple or neon gradients.
-- Gradients are banned except for subtle linear debit card simulation.
-- Glow effects are never used as primary affordances.
+- **Aesthetic**: Minimalist, elegant, restrained, and unmistakably financial.
+- **Visual Personality**: High-trust, Swiss-style precision, calm surfaces, crisp hairline borders, and purposeful whitespace.
+- **Core Tenet**: Clear financial data over visual noise. Every number, status, and button has an intentional reason to exist.
+- **Anti-Patterns Rejected**:
+  - No bloated multi-color gradients or neon glows.
+  - No decorative AI capsule pills without real status.
+  - No emoji as navigation icons.
+  - No floating excessive blur or glassmorphism everywhere.
 
 ---
 
-## 4. Typography & Numbers
+## 2. Design Tokens
 
-- **UI Sans**: `var(--font-geist-sans)`, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif.
-- **Financial Monospace**: `var(--font-geist-mono)`, 'SFMono-Regular', Consolas, monospace.
-- **Formatting Rules**:
-  - All currency numbers **MUST** use `tabular-nums` to prevent horizontal jitter during updates.
-  - Dollar amounts formatted as `$1,234.56` (stored strictly as integer cents in database/domain).
-  - Rupiah amounts formatted as `Rp 1.500.000` (stored strictly as integer IDR).
-  - Headings use `text-balance`, body paragraphs use `text-pretty`.
+### Spacing System (8px Grid)
+- Base Unit: `4px` / `8px`
+- Scales: `xs (4px)`, `sm (8px)`, `md (16px)`, `lg (24px)`, `xl (32px)`, `2xl (48px)`, `3xl (64px)`
+- Tap Target Minimum: `44px` on all mobile and desktop controls.
+
+### Color Tokens
+
+| Token | Light Mode | Dark Mode | Usage |
+|---|---|---|---|
+| `background` | `#F8FAFC` (Slate 50) | `#090D14` (Obsidian) | App root canvas |
+| `card` | `#FFFFFF` | `#111726` | Financial cards & modals |
+| `foreground` | `#0F172A` (Slate 900) | `#F8FAFC` (Slate 50) | Primary typography (contrast > 12:1) |
+| `muted-foreground` | `#64748B` (Slate 500) | `#94A3B8` (Slate 400) | Secondary labels (contrast > 4.5:1) |
+| `border` | `#E2E8F0` (Slate 200) | `#1E293B` (Slate 800) | Hairline 1px dividers & cards |
+| `accent` | `#0D9488` (Teal 600) | `#14B8A6` (Teal 500) | Primary financial CTA & active metrics |
+| `destructive` | `#E11D48` (Rose 600) | `#F43F5E` (Rose 500) | Freeze card, errors, negative deltas |
+| `warning` | `#D97706` (Amber 600) | `#F59E0B` (Amber 500) | Pending KYC, awaiting webhook |
+
+### Typography Scale
+- **Headings**: `var(--font-geist-sans)` with `font-bold` or `font-semibold`, `text-balance`.
+- **Financial Values**: `var(--font-mono)` with `tabular-nums tracking-tight font-bold`.
+- **Body & Labels**: `var(--font-geist-sans)`, `text-pretty`.
 
 ---
 
-## 5. Component & Interaction Constraints
+## 3. Financial Components Architecture
 
-- **Touch Targets**: Minimum 44px x 44px for every interactive element on mobile and desktop.
-- **Focus Rings**: Never use `outline: none` without a clear ring. Always use `focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2`.
-- **Destructive Actions**: Always require explicit confirmation modal (`AlertDialog` / Dialog).
-- **Icons**: Vector SVG only (Lucide Icons). Decorative icons beside text must have `aria-hidden="true"`. Standalone icon buttons must have explicit `aria-label`.
-- **Card Elevation**: Flat 1px border (`border-slate-200 dark:border-slate-800`) by default; subtle shadow (`shadow-xs` / `shadow-sm`) only for interactive hovering or popovers.
-- **States Requirement**: Every financial data component must support:
-  1. `loading`: Structural skeleton loader matching layout height.
-  2. `empty`: Clear explanation of why no records exist with a single primary action button.
-  3. `error`: Explicit failure reason and a "Try again" retry trigger.
-  4. `success`: Clear data presentation with localized WIB timestamps.
+1. **Balance & Fund Summary**:
+   - High-contrast, bold font-mono currency values (`$1,234.56`).
+   - Tactile eye toggle for balance privacy with instant state feedback.
+2. **Virtual Debit Card**:
+   - Sleek Apple Wallet-inspired physical simulation: metallic obsidian card finish, contactless waves, EMV chip visual, masked card number, and live freeze/unfreeze status badge.
+3. **Quick Action Group**:
+   - Circular/pill action buttons for Top Up, Request Card, Receive Payment, and History.
+4. **FX Rate & Exchange Ticker**:
+   - Live USD/IDR conversion indicator with guaranteed 15-minute rate lock countdown.
+5. **Activity Ledger**:
+   - High-contrast transaction rows displaying merchant name, category icon, WIB date, and color-coded tabular amounts (`+$50.00` in teal, `-$12.00` in slate).
+6. **Accessible States**:
+   - Every view must provide: loading (skeleton), empty (clear cause and single action), error (cause + retry), and success.
