@@ -16,6 +16,17 @@ const PROTECTED_ROUTES = [
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Maintenance mode enforcement (bypass for admin and API routes)
+  const isMaintenanceMode = process.env.MAINTENANCE_MODE === 'true';
+  const isMaintenanceRoute = pathname === '/maintenance';
+  const isAdminRoute = pathname.startsWith('/admin');
+  const isApiRoute = pathname.startsWith('/api');
+
+  if (isMaintenanceMode && !isAdminRoute && !isMaintenanceRoute && !isApiRoute) {
+    return NextResponse.redirect(new URL('/maintenance', request.url));
+  }
+
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
   const now = Date.now();
   const result = await verifySessionCookie(sessionCookie, now);
