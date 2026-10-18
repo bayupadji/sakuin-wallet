@@ -4,10 +4,14 @@ import { config } from '@/shared/config';
 
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
-  const url = config.supabase.url || 'https://placeholder-project.supabase.co';
-  const key =
-    config.supabase.publishableKey ||
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2MDAwMDAwMDAsImV4cCI6MTkwMDAwMDAwMH0.signature';
+  const url = config.supabase.url;
+  const key = config.supabase.publishableKey;
+
+  if (!url || !key) {
+    throw new Error(
+      'Missing Supabase credentials. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY in .env.local.'
+    );
+  }
 
   return createServerClient(url, key, {
     cookies: {
@@ -24,6 +28,24 @@ export async function createServerSupabaseClient() {
           // This can be ignored if you have middleware refreshing sessions.
         }
       },
+    },
+  });
+}
+
+export function createAdminSupabaseClient() {
+  const url = config.supabase.url;
+  const key = config.supabase.serviceRoleKey;
+
+  if (!url || !key) {
+    throw new Error(
+      'Missing Supabase service role credentials. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local.'
+    );
+  }
+
+  return createServerClient(url, key, {
+    cookies: {
+      getAll: () => [],
+      setAll: () => {},
     },
   });
 }

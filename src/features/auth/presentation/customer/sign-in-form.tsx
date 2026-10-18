@@ -2,11 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSignInMutation } from '../../application/mutations/use-auth-mutations';
 import { Button } from '@/shared/presentation/ui/button';
 import { Input } from '@/shared/presentation/ui/input';
 import { messages } from '@/shared/messages/en';
+import { Clock, ShieldAlert } from 'lucide-react';
 
 export function SignInForm() {
   const [email, setEmail] = useState('');
@@ -14,6 +15,9 @@ export function SignInForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const reason = searchParams.get('reason');
+  const redirectTarget = searchParams.get('redirect');
   const signInMutation = useSignInMutation();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -26,8 +30,9 @@ export function SignInForm() {
     }
 
     try {
-      await signInMutation.mutateAsync({ email, password });
-      router.push('/wallet');
+      const user = await signInMutation.mutateAsync({ email, password });
+      const target = redirectTarget || (user.role === 'super_admin' ? '/admin' : '/wallet');
+      router.push(target);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setErrorMessage(err.message);
@@ -39,6 +44,36 @@ export function SignInForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+      {reason === 'idle' && (
+        <div
+          role="alert"
+          className="rounded-xl border border-amber-500/30 bg-amber-950/40 p-3.5 text-xs text-amber-200 flex items-start gap-2.5"
+        >
+          <Clock className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
+          <div>
+            <p className="font-semibold">Sesi Berakhir (Idle Timeout)</p>
+            <p className="text-[11px] text-amber-300/80 mt-0.5">
+              Tidak ada aktivitas selama 30 menit. Silakan masuk kembali untuk melanjutkan akses dompet.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {reason === 'expired' && (
+        <div
+          role="alert"
+          className="rounded-xl border border-rose-500/30 bg-rose-950/40 p-3.5 text-xs text-rose-200 flex items-start gap-2.5"
+        >
+          <ShieldAlert className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" aria-hidden="true" />
+          <div>
+            <p className="font-semibold">Batas Sesi 2 Jam Habis</p>
+            <p className="text-[11px] text-rose-300/80 mt-0.5">
+              Maksimum durasi sesi perbankan (2 jam) telah tercapai demi alasan keamanan. Silakan otorisasi ulang akun Anda.
+            </p>
+          </div>
+        </div>
+      )}
+
       {errorMessage && (
         <div
           role="alert"

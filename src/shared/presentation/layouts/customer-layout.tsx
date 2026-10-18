@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/shared/utils/cn';
 import { FxRateWidget } from '@/shared/presentation/ui/fx-rate-widget';
-import { useAuthUser } from '@/features/auth';
+import { useAuthUser, useSignOutMutation } from '@/features/auth';
 import {
   Bell,
   CreditCard,
@@ -27,7 +27,17 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const { data: user } = useAuthUser();
+  const signOutMutation = useSignOutMutation();
+
+  function handleSignOut() {
+    signOutMutation.mutate(undefined, {
+      onSettled: () => {
+        router.push('/signin');
+      },
+    });
+  }
 
   const navItems = [
     { label: 'Ringkasan', href: '/wallet', icon: LayoutDashboard },
@@ -235,13 +245,14 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
 
                   <div className="border-t border-slate-800 my-1" />
 
-                  <Link
-                    href="/signin"
-                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors"
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className="w-full text-left flex items-center gap-2 rounded-lg px-3 py-2 text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors cursor-pointer"
                   >
                     <LogOut className="h-4 w-4" aria-hidden="true" />
                     <span>Keluar (Sign Out)</span>
-                  </Link>
+                  </button>
                 </div>
               )}
             </div>

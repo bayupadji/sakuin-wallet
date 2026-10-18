@@ -14,10 +14,17 @@ interface WalletRow {
 }
 
 export class WalletSupabaseRepository implements WalletRepository {
-  private client = createClient();
+  private _client?: ReturnType<typeof createClient>;
+
+  private get client() {
+    if (!this._client) {
+      this._client = createClient();
+    }
+    return this._client;
+  }
 
   async getWallet(userId?: string): Promise<Wallet | null> {
-    if (!config.supabase.url) {
+    if (!config.supabase.isConfigured) {
       return null;
     }
 

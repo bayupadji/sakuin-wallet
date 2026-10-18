@@ -103,10 +103,17 @@ const SEED_TRANSACTIONS: TransactionItem[] = [
 let inMemoryTransactions = [...SEED_TRANSACTIONS];
 
 export class TransactionSupabaseRepository implements TransactionRepository {
-  private client = createClient();
+  private _client?: ReturnType<typeof createClient>;
+
+  private get client() {
+    if (!this._client) {
+      this._client = createClient();
+    }
+    return this._client;
+  }
 
   async getTransactions(filter?: TransactionFilter): Promise<TransactionItem[]> {
-    if (!config.supabase.url) {
+    if (!config.supabase.isConfigured) {
       return this.filterInMemory(filter);
     }
     try {
@@ -147,7 +154,7 @@ export class TransactionSupabaseRepository implements TransactionRepository {
 
     inMemoryTransactions = [newTx, ...inMemoryTransactions];
 
-    if (config.supabase.url) {
+    if (config.supabase.isConfigured) {
       try {
         await this.client.from('audit_logs').insert({
           action: `TRANSACTION_${params.type.toUpperCase()}`,

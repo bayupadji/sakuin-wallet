@@ -17,10 +17,17 @@ let inMemoryCard: CardDetails = {
 };
 
 export class CardSupabaseRepository implements CardRepository {
-  private client = createClient();
+  private _client?: ReturnType<typeof createClient>;
+
+  private get client() {
+    if (!this._client) {
+      this._client = createClient();
+    }
+    return this._client;
+  }
 
   async getCardDetails(): Promise<CardDetails> {
-    if (!config.supabase.url) {
+    if (!config.supabase.isConfigured) {
       return inMemoryCard;
     }
     try {
@@ -39,7 +46,7 @@ export class CardSupabaseRepository implements CardRepository {
 
   async toggleFreezeCard(isFrozen: boolean): Promise<boolean> {
     inMemoryCard = { ...inMemoryCard, isFrozen };
-    if (!config.supabase.url) {
+    if (!config.supabase.isConfigured) {
       return isFrozen;
     }
     try {

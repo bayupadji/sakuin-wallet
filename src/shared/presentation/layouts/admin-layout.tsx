@@ -2,9 +2,10 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/shared/utils/cn';
-import { Activity, AlertTriangle, FileCheck, Shield, Users } from 'lucide-react';
+import { useAuthUser, useSignOutMutation } from '@/features/auth';
+import { Activity, AlertTriangle, FileCheck, LogOut, Shield, Users } from 'lucide-react';
 
 export interface AdminLayoutProps {
   children: React.ReactNode;
@@ -12,6 +13,17 @@ export interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: user } = useAuthUser();
+  const signOutMutation = useSignOutMutation();
+
+  function handleSignOut() {
+    signOutMutation.mutate(undefined, {
+      onSettled: () => {
+        router.push('/signin');
+      },
+    });
+  }
 
   const adminNav = [
     { label: 'Ringkasan Konsol', href: '/admin', icon: Shield },
@@ -57,13 +69,22 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           })}
         </nav>
 
-        <div className="pt-6 border-t border-slate-850 mt-auto">
+        <div className="pt-6 border-t border-slate-850 mt-auto space-y-3">
           <div className="flex items-center justify-between text-xs text-slate-500">
-            <span>Role: Super Admin</span>
+            <span>Role: {user?.role || 'Super Admin'}</span>
             <span className="rounded bg-teal-950 px-1.5 py-0.5 text-teal-400 border border-teal-800">
               2FA Active
             </span>
           </div>
+
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="w-full text-left flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors cursor-pointer"
+          >
+            <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>Keluar Admin</span>
+          </button>
         </div>
       </aside>
 

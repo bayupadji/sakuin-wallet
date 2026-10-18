@@ -32,7 +32,9 @@ export default function SignInPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="rounded-3xl border border-slate-200/80 bg-white p-7 sm:p-9 shadow-xl shadow-slate-200/50 dark:border-slate-800/80 dark:bg-[#111726] dark:shadow-none">
-          <SignInForm />
+          <React.Suspense fallback={<div className="py-6 text-center text-xs text-slate-400">Loading form...</div>}>
+            <SignInForm />
+          </React.Suspense>
 
           {/* Security Assurance Footer */}
           <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-center gap-4 text-[11px] text-slate-400">

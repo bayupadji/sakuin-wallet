@@ -9,10 +9,17 @@ import {
 import { AuthRepository, SignInParams, SignUpParams } from '../domain/repository';
 
 export class AuthSupabaseRepository implements AuthRepository {
-  private client = createClient();
+  private _client?: ReturnType<typeof createClient>;
+
+  private get client() {
+    if (!this._client) {
+      this._client = createClient();
+    }
+    return this._client;
+  }
 
   async signUp({ email, password, fullName }: SignUpParams): Promise<User> {
-    if (!config.supabase.url) {
+    if (!config.supabase.isConfigured) {
       return {
         id: `user-${Date.now()}`,
         email,
@@ -48,51 +55,98 @@ export class AuthSupabaseRepository implements AuthRepository {
   }
 
   async signIn({ email, password }: SignInParams): Promise<User> {
-    if (!config.supabase.url) {
-      return {
+    let user: User;
+
+    if (!config.supabase.isConfigured) {
+      user = {
         id: 'user-01',
         email,
         fullName: 'Bayu Prasetya Adji Sugiyarto',
         role: email.includes('admin') ? 'super_admin' : 'customer',
         createdAt: '2026-10-15T00:00:00Z',
       };
-    }
+    } else {
+      const { data, error } = await this.client.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    const { data, error } = await this.client.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      if (error.status === 429 || error.message.toLowerCase().includes('rate limit')) {
-        throw new RateLimitExceededError();
+      if (error) {
+        if (error.status === 429 || error.message.toLowerCase().includes('rate limit')) {
+          throw new RateLimitExceededError();
+        }
+        if (
+          error.message.toLowerCase().includes('invalid login credentials') ||
+          error.message.toLowerCase().includes('invalid credentials')
+        ) {
+          throw new InvalidCredentialsError();
+        }
+        throw new Error(error.message);
       }
-      if (
-        error.message.toLowerCase().includes('invalid login credentials') ||
-        error.message.toLowerCase().includes('invalid credentials')
-      ) {
+
+      if (!data.user) {
         throw new InvalidCredentialsError();
       }
-      throw new Error(error.message);
+
+      user = this.mapSupabaseUser(data.user);
     }
 
-    if (!data.user) {
-      throw new InvalidCredentialsError();
+    // Issue HMAC-signed session cookie with 30-min idle and 2-hour hard expiration
+    if (typeof window !== 'undefined') {
+      try {
+        await fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user }),
+        });
+      } catch {
+        // Fallback for offline or test environments
+      }
     }
 
-    return this.mapSupabaseUser(data.user);
+    return user;
   }
 
   async signOut(): Promise<void> {
-    if (!config.supabase.url) return;
-    const { error } = await this.client.auth.signOut();
-    if (error) {
-      throw new Error(error.message);
+    if (typeof window !== 'undefined') {
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+      } catch {
+        // Fallback
+      }
+    }
+
+    if (config.supabase.isConfigured) {
+      const { error } = await this.client.auth.signOut();
+      if (error) {
+        throw new Error(error.message);
+      }
     }
   }
 
   async getCurrentUser(): Promise<User | null> {
-    if (!config.supabase.url) return null;
+    // 1. Check active HMAC session cookie first if running in browser
+    if (typeof window !== 'undefined') {
+      try {
+        const res = await fetch('/api/auth/session');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.valid && data.user) {
+            return {
+              id: data.user.userId,
+              email: data.user.email,
+              fullName: data.user.fullName,
+              role: data.user.role,
+              createdAt: new Date(data.user.createdAt).toISOString(),
+            };
+          }
+        }
+      } catch {
+        // Continue to Supabase fallback
+      }
+    }
+
+    if (!config.supabase.isConfigured) return null;
     const { data, error } = await this.client.auth.getUser();
     if (error || !data.user) {
       return null;

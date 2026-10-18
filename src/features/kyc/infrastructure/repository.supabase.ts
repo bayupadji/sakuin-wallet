@@ -50,10 +50,17 @@ let inMemoryPendingList: KycSubmission[] = [
 ];
 
 export class KycSupabaseRepository implements KycRepository {
-  private client = createClient();
+  private _client?: ReturnType<typeof createClient>;
+
+  private get client() {
+    if (!this._client) {
+      this._client = createClient();
+    }
+    return this._client;
+  }
 
   async getLatestSubmission(userId?: string): Promise<KycSubmission | null> {
-    if (!config.supabase.url) {
+    if (!config.supabase.isConfigured) {
       return inMemoryKyc;
     }
 
@@ -92,7 +99,7 @@ export class KycSupabaseRepository implements KycRepository {
 
     // 2. Auth check
     let userId = 'user-01';
-    if (config.supabase.url) {
+    if (config.supabase.isConfigured) {
       const { data: authData } = await this.client.auth.getUser();
       if (!authData.user) {
         throw new KycSubmissionError('User must be signed in to submit KYC.');
@@ -107,7 +114,7 @@ export class KycSupabaseRepository implements KycRepository {
       throw new KycMaxAttemptsExceededError();
     }
 
-    if (!config.supabase.url) {
+    if (!config.supabase.isConfigured) {
       const newSubmission: KycSubmission = {
         id: `kyc-${Date.now()}`,
         userId,
@@ -157,7 +164,7 @@ export class KycSupabaseRepository implements KycRepository {
   }
 
   async getPendingSubmissions(): Promise<KycSubmission[]> {
-    if (!config.supabase.url) {
+    if (!config.supabase.isConfigured) {
       return inMemoryPendingList.filter((s) => s.status === 'in_review');
     }
 
@@ -175,7 +182,7 @@ export class KycSupabaseRepository implements KycRepository {
   }
 
   async reviewSubmission({ submissionId, decision, reason }: ReviewKycParams): Promise<void> {
-    if (!config.supabase.url) {
+    if (!config.supabase.isConfigured) {
       inMemoryPendingList = inMemoryPendingList.map((item) =>
         item.id === submissionId
           ? {
