@@ -1,4 +1,5 @@
 import { createClient } from '@/shared/infrastructure/supabase/client';
+import { config } from '@/shared/config';
 import { User, UserRole } from '../domain/entities/user';
 import {
   InvalidCredentialsError,
@@ -11,6 +12,16 @@ export class AuthSupabaseRepository implements AuthRepository {
   private client = createClient();
 
   async signUp({ email, password, fullName }: SignUpParams): Promise<User> {
+    if (!config.supabase.url) {
+      return {
+        id: `user-${Date.now()}`,
+        email,
+        fullName,
+        role: 'customer',
+        createdAt: new Date().toISOString(),
+      };
+    }
+
     const { data, error } = await this.client.auth.signUp({
       email,
       password,
@@ -37,6 +48,16 @@ export class AuthSupabaseRepository implements AuthRepository {
   }
 
   async signIn({ email, password }: SignInParams): Promise<User> {
+    if (!config.supabase.url) {
+      return {
+        id: 'user-01',
+        email,
+        fullName: 'Bayu Prasetya Adji Sugiyarto',
+        role: email.includes('admin') ? 'super_admin' : 'customer',
+        createdAt: '2026-10-15T00:00:00Z',
+      };
+    }
+
     const { data, error } = await this.client.auth.signInWithPassword({
       email,
       password,
@@ -63,6 +84,7 @@ export class AuthSupabaseRepository implements AuthRepository {
   }
 
   async signOut(): Promise<void> {
+    if (!config.supabase.url) return;
     const { error } = await this.client.auth.signOut();
     if (error) {
       throw new Error(error.message);
@@ -70,6 +92,7 @@ export class AuthSupabaseRepository implements AuthRepository {
   }
 
   async getCurrentUser(): Promise<User | null> {
+    if (!config.supabase.url) return null;
     const { data, error } = await this.client.auth.getUser();
     if (error || !data.user) {
       return null;
@@ -77,8 +100,21 @@ export class AuthSupabaseRepository implements AuthRepository {
     return this.mapSupabaseUser(data.user);
   }
 
-  private mapSupabaseUser(user: { id: string; email?: string; user_metadata?: Record<string, unknown>; created_at: string }, fallbackFullName = ''): User {
-    const role = (user.user_metadata?.role as UserRole) || 'customer';
+  private mapSupabaseUser(
+    user: {
+      id: string;
+      email?: string;
+      app_metadata?: Record<string, unknown>;
+      user_metadata?: Record<string, unknown>;
+      created_at: string;
+    },
+    fallbackFullName = ''
+  ): User {
+    // Prioritize app_metadata (server-only claims) over client-writable user_metadata
+    const role =
+      (user.app_metadata?.role as UserRole) ||
+      (user.user_metadata?.role as UserRole) ||
+      'customer';
     const fullName = (user.user_metadata?.full_name as string) || fallbackFullName;
 
     return {

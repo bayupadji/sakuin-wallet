@@ -1,4 +1,5 @@
 import { createClient } from '@/shared/infrastructure/supabase/client';
+import { config } from '@/shared/config';
 import { Money } from '@/shared/domain/money';
 import { Wallet } from '../domain/entities/wallet';
 import { WalletRepository } from '../domain/repository';
@@ -16,13 +17,26 @@ export class WalletSupabaseRepository implements WalletRepository {
   private client = createClient();
 
   async getWallet(userId?: string): Promise<Wallet | null> {
-    let query = this.client.from('wallets').select('*').limit(1);
-
-    if (userId) {
-      query = query.eq('user_id', userId);
+    if (!config.supabase.url) {
+      return null;
     }
 
-    const { data, error } = await query;
+    let targetUserId = userId;
+    if (!targetUserId) {
+      const { data: authData } = await this.client.auth.getUser();
+      targetUserId = authData.user?.id;
+    }
+
+    if (!targetUserId) {
+      return null;
+    }
+
+    const { data, error } = await this.client
+      .from('wallets')
+      .select('*')
+      .eq('user_id', targetUserId)
+      .limit(1);
+
     if (error || !data || data.length === 0) {
       return null;
     }

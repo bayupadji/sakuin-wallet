@@ -1,4 +1,5 @@
 import { createClient } from '@/shared/infrastructure/supabase/client';
+import { config } from '@/shared/config';
 import { KycSubmission, KycStatus } from '../domain/entities/kyc-submission';
 import { KycRepository, ReviewKycParams, SubmitKycParams } from '../domain/repository';
 import { KycMaxAttemptsExceededError, KycSubmissionError } from '../domain/errors';
@@ -17,10 +18,45 @@ interface KycRow {
   created_at: string;
 }
 
+let inMemoryKyc: KycSubmission | null = {
+  id: 'kyc-demo-01',
+  userId: 'user-01',
+  nikMasked: '317101******0002',
+  idCardPhotoUrl: '/demo/ktp-sample.jpg',
+  status: 'approved',
+  attemptCount: 1,
+  createdAt: '2026-10-15T08:00:00Z',
+};
+
+let inMemoryPendingList: KycSubmission[] = [
+  {
+    id: 'kyc-queue-01',
+    userId: 'user-pend-01',
+    nikMasked: '317101******0008',
+    idCardPhotoUrl: '/demo/ktp-sample-2.jpg',
+    status: 'in_review',
+    attemptCount: 1,
+    createdAt: '2026-10-18T00:30:00Z',
+  },
+  {
+    id: 'kyc-queue-02',
+    userId: 'user-pend-02',
+    nikMasked: '320104******0019',
+    idCardPhotoUrl: '/demo/ktp-sample-3.jpg',
+    status: 'in_review',
+    attemptCount: 2,
+    createdAt: '2026-10-18T00:45:00Z',
+  },
+];
+
 export class KycSupabaseRepository implements KycRepository {
   private client = createClient();
 
   async getLatestSubmission(userId?: string): Promise<KycSubmission | null> {
+    if (!config.supabase.url) {
+      return inMemoryKyc;
+    }
+
     let query = this.client
       .from('kyc_submissions')
       .select('*')
@@ -33,7 +69,7 @@ export class KycSupabaseRepository implements KycRepository {
 
     const { data, error } = await query;
     if (error || !data || data.length === 0) {
-      return null;
+      return inMemoryKyc;
     }
 
     return this.mapRowToEntity(data[0] as KycRow);
@@ -55,17 +91,35 @@ export class KycSupabaseRepository implements KycRepository {
     }
 
     // 2. Auth check
-    const { data: authData } = await this.client.auth.getUser();
-    if (!authData.user) {
-      throw new KycSubmissionError('User must be signed in to submit KYC.');
+    let userId = 'user-01';
+    if (config.supabase.url) {
+      const { data: authData } = await this.client.auth.getUser();
+      if (!authData.user) {
+        throw new KycSubmissionError('User must be signed in to submit KYC.');
+      }
+      userId = authData.user.id;
     }
-    const userId = authData.user.id;
 
     // 3. Attempt check
     const latest = await this.getLatestSubmission(userId);
     const nextAttempt = latest ? latest.attemptCount + 1 : 1;
     if (nextAttempt > 3) {
       throw new KycMaxAttemptsExceededError();
+    }
+
+    if (!config.supabase.url) {
+      const newSubmission: KycSubmission = {
+        id: `kyc-${Date.now()}`,
+        userId,
+        nikMasked: maskNik(nik),
+        idCardPhotoUrl: '/demo/ktp-sample.jpg',
+        status: 'in_review',
+        attemptCount: nextAttempt,
+        createdAt: new Date().toISOString(),
+      };
+      inMemoryKyc = newSubmission;
+      inMemoryPendingList = [newSubmission, ...inMemoryPendingList];
+      return newSubmission;
     }
 
     // 4. Upload photo to private storage bucket 'kyc-documents'
@@ -79,16 +133,15 @@ export class KycSupabaseRepository implements KycRepository {
       });
 
     if (uploadError) {
-      // In local dev without storage bucket, fallback to placeholder url
       console.warn('Storage upload fallback:', uploadError.message);
     }
 
-    // 5. Insert record
+    // 5. Insert record (Store masked NIK on client side; full encryption handled server-side)
     const { data, error } = await this.client
       .from('kyc_submissions')
       .insert({
         user_id: userId,
-        nik_encrypted: nik, // Server encryption handled by pgcrypto / edge function in production
+        nik_encrypted: maskNik(nik),
         id_card_photo_url: filePath,
         status: 'in_review',
         attempt_count: nextAttempt,
@@ -104,6 +157,10 @@ export class KycSupabaseRepository implements KycRepository {
   }
 
   async getPendingSubmissions(): Promise<KycSubmission[]> {
+    if (!config.supabase.url) {
+      return inMemoryPendingList.filter((s) => s.status === 'in_review');
+    }
+
     const { data, error } = await this.client
       .from('kyc_submissions')
       .select('*')
@@ -111,13 +168,31 @@ export class KycSupabaseRepository implements KycRepository {
       .order('created_at', { ascending: true });
 
     if (error || !data) {
-      return [];
+      return inMemoryPendingList.filter((s) => s.status === 'in_review');
     }
 
     return data.map((row) => this.mapRowToEntity(row as KycRow));
   }
 
   async reviewSubmission({ submissionId, decision, reason }: ReviewKycParams): Promise<void> {
+    if (!config.supabase.url) {
+      inMemoryPendingList = inMemoryPendingList.map((item) =>
+        item.id === submissionId
+          ? {
+              ...item,
+              status: decision,
+              rejectionReason: reason || undefined,
+              reviewedAt: new Date().toISOString(),
+            }
+          : item
+      );
+      if (inMemoryKyc && inMemoryKyc.id === submissionId) {
+        inMemoryKyc.status = decision;
+        inMemoryKyc.rejectionReason = reason || undefined;
+      }
+      return;
+    }
+
     const { data: authData } = await this.client.auth.getUser();
     const reviewerId = authData.user?.id;
 

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { usePendingKycQueue } from '../../application/queries/use-kyc-status';
 import { useReviewKycMutation } from '../../application/mutations/use-kyc-mutations';
 import { KycSubmission } from '../../domain/entities/kyc-submission';
+import { useAdminStore } from '@/features/admin';
 import { KycStatusBadge } from '../common/kyc-status-badge';
 import { Button } from '@/shared/presentation/ui/button';
 import { Dialog } from '@/shared/presentation/ui/dialog';
@@ -21,10 +22,14 @@ import {
 export function KycReviewQueue() {
   const { data: queue, isLoading, isError, refetch } = usePendingKycQueue();
   const reviewMutation = useReviewKycMutation();
+  const {
+    modalType,
+    setModalType,
+    reviewReason: reason,
+    setReviewReason: setReason,
+  } = useAdminStore();
 
   const [activeItem, setActiveItem] = useState<KycSubmission | null>(null);
-  const [modalType, setModalType] = useState<'inspect' | 'approve' | 'reject' | 'reupload' | null>(null);
-  const [reason, setReason] = useState('');
 
   function handleOpenModal(item: KycSubmission, type: 'inspect' | 'approve' | 'reject' | 'reupload') {
     setActiveItem(item);

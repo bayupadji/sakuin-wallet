@@ -1,8 +1,8 @@
 import { ActivityHub } from '@/features/transactions';
 
 export const metadata = {
-  title: 'Activity & Ledger | Dompet Digital Dollar',
-  description: 'View full double-entry ledger history, settlement receipts, and foreign exchange rates.',
+  title: 'Riwayat Transaksi & Buku Besar | Sakuin - Dompet Digital Dollar',
+  description: 'Catatan mutasi buku besar append-only double-entry dan bukti settlement kriptografis.',
 };
 
 export default function TransactionsPage() {

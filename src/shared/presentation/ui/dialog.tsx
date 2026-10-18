@@ -68,8 +68,8 @@ export function Dialog({
       <div
         ref={dialogRef}
         className={cn(
-          'relative w-full max-w-lg rounded-xl border border-slate-200 bg-white p-6 shadow-xl transition-all',
-          'dark:border-slate-800 dark:bg-slate-900',
+          'relative w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl transition-all',
+          'dark:border-slate-800 dark:bg-[#111726]',
           className
         )}
       >

@@ -2,8 +2,8 @@ import React from 'react';
 import { WalletOverview } from '@/features/wallet';
 
 export const metadata = {
-  title: 'Wallet Overview | Dompet Digital Dollar',
-  description: 'View your USD balance and manage your virtual card.',
+  title: 'Ringkasan Dompet | Sakuin - Dompet Digital Dollar',
+  description: 'Kelola saldo USD, pantau kurs real-time, dan akses kartu virtual Anda.',
 };
 
 export default function WalletPage() {

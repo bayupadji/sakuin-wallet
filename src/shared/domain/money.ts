@@ -28,23 +28,31 @@ export class Money {
     }
 
     const cleanStr = decimalStrOrNum.trim();
+
     if (currency === 'IDR') {
-      const parsed = BigInt(Math.round(Number(cleanStr)));
-      return new Money(parsed, 'IDR');
+      const sanitized = cleanStr.replace(/[.,\s]/g, '');
+      if (!/^\d+$/.test(sanitized)) {
+        throw new InvalidMoneyAmountError(`Invalid IDR amount: ${cleanStr}`);
+      }
+      return new Money(BigInt(sanitized), 'IDR');
     }
 
-    // USD (cents): parse dollars and cents safely without float multiplication
-    const parts = cleanStr.split('.');
-    if (parts.length > 2) {
+    // USD (cents): validate non-negative numeric format with optional decimals
+    if (!/^\d+(\.\d+)?$/.test(cleanStr)) {
       throw new InvalidMoneyAmountError(`Malformed decimal string: ${cleanStr}`);
     }
 
-    const dollarsPart = parts[0] ? BigInt(parts[0]) : 0n;
+    const parts = cleanStr.split('.');
+    const dollarsPart = BigInt(parts[0]);
     let centsPart = 0n;
 
-    if (parts.length === 2) {
-      const centStr = (parts[1] + '00').slice(0, 2);
-      centsPart = BigInt(centStr);
+    if (parts.length === 2 && parts[1]) {
+      if (parts[1].length <= 2) {
+        centsPart = BigInt((parts[1] + '00').slice(0, 2));
+      } else {
+        const rounded = Math.round(Number(`0.${parts[1]}`) * 100);
+        centsPart = BigInt(rounded);
+      }
     }
 
     const totalCents = dollarsPart * 100n + centsPart;

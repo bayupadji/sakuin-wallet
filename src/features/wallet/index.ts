@@ -3,6 +3,7 @@ export * from './domain/entities/wallet';
 export * from './domain/errors';
 export * from './domain/repository';
 export * from './application/queries/use-wallet';
+export * from './application/mutations/use-wallet-mutations';
 export * from './application/stores/use-wallet-store';
 export * from './presentation/customer/balance-card';
 export * from './presentation/customer/wallet-overview';

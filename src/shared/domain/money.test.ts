@@ -46,4 +46,20 @@ describe('Money Domain Value Object', () => {
     const idr = Money.fromCents(100000n, 'IDR');
     expect(() => usd.add(idr)).toThrow(CurrencyMismatchError);
   });
+
+  it('throws InvalidMoneyAmountError on malformed or non-numeric strings', () => {
+    expect(() => Money.fromDecimal('abc', 'USD')).toThrow(InvalidMoneyAmountError);
+    expect(() => Money.fromDecimal('xyz', 'IDR')).toThrow(InvalidMoneyAmountError);
+    expect(() => Money.fromDecimal('-5.00', 'USD')).toThrow(InvalidMoneyAmountError);
+  });
+
+  it('rounds sub-cent USD fractions to nearest cent instead of silent truncation', () => {
+    const roundedUp = Money.fromDecimal('10.999', 'USD');
+    expect(roundedUp.amount).toBe(1100n);
+    expect(roundedUp.format()).toBe('$11.00');
+
+    const roundedDown = Money.fromDecimal('10.994', 'USD');
+    expect(roundedDown.amount).toBe(1099n);
+    expect(roundedDown.format()).toBe('$10.99');
+  });
 });

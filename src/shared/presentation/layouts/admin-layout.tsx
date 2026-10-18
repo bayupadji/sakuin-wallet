@@ -14,6 +14,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
 
   const adminNav = [
+    { label: 'Ringkasan Konsol', href: '/admin', icon: Shield },
     { label: 'KYC Review Queue', href: '/admin/kyc', icon: FileCheck },
     { label: 'Customer Management', href: '/admin/customers', icon: Users },
     { label: 'Disputes & Chargebacks', href: '/admin/disputes', icon: AlertTriangle },

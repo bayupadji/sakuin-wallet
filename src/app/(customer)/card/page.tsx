@@ -1,8 +1,8 @@
 import { CardHub } from '@/features/card';
 
 export const metadata = {
-  title: 'Virtual Debit Card | Dompet Digital Dollar',
-  description: 'Manage your USD virtual debit card, spending limits, and security controls.',
+  title: 'Kartu Debit Virtual | Sakuin - Dompet Digital Dollar',
+  description: 'Kelola kartu virtual USD, batas belanja bulanan, dan kontrol keamanan perbankan.',
 };
 
 export default function CardPage() {

@@ -4,8 +4,12 @@ import { config } from '@/shared/config';
 
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
+  const url = config.supabase.url || 'https://placeholder-project.supabase.co';
+  const key =
+    config.supabase.publishableKey ||
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2MDAwMDAwMDAsImV4cCI6MTkwMDAwMDAwMH0.signature';
 
-  return createServerClient(config.supabase.url, config.supabase.publishableKey, {
+  return createServerClient(url, key, {
     cookies: {
       getAll() {
         return cookieStore.getAll();
