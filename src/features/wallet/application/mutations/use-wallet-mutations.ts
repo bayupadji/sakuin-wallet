@@ -8,6 +8,7 @@ import { Money } from '@/shared/domain/money';
 export interface TopUpParams {
   amountUsd: number;
   channel: string;
+  fxRate?: number;
 }
 
 export function useTopUpMutation() {
@@ -16,7 +17,7 @@ export function useTopUpMutation() {
   return useMutation({
     mutationFn: async (params: TopUpParams) => {
       const amountUsdCents = BigInt(Math.round(params.amountUsd * 100));
-      const fxRate = 16250;
+      const fxRate = params.fxRate && params.fxRate > 0 ? params.fxRate : 16250;
       const amountIdr = Math.round(params.amountUsd * fxRate);
 
       const createdTx = await transactionRepository.createTransaction({

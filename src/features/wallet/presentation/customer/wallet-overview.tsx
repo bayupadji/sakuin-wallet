@@ -14,10 +14,12 @@ import {
 import { Button } from '@/shared/presentation/ui/button';
 import { Skeleton } from '@/shared/presentation/ui/skeleton';
 import { FxRateWidget } from '@/shared/presentation/ui/fx-rate-widget';
+import { useFxRateQuery } from '@/shared/application/queries/use-fx-rate';
 import { Money } from '@/shared/domain/money';
 import { SpendingAnalyticsCard } from './spending-analytics-card';
 import { SavingsVaultsCard } from './savings-vaults-card';
 import { QuickTransferModal } from './quick-transfer-modal';
+import { PromoBannerCarousel } from './promo-banner-carousel';
 import {
   CreditCard,
   Eye,
@@ -49,13 +51,19 @@ export function WalletOverview() {
     search: searchQuery,
   });
   const filteredTransactions = transactionsData || [];
+  // Halaman Ringkasan hanya menampilkan 5 transaksi terbaru
+  const recentTransactions = filteredTransactions.slice(0, 5);
 
   const kycStatus = kycSubmission?.status || 'not_verified';
   const isApproved = canTransact(kycStatus);
 
+  const { data: fxData } = useFxRateQuery();
+  const effectiveFxRate = fxData?.rate ?? 16250;
+
   // Initial demo / realistic balance: $1,250.00 (125,000 cents) if newly created
   const balanceCents = wallet ? wallet.balance.amount : 125000n;
   const currentMoney = Money.fromCents(balanceCents, 'USD');
+  const balanceIdr = Math.round((Number(balanceCents) / 100) * effectiveFxRate);
 
   function getTransactionIcon(type: TransactionItem['type']) {
     switch (type) {
@@ -137,7 +145,7 @@ export function WalletOverview() {
       )}
 
       {/* 2. Garansi Kurs Valas (Full-Width di Atas Saldo Utama) */}
-      <FxRateWidget rateIdr={16250} guaranteedMinutes={15} />
+      <FxRateWidget rateIdr={effectiveFxRate} guaranteedMinutes={15} />
 
       {/* 3. Hero Saldo Utama (Full-Width Header) */}
       <div className="rounded-2xl border border-slate-800 bg-[#111726] p-6 sm:p-7 shadow-xl relative overflow-hidden">
@@ -178,9 +186,9 @@ export function WalletOverview() {
             <p className="mt-1 font-mono text-xs text-slate-400">
               {isBalanceHidden
                 ? '••••••••••••'
-                : `≈ Rp ${(Number(balanceCents) * 162.5).toLocaleString('id-ID')} IDR`}
+                : `≈ Rp ${balanceIdr.toLocaleString('id-ID')} IDR`}
               <span className="ml-2 inline-flex items-center rounded-sm bg-teal-950 px-1.5 py-0.5 text-[10px] font-medium text-teal-300 border border-teal-800/40">
-                Kurs 16.250
+                Kurs {effectiveFxRate.toLocaleString('id-ID')}
               </span>
             </p>
           </div>
@@ -258,7 +266,13 @@ export function WalletOverview() {
         </div>
       </div>
 
-      {/* 3. Baris Ketiga: Brankas Tabungan & Analisis Pengeluaran (Grid 6 / 6) */}
+      {/* 4. Banner Promo & Fitur Unggulan (Full-Width Carousel) */}
+      <PromoBannerCarousel
+        onTopUpClick={() => setModalMode('topup')}
+        onReceiveClick={() => setModalMode('receive')}
+      />
+
+      {/* 5. Baris Ketiga: Brankas Tabungan & Analisis Pengeluaran (Grid 6 / 6) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-6">
           <SavingsVaultsCard />
@@ -353,12 +367,12 @@ export function WalletOverview() {
 
         {/* Transaction List */}
         <div className="divide-y divide-slate-800/80 border-t border-slate-800 pt-1">
-          {filteredTransactions.length === 0 ? (
+          {recentTransactions.length === 0 ? (
             <div className="py-8 text-center text-xs text-slate-400">
               Tidak ada transaksi yang cocok dengan kriteria pencarian Anda.
             </div>
           ) : (
-            filteredTransactions.map((tx) => {
+            recentTransactions.map((tx) => {
               const Icon = getTransactionIcon(tx.type);
               const isCredit = tx.type === 'topup' || tx.type === 'receive';
               const formattedUsd = `$${(Number(tx.amountUsdCents) / 100).toFixed(2)}`;

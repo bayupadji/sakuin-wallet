@@ -5,6 +5,7 @@ import { Dialog } from '@/shared/presentation/ui/dialog';
 import { Button } from '@/shared/presentation/ui/button';
 import { ArrowRight, CheckCircle2, Clock, Copy, QrCode, ShieldCheck } from 'lucide-react';
 import { useTopUpMutation } from '../../application/mutations/use-wallet-mutations';
+import { useFxRateQuery } from '@/shared/application/queries/use-fx-rate';
 
 interface QuickTransferModalProps {
   mode: 'topup' | 'receive' | null;
@@ -20,14 +21,15 @@ export function QuickTransferModal({
   onSuccess,
 }: QuickTransferModalProps) {
   const topUpMutation = useTopUpMutation();
+  const { data: fxData } = useFxRateQuery();
+  const fxRate = fxData?.rate ?? 16250;
+
   const [amountUsd, setAmountUsd] = useState('100');
   const [method, setMethod] = useState<'va' | 'qris'>('va');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<'input' | 'confirm' | 'payment_ready'>('input');
   const [copied, setCopied] = useState(false);
 
-  // Locked exchange rate (15-min guarantee)
-  const fxRate = 16250;
   const parsedUsd = Math.max(1, parseFloat(amountUsd) || 0);
   const totalIdr = Math.round(parsedUsd * fxRate);
   const feeIdr = method === 'va' ? 4500 : Math.round(totalIdr * 0.007); // VA flat or QRIS 0.7%
@@ -43,6 +45,7 @@ export function QuickTransferModal({
       {
         amountUsd: parsedUsd,
         channel: method === 'va' ? 'BCA Virtual Account (*8924)' : 'QRIS Dynamic Merchant',
+        fxRate,
       },
       {
         onSettled: () => {

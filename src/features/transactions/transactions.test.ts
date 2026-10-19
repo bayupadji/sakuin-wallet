@@ -23,6 +23,35 @@ describe('TransactionSupabaseRepository', () => {
     expect(results[0].title).toContain('AWS');
   });
 
+  it('filters transactions by month period', async () => {
+    const repo = new TransactionSupabaseRepository();
+    const octTransactions = await repo.getTransactions({ month: '2026-10' });
+    expect(octTransactions.length).toBeGreaterThanOrEqual(1);
+    expect(octTransactions.every((tx) => tx.timestampUtc.startsWith('2026-10'))).toBe(true);
+
+    const sepTransactions = await repo.getTransactions({ month: '2026-09' });
+    expect(sepTransactions.length).toBeGreaterThanOrEqual(1);
+    expect(sepTransactions.every((tx) => tx.timestampUtc.startsWith('2026-09'))).toBe(true);
+  });
+
+  it('limits all transactions to a maximum of 1 year in the past', async () => {
+    const repo = new TransactionSupabaseRepository();
+    const all = await repo.getTransactions({ month: 'all' });
+    // Pastikan transaksi arsip dari 2024 tidak ada di hasil
+    expect(all.some((tx) => tx.id === 'tx-archive-old')).toBe(false);
+
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    oneYearAgo.setDate(1);
+
+    expect(
+      all.every((tx) => {
+        const txDate = new Date(tx.timestampUtc.replace(' UTC', 'Z').replace(' ', 'T'));
+        return txDate >= oneYearAgo;
+      })
+    ).toBe(true);
+  });
+
   it('creates and prepends a new transaction', async () => {
     const repo = new TransactionSupabaseRepository();
     const created = await repo.createTransaction({

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTopUpMutation } from '@/features/wallet';
+import { useFxRateQuery } from '@/shared/application/queries/use-fx-rate';
 import { Button } from '@/shared/presentation/ui/button';
 import {
   ArrowLeft,
@@ -24,7 +25,8 @@ export default function TopUpPage() {
   const [copied, setCopied] = useState(false);
   const [countdown, setCountdown] = useState(890); // ~14:50
 
-  const fxRate = 16250;
+  const { data: fxData } = useFxRateQuery();
+  const fxRate = fxData?.rate ?? 16250;
   const parsedUsd = Math.max(1, parseFloat(usdAmount) || 0);
   const idrSubtotal = Math.round(parsedUsd * fxRate);
   const feeIdr = paymentMethod === 'qris' ? Math.round(idrSubtotal * 0.007) : 4500;
@@ -63,7 +65,7 @@ export default function TopUpPage() {
         : 'QRIS Dynamic Merchant';
 
     topUpMutation.mutate(
-      { amountUsd: parsedUsd, channel: channelName },
+      { amountUsd: parsedUsd, channel: channelName, fxRate },
       {
         onSettled: () => {
           router.push('/wallet');

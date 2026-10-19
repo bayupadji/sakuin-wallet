@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePublicStore } from '@/features/public';
+import { useFxRateQuery } from '@/shared/application/queries/use-fx-rate';
 import {
   ArrowRight,
   CreditCard,
@@ -17,7 +18,8 @@ export function LandingHero() {
   const { usdInput, setUsdInput } = usePublicStore();
   const [rateCountdown, setRateCountdown] = useState(892); // ~14m 52s
 
-  const fxRate = 16250;
+  const { data: fxData } = useFxRateQuery();
+  const fxRate = fxData?.rate ?? 16250;
   const parsedUsd = Math.max(1, parseFloat(usdInput) || 0);
   const totalIdr = Math.round(parsedUsd * fxRate);
 
@@ -309,7 +311,7 @@ export function LandingHero() {
 
                 <div>
                   <span className="block text-[11px] font-semibold text-slate-400 mb-1">
-                    Estimasi Rupiah (Kurs 1:16.250)
+                    Estimasi Rupiah (Kurs 1:{fxRate.toLocaleString('id-ID')})
                   </span>
                   <div className="rounded-xl border border-slate-800 bg-slate-900/50 px-3.5 py-2.5 flex items-center justify-between">
                     <span className="text-xs text-slate-400">🇮🇩 IDR</span>

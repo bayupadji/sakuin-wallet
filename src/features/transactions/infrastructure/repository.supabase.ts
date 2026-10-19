@@ -6,99 +6,7 @@ import {
   TransactionFilter,
   CreateTransactionParams,
 } from '../domain/repository';
-
-const SEED_TRANSACTIONS: TransactionItem[] = [
-  {
-    id: 'tx-01',
-    title: 'Top Up via BCA Virtual Account',
-    merchant: 'PT Bank Central Asia Tbk',
-    type: 'topup',
-    category: 'Deposit Saldo',
-    status: 'success',
-    amountUsdCents: 50000n,
-    amountIdr: 8125000,
-    fxRate: 16250,
-    feeIdr: 0,
-    channel: 'BCA VA (*8924)',
-    referenceId: 'REF-BCA-9812739182390',
-    idempotencyKey: 'idemp_topup_500_00',
-    ledgerSequence: 'LDG-2026-00891',
-    timestampUtc: '2026-10-17 07:20:00 UTC',
-    timestampWib: 'Hari ini, 14:20 WIB',
-  },
-  {
-    id: 'tx-02',
-    title: 'AWS Cloud Infrastructure',
-    merchant: 'Amazon Web Services, Inc.',
-    type: 'card',
-    category: 'Cloud & Hosting',
-    status: 'success',
-    amountUsdCents: 8450n,
-    amountIdr: 1373125,
-    fxRate: 16250,
-    feeIdr: 0,
-    channel: 'VISA Platinum Virtual (*4821)',
-    referenceId: 'REF-AWS-4829103948192',
-    idempotencyKey: 'idemp_aws_bill_84_50',
-    ledgerSequence: 'LDG-2026-00892',
-    timestampUtc: '2026-10-16 02:15:00 UTC',
-    timestampWib: 'Kemarin, 09:15 WIB',
-  },
-  {
-    id: 'tx-03',
-    title: 'GitHub Enterprise Subscription',
-    merchant: 'GitHub Inc.',
-    type: 'card',
-    category: 'Software & Tools',
-    status: 'success',
-    amountUsdCents: 2100n,
-    amountIdr: 341250,
-    fxRate: 16250,
-    feeIdr: 0,
-    channel: 'VISA Platinum Virtual (*4821)',
-    referenceId: 'REF-GH-1029384756102',
-    idempotencyKey: 'idemp_gh_sub_21_00',
-    ledgerSequence: 'LDG-2026-00893',
-    timestampUtc: '2026-10-14 11:00:00 UTC',
-    timestampWib: '14 Okt 2026, 18:00 WIB',
-  },
-  {
-    id: 'tx-05',
-    title: 'Figma Professional Team',
-    merchant: 'Figma, Inc.',
-    type: 'card',
-    category: 'Design & Productivity',
-    status: 'success',
-    amountUsdCents: 1500n,
-    amountIdr: 243750,
-    fxRate: 16250,
-    feeIdr: 0,
-    channel: 'VISA Platinum Virtual (*4821)',
-    referenceId: 'REF-FIG-9928172635412',
-    idempotencyKey: 'idemp_fig_pro_15_00',
-    ledgerSequence: 'LDG-2026-00895',
-    timestampUtc: '2026-10-12 08:45:00 UTC',
-    timestampWib: '12 Okt 2026, 15:45 WIB',
-  },
-  {
-    id: 'tx-04',
-    title: 'Pembayaran Diterima via QRIS',
-    merchant: 'PT Solusi Teknologi Bersama',
-    type: 'receive',
-    category: 'Konversi Rupiah Masuk',
-    status: 'success',
-    amountUsdCents: 12000n,
-    amountIdr: 1950000,
-    fxRate: 16250,
-    feeIdr: 13650,
-    channel: 'QRIS Dynamic Merchant',
-    referenceId: 'REF-QRS-8492019481023',
-    idempotencyKey: 'idemp_qris_rec_120_00',
-    ledgerSequence: 'LDG-2026-00894',
-    timestampUtc: '2026-10-13 04:30:00 UTC',
-    timestampWib: '13 Okt 2026, 11:30 WIB',
-  },
-];
+import { SEED_TRANSACTIONS } from './seed';
 
 let inMemoryTransactions = [...SEED_TRANSACTIONS];
 
@@ -172,6 +80,17 @@ export class TransactionSupabaseRepository implements TransactionRepository {
 
   private filterInMemory(filter?: TransactionFilter): TransactionItem[] {
     let result = inMemoryTransactions;
+
+    // Batasi transaksi maksimal 1 tahun ke belakang (12 bulan dari awal bulan tahun lalu)
+    const now = new Date();
+    const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+
+    result = result.filter((tx) => {
+      const normalizedIso = tx.timestampUtc.replace(' UTC', 'Z').replace(' ', 'T');
+      const txDate = new Date(normalizedIso);
+      return !isNaN(txDate.getTime()) ? txDate >= oneYearAgo : true;
+    });
+
     if (filter?.type && filter.type !== 'all') {
       result = result.filter((tx) => tx.type === filter.type);
     }
@@ -184,6 +103,9 @@ export class TransactionSupabaseRepository implements TransactionRepository {
           tx.referenceId.toLowerCase().includes(q) ||
           tx.category.toLowerCase().includes(q)
       );
+    }
+    if (filter?.month && filter.month !== 'all') {
+      result = result.filter((tx) => tx.timestampUtc.startsWith(filter.month!));
     }
     return result;
   }

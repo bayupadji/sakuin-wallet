@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/shared/utils/cn';
 import { useAuthUser, useSignOutMutation } from '@/features/auth';
-import { Activity, AlertTriangle, FileCheck, LogOut, Shield, Users } from 'lucide-react';
+import { Activity, AlertTriangle, FileCheck, LogOut, Megaphone, Shield, Users } from 'lucide-react';
 
 export interface AdminLayoutProps {
   children: React.ReactNode;
@@ -27,6 +27,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   const adminNav = [
     { label: 'Ringkasan Konsol', href: '/admin', icon: Shield },
+    { label: 'Promo Banners CMS', href: '/admin/banners', icon: Megaphone },
     { label: 'KYC Review Queue', href: '/admin/kyc', icon: FileCheck },
     { label: 'Customer Management', href: '/admin/customers', icon: Users },
     { label: 'Disputes & Chargebacks', href: '/admin/disputes', icon: AlertTriangle },

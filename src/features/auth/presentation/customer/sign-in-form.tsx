@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useSignInMutation } from '../../application/mutations/use-auth-mutations';
 import { Button } from '@/shared/presentation/ui/button';
 import { Input } from '@/shared/presentation/ui/input';
@@ -14,7 +14,6 @@ export function SignInForm() {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const router = useRouter();
   const searchParams = useSearchParams();
   const reason = searchParams.get('reason');
   const redirectTarget = searchParams.get('redirect');

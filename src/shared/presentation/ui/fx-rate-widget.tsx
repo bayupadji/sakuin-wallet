@@ -13,13 +13,13 @@ export interface FxRateWidgetProps {
 }
 
 export function FxRateWidget({
-  rateIdr = 16250,
+  rateIdr,
   guaranteedMinutes = 15,
   className,
   compact = false,
 }: FxRateWidgetProps) {
   const { data: fxData } = useFxRateQuery();
-  const effectiveRate = fxData?.rate || rateIdr;
+  const effectiveRate = fxData?.rate ?? rateIdr ?? 16250;
   const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
@@ -82,9 +82,6 @@ export function FxRateWidget({
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
                 Garansi Kurs Valas Real-Time
-              </span>
-              <span className="hidden sm:inline-flex items-center rounded-xs bg-teal-950/60 px-1.5 py-0.5 text-[10px] font-semibold text-teal-300 border border-teal-800/40">
-                Acuan Bank Indonesia (JISDOR)
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">

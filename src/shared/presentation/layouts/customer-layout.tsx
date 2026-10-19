@@ -94,10 +94,6 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
                 S
               </span>
               <span className="tracking-tight text-white font-bold">Sakuin</span>
-              <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-teal-500/30 bg-teal-950/50 px-2 py-0.5 text-[10px] font-semibold text-teal-300 ml-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-teal-400" />
-                USD Wallet
-              </span>
             </Link>
 
             {/* Desktop Navigation Pill Tabs (Linear / Apple style) */}

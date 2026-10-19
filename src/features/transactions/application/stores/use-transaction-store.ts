@@ -6,6 +6,8 @@ import { TransactionItem, TransactionType } from '../../domain/entities/transact
 interface TransactionUIState {
   activeTab: 'all' | TransactionType;
   setActiveTab: (tab: 'all' | TransactionType) => void;
+  selectedMonth: string;
+  setSelectedMonth: (month: string) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   selectedTransaction: TransactionItem | null;
@@ -19,6 +21,8 @@ export const useTransactionStore = create<TransactionUIState>()(
     (set) => ({
       activeTab: 'all',
       setActiveTab: (activeTab) => set({ activeTab }),
+      selectedMonth: 'all',
+      setSelectedMonth: (selectedMonth) => set({ selectedMonth }),
       searchQuery: '',
       setSearchQuery: (searchQuery) => set({ searchQuery }),
       selectedTransaction: null,
@@ -29,7 +33,7 @@ export const useTransactionStore = create<TransactionUIState>()(
     {
       name: 'sakuin-transaction-ui',
       storage: createJSONStorage(() => safeLocalStorage),
-      partialize: (state) => ({ activeTab: state.activeTab }),
+      partialize: (state) => ({ activeTab: state.activeTab, selectedMonth: state.selectedMonth }),
     }
   )
 );

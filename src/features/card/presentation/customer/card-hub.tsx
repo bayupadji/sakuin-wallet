@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useKycStatus, canTransact } from '@/features/kyc';
 import { VirtualDebitCard } from './virtual-debit-card';
 import { useCardStore } from '../../application/stores/use-card-store';

@@ -7,6 +7,7 @@ import {
   UserAlreadyExistsError,
 } from '../domain/errors';
 import { AuthRepository, SignInParams, SignUpParams } from '../domain/repository';
+import { createSeedUser } from './seed';
 
 export class AuthSupabaseRepository implements AuthRepository {
   private _client?: ReturnType<typeof createClient>;
@@ -58,13 +59,7 @@ export class AuthSupabaseRepository implements AuthRepository {
     let user: User;
 
     if (!config.supabase.isConfigured) {
-      user = {
-        id: 'user-01',
-        email,
-        fullName: 'Bayu Prasetya Adji Sugiyarto',
-        role: email.includes('admin') ? 'super_admin' : 'customer',
-        createdAt: '2026-10-15T00:00:00Z',
-      };
+      user = createSeedUser(email);
     } else {
       const { data, error } = await this.client.auth.signInWithPassword({
         email,
