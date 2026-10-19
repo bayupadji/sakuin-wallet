@@ -251,3 +251,12 @@ Physical cards, withdrawals to bank accounts, transfers between users, currencie
 - Do not weaken RLS, skip signature checks, or bypass the ledger to make something work.
 - If the PRD and the code disagree, say so and ask before choosing.
 - Describe what you changed and how you verified it (commands run, tests added).
+
+## 16. Skill Execution Rules
+
+Wajib menerapkan semua skill aktif pada setiap prompt yang diberikan:
+- **antislop** (termasuk antislop-code, antislop-copywriting, antislop-human, antislop-layoutmobile, antislop-ui): Tanpa AI-slop, larangan em-dash (`—`), kepatuhan WCAG 2.1 AA, dan kelengkapan fungsional.
+- **ponytail**: Perubahan terkecil yang tuntas, minim kode baru, anti-overengineering, dan tanpa abstraksi berlebih.
+- **supabase** & **supabase-postgres-best-practices**: Keamanan RLS, append-only ledger, Edge Functions, dan kaidah performa/keamanan Postgres.
+- **ui-ux-pro-max**, **ui-styling**, **frontend-design**, **design-system**, **baseline-ui**: Desain visual berkarakter, token terstruktur, konsistensi hierarki, dan tata letak responsif.
+- **Pengecualian**: Jangan gunakan `/grill-me` kecuali diminta secara eksplisit.
