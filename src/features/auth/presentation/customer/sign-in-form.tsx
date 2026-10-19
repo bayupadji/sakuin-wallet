@@ -32,7 +32,8 @@ export function SignInForm() {
     try {
       const user = await signInMutation.mutateAsync({ email, password });
       const target = redirectTarget || (user.role === 'super_admin' ? '/admin' : '/wallet');
-      router.push(target);
+      // Full navigation guarantees Safari iOS commits the HTTP cookie before loading the target page
+      window.location.href = target;
     } catch (err: unknown) {
       if (err instanceof Error) {
         setErrorMessage(err.message);
@@ -87,6 +88,7 @@ export function SignInForm() {
         label={messages.auth.emailLabel}
         type="email"
         id="signin-email"
+        name="email"
         autoComplete="username"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
@@ -98,6 +100,7 @@ export function SignInForm() {
         label={messages.auth.passwordLabel}
         type="password"
         id="signin-password"
+        name="password"
         autoComplete="current-password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}

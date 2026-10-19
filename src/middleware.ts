@@ -27,6 +27,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/maintenance', request.url));
   }
 
+  const isHttps =
+    request.nextUrl.protocol === 'https:' ||
+    request.headers.get('x-forwarded-proto') === 'https';
+
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
   const now = Date.now();
   const result = await verifySessionCookie(sessionCookie, now);
@@ -75,7 +79,7 @@ export async function middleware(request: NextRequest) {
       name: SESSION_COOKIE_NAME,
       value: cookieValue,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isHttps,
       sameSite: 'lax',
       path: '/',
       maxAge: remainingSeconds,
@@ -103,7 +107,7 @@ export async function middleware(request: NextRequest) {
       name: SESSION_COOKIE_NAME,
       value: cookieValue,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isHttps,
       sameSite: 'lax',
       path: '/',
       maxAge: remainingSeconds,

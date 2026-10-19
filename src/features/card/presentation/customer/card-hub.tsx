@@ -86,7 +86,7 @@ export function CardHub() {
       />
 
       {/* 4. Full-Width Apple Pay & Apple Wallet Integration Banner */}
-      <div className="rounded-2xl border border-slate-800 bg-[#111726] p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* <div className="rounded-2xl border border-slate-800 bg-[#111726] p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="h-12 w-12 rounded-xl bg-black border border-slate-800 p-2 flex items-center justify-center shrink-0 shadow-inner">
             <Image
@@ -134,7 +134,7 @@ export function CardHub() {
             </div>
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* 5. Bottom Grid: Spending Limits + Card Transactions */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

@@ -25,13 +25,17 @@ export async function POST(request: NextRequest) {
       role: user.role || 'customer',
     });
 
+    const isHttps =
+      request.nextUrl.protocol === 'https:' ||
+      request.headers.get('x-forwarded-proto') === 'https';
+
     const response = NextResponse.json({ success: true, session: payload });
 
     response.cookies.set({
       name: SESSION_COOKIE_NAME,
       value: cookieValue,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isHttps,
       sameSite: 'lax',
       path: '/',
       maxAge: Math.floor(MAX_SESSION_AGE_MS / 1000), // 7200 seconds (2 hours)
@@ -55,13 +59,17 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ valid: true, user: result.payload });
 }
 
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
+  const isHttps =
+    request.nextUrl.protocol === 'https:' ||
+    request.headers.get('x-forwarded-proto') === 'https';
+
   const response = NextResponse.json({ success: true });
   response.cookies.set({
     name: SESSION_COOKIE_NAME,
     value: '',
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isHttps,
     sameSite: 'lax',
     path: '/',
     maxAge: 0,

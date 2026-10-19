@@ -20,17 +20,20 @@ export function FxRateWidget({
 }: FxRateWidgetProps) {
   const { data: fxData } = useFxRateQuery();
   const effectiveRate = fxData?.rate || rateIdr;
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
+    setNow(Date.now());
     const interval = setInterval(() => {
       setNow(Date.now());
     }, 1000);
     return () => clearInterval(interval);
   }, []);
 
-  const targetExpiresAt = fxData?.expiresAt ?? now + guaranteedMinutes * 60 * 1000;
-  const secondsRemaining = Math.max(0, Math.floor((targetExpiresAt - now) / 1000));
+  const targetExpiresAt = fxData?.expiresAt ?? (now ? now + guaranteedMinutes * 60 * 1000 : 0);
+  const secondsRemaining = now
+    ? Math.max(0, Math.floor((targetExpiresAt - now) / 1000))
+    : guaranteedMinutes * 60;
 
   const minutes = Math.floor(secondsRemaining / 60);
   const seconds = secondsRemaining % 60;
