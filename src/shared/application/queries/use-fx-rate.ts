@@ -11,14 +11,14 @@ export interface FxRateData {
   expiresAt: number;
 }
 
-let sessionExpiresAt = Date.now() + 900 * 1000;
+let sessionExpiresAt: number | null = null;
 
 export function useFxRateQuery() {
   return useQuery({
     queryKey: fxKeys.rate(),
     queryFn: async (): Promise<FxRateData> => {
-      // If previous lock expired, establish new 15-min lock window
-      if (Date.now() >= sessionExpiresAt) {
+      // If previous lock expired or uninitialized, establish new 15-min lock window
+      if (!sessionExpiresAt || Date.now() >= sessionExpiresAt) {
         sessionExpiresAt = Date.now() + 900 * 1000;
       }
 
