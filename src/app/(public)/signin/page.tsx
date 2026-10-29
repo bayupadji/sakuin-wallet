@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { SignInForm } from '@/features/auth';
-import { messages } from '@/shared/messages/en';
+import { messages } from '@/shared/messages';
 import { Lock, ShieldCheck } from 'lucide-react';
 
 export const metadata = {

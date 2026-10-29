@@ -6,6 +6,7 @@ import {
   UpdatePromoBannerInput,
 } from '../../domain/entities/promo-banner';
 import { SEED_PROMO_BANNERS } from '../../infrastructure/promo-banner-seed';
+import { safeLocalStorage } from '@/shared/stores/safe-storage';
 
 interface PromoBannerState {
   banners: PromoBannerItem[];
@@ -120,7 +121,7 @@ export const usePromoBannerStore = create<PromoBannerState>()(
     }),
     {
       name: 'sakuin_promo_banners_storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => safeLocalStorage),
     }
   )
 );

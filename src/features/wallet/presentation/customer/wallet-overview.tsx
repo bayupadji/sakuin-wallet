@@ -17,7 +17,7 @@ import { FxRateWidget } from '@/shared/presentation/ui/fx-rate-widget';
 import { useFxRateQuery } from '@/shared/application/queries/use-fx-rate';
 import { Money } from '@/shared/domain/money';
 import { SpendingAnalyticsCard } from './spending-analytics-card';
-import { SavingsVaultsCard } from './savings-vaults-card';
+import { SecuritySettingsCard } from './security-settings-card';
 import { QuickTransferModal } from './quick-transfer-modal';
 import { PromoBannerCarousel } from './promo-banner-carousel';
 import {
@@ -272,10 +272,9 @@ export function WalletOverview() {
         onReceiveClick={() => setModalMode('receive')}
       />
 
-      {/* 5. Baris Ketiga: Brankas Tabungan & Analisis Pengeluaran (Grid 6 / 6) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-6">
-          <SavingsVaultsCard />
+          <SecuritySettingsCard kycStatus={kycStatus} />
         </div>
         <div className="lg:col-span-6">
           <SpendingAnalyticsCard />

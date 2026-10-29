@@ -1,4 +1,5 @@
 import { TransactionItem } from '../../domain/entities/transaction';
+import { Money } from '@/shared/domain/money';
 
 /**
  * Menghasilkan markup HTML spreadsheet yang kompatibel dengan Microsoft Excel dan spreadsheet modern.
@@ -13,21 +14,20 @@ export function generateTransactionsExcelHtml(
     timeStyle: 'medium',
   });
 
-  // Hitung ringkasan
   const totalInflowCents = transactions
     .filter((tx) => tx.type === 'topup' || tx.type === 'receive')
-    .reduce((acc, tx) => acc + Number(tx.amountUsdCents), 0);
+    .reduce((acc, tx) => acc + tx.amountUsdCents, 0n);
 
   const totalOutflowCents = transactions
     .filter((tx) => tx.type === 'card')
-    .reduce((acc, tx) => acc + Number(tx.amountUsdCents), 0);
+    .reduce((acc, tx) => acc + tx.amountUsdCents, 0n);
 
   const netGrowthCents = totalInflowCents - totalOutflowCents;
 
   const rows = transactions.map((tx, idx) => {
     const isCredit = tx.type === 'topup' || tx.type === 'receive';
     const sign = isCredit ? '+' : '-';
-    const usdVal = `${sign}$${(Number(tx.amountUsdCents) / 100).toFixed(2)}`;
+    const usdVal = `${sign}${Money.fromCents(tx.amountUsdCents, 'USD').format()}`;
     const idrVal = `Rp ${tx.amountIdr.toLocaleString('id-ID')}`;
     const rateVal = `Rp ${tx.fxRate.toLocaleString('id-ID')}`;
     const feeVal = `Rp ${tx.feeIdr.toLocaleString('id-ID')}`;
@@ -115,18 +115,18 @@ export function generateTransactionsExcelHtml(
           <tr><td colspan="15"></td></tr>
           <tr class="summary-box">
             <td colspan="10" style="text-align: right;">TOTAL ARUS MASUK (TOP UP & TERIMA DANA):</td>
-            <td style="text-align: right; color: #0d9488;">+$${(totalInflowCents / 100).toFixed(2)}</td>
+            <td style="text-align: right; color: #0d9488;">+${Money.fromCents(totalInflowCents, 'USD').format()}</td>
             <td colspan="4"></td>
           </tr>
           <tr class="summary-box">
             <td colspan="10" style="text-align: right;">TOTAL PENGELUARAN (KARTU DEBIT):</td>
-            <td style="text-align: right; color: #e11d48;">-$${(totalOutflowCents / 100).toFixed(2)}</td>
+            <td style="text-align: right; color: #e11d48;">-${Money.fromCents(totalOutflowCents, 'USD').format()}</td>
             <td colspan="4"></td>
           </tr>
           <tr class="summary-box">
             <td colspan="10" style="text-align: right;">DELTA SALDO BERSIH PERIODE:</td>
-            <td style="text-align: right; color: ${netGrowthCents >= 0 ? '#0d9488' : '#e11d48'};">
-              ${netGrowthCents >= 0 ? '+' : '-'}$${Math.abs(netGrowthCents / 100).toFixed(2)}
+            <td style="text-align: right; color: ${netGrowthCents >= 0n ? '#0d9488' : '#e11d48'};">
+              ${netGrowthCents >= 0n ? '+' : '-'}${Money.fromCents(netGrowthCents >= 0n ? netGrowthCents : -netGrowthCents, 'USD').format()}
             </td>
             <td colspan="4"></td>
           </tr>

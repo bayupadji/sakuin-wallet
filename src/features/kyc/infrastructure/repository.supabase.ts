@@ -37,17 +37,23 @@ export class KycSupabaseRepository implements KycRepository {
       return inMemoryKyc;
     }
 
-    let query = this.client
+    let targetUserId = userId;
+    if (!targetUserId) {
+      const { data: authData } = await this.client.auth.getUser();
+      targetUserId = authData.user?.id;
+    }
+
+    if (!targetUserId) {
+      return inMemoryKyc;
+    }
+
+    const { data, error } = await this.client
       .from('kyc_submissions')
       .select('*')
+      .eq('user_id', targetUserId)
       .order('created_at', { ascending: false })
       .limit(1);
 
-    if (userId) {
-      query = query.eq('user_id', userId);
-    }
-
-    const { data, error } = await query;
     if (error || !data || data.length === 0) {
       return inMemoryKyc;
     }
@@ -113,7 +119,7 @@ export class KycSupabaseRepository implements KycRepository {
       });
 
     if (uploadError) {
-      console.warn('Storage upload fallback:', uploadError.message);
+      throw new KycSubmissionError(`Gagal mengunggah foto KTP: ${uploadError.message}`);
     }
 
     // 5. Insert record (Store masked NIK on client side; full encryption handled server-side)

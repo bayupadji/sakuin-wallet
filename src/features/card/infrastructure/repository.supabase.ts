@@ -21,7 +21,16 @@ export class CardSupabaseRepository implements CardRepository {
       return inMemoryCard;
     }
     try {
-      const { data, error } = await this.client.from('wallets').select('is_frozen').limit(1);
+      const { data: authData } = await this.client.auth.getUser();
+      const userId = authData.user?.id;
+      if (!userId) return inMemoryCard;
+
+      const { data, error } = await this.client
+        .from('wallets')
+        .select('is_frozen')
+        .eq('user_id', userId)
+        .limit(1);
+
       if (!error && data && data.length > 0) {
         return {
           ...inMemoryCard,
@@ -40,7 +49,11 @@ export class CardSupabaseRepository implements CardRepository {
       return isFrozen;
     }
     try {
-      await this.client.from('wallets').update({ is_frozen: isFrozen }).neq('id', '');
+      const { data: authData } = await this.client.auth.getUser();
+      const userId = authData.user?.id;
+      if (userId) {
+        await this.client.from('wallets').update({ is_frozen: isFrozen }).eq('user_id', userId);
+      }
     } catch {
       // Continue offline fallback
     }

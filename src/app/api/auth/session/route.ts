@@ -5,6 +5,10 @@ import {
   SESSION_COOKIE_NAME,
   MAX_SESSION_AGE_MS,
 } from '@/shared/infrastructure/auth/session';
+import { config } from '@/shared/config';
+import { createServerSupabaseClient } from '@/shared/infrastructure/supabase/server';
+import { createSeedUser } from '@/features/auth/infrastructure/seed';
+import { UserRole } from '@/features/auth/domain/entities/user';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,11 +22,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let verifiedRole: UserRole = 'customer';
+    let verifiedId = user.id;
+    let verifiedEmail = user.email;
+    let verifiedFullName = user.fullName || user.email.split('@')[0];
+
+    if (config.supabase.isConfigured) {
+      const supabase = await createServerSupabaseClient();
+      const { data: { user: authUser }, error } = await supabase.auth.getUser();
+
+      if (error || !authUser || authUser.id !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized session request.' }, { status: 401 });
+      }
+
+      verifiedId = authUser.id;
+      verifiedEmail = authUser.email || user.email;
+      verifiedRole = (authUser.app_metadata?.role as UserRole) || 'customer';
+      verifiedFullName = (authUser.user_metadata?.full_name as string) || verifiedFullName;
+    } else {
+      const seed = createSeedUser(user.email);
+      verifiedRole = seed.role;
+    }
+
     const { cookieValue, payload } = await createSignedSessionCookie({
-      id: user.id,
-      email: user.email,
-      fullName: user.fullName || user.email.split('@')[0],
-      role: user.role || 'customer',
+      id: verifiedId,
+      email: verifiedEmail,
+      fullName: verifiedFullName,
+      role: verifiedRole,
     });
 
     const isHttps =

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useSignUpMutation } from '../../application/mutations/use-auth-mutations';
 import { Button } from '@/shared/presentation/ui/button';
 import { Input } from '@/shared/presentation/ui/input';
-import { messages } from '@/shared/messages/en';
+import { messages } from '@/shared/messages';
 
 export function SignUpForm() {
   const [fullName, setFullName] = useState('');

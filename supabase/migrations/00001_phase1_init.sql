@@ -97,7 +97,12 @@ CREATE POLICY "Users can view own KYC submissions"
 
 CREATE POLICY "Users can insert own KYC submission"
   ON public.kyc_submissions FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (
+    auth.uid() = user_id
+    AND status = 'in_review'
+    AND reviewed_by IS NULL
+    AND reviewed_at IS NULL
+  );
 
 CREATE POLICY "KYC Reviewers and Super Admins can view all KYC submissions"
   ON public.kyc_submissions FOR SELECT
@@ -150,7 +155,7 @@ BEGIN
     NEW.id,
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
-    COALESCE((NEW.raw_user_meta_data->>'role')::user_role, 'customer')
+    'customer'::user_role
   );
 
   INSERT INTO public.wallets (user_id, balance_cents, currency)

@@ -46,7 +46,7 @@ export function VirtualDebitCard({
   cardholderName = 'Bayu Prasetya Adji Sugiyarto',
   last4 = '9109',
   expiry = '05/29',
-  issuingCountry = 'Kazakhstan',
+  issuingCountry = 'Singapura (MAS)',
   isFrozen: initialFrozen = false,
   onToggleFreeze,
   className,
@@ -125,7 +125,7 @@ export function VirtualDebitCard({
   function handleVerifyPin(e: React.FormEvent) {
     e.preventDefault();
     setPinError(null);
-    if (pinInput === '123456' || pinInput.length === 6) {
+    if (pinInput === '123456') {
       setShowDetails(true);
       setCountdown(30);
       setPinDialogOpen(false);
@@ -394,9 +394,7 @@ export function VirtualDebitCard({
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* 4. MODAL: Card Actions & Keamanan & Notifikasi (per screenshot 2)          */}
-      {/* ========================================================================= */}
+      {/* Modal: Card Actions */}
       <Dialog
         isOpen={moreModalOpen}
         onClose={() => setMoreModalOpen(false)}
@@ -790,9 +788,7 @@ export function VirtualDebitCard({
         </div>
       </Dialog>
 
-      {/* ========================================================================= */}
-      {/* 5. MODAL: Konfirmasi Freeze / Unfreeze                                    */}
-      {/* ========================================================================= */}
+      {/* Modal: Freeze / Unfreeze confirmation */}
       <Dialog
         isOpen={freezeDialogOpen}
         onClose={() => setFreezeDialogOpen(false)}
@@ -844,9 +840,7 @@ export function VirtualDebitCard({
         </div>
       </Dialog>
 
-      {/* ========================================================================= */}
-      {/* 6. MODAL: Verifikasi PIN untuk Menampilkan Detail Kartu                  */}
-      {/* ========================================================================= */}
+      {/* Modal: PIN verification */}
       <Dialog
         isOpen={pinDialogOpen}
         onClose={() => {

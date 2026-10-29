@@ -2,7 +2,7 @@ import React from 'react';
 import { KycStatus } from '../../domain/entities/kyc-submission';
 import { cn } from '@/shared/utils/cn';
 import { AlertCircle, CheckCircle2, Clock, HelpCircle, XCircle } from 'lucide-react';
-import { messages } from '@/shared/messages/en';
+import { messages } from '@/shared/messages';
 
 export interface KycStatusBadgeProps {
   status: KycStatus;

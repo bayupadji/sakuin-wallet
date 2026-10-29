@@ -18,11 +18,14 @@ export type SessionVerifyResult =
   | { valid: false; reason: 'tampered' | 'idle_timeout' | 'expired' | 'missing' };
 
 export function getSessionSecret(): string {
-  return (
-    process.env.SESSION_SECRET ||
-    process.env.NEXTAUTH_SECRET ||
-    'sakuin-fintech-fallback-hmac-secret-key-32b'
-  );
+  const secret = process.env.SESSION_SECRET || process.env.NEXTAUTH_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('SESSION_SECRET environment variable is required in production.');
+    }
+    return 'sakuin-fintech-fallback-hmac-secret-key-32b';
+  }
+  return secret;
 }
 
 function base64UrlEncode(str: string): string {

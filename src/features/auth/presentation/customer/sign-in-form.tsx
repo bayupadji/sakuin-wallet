@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useSignInMutation } from '../../application/mutations/use-auth-mutations';
 import { Button } from '@/shared/presentation/ui/button';
 import { Input } from '@/shared/presentation/ui/input';
-import { messages } from '@/shared/messages/en';
+import { messages } from '@/shared/messages';
 import { Clock, ShieldAlert } from 'lucide-react';
 
 export function SignInForm() {

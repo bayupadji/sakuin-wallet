@@ -159,11 +159,7 @@ export class AuthSupabaseRepository implements AuthRepository {
     },
     fallbackFullName = ''
   ): User {
-    // Prioritize app_metadata (server-only claims) over client-writable user_metadata
-    const role =
-      (user.app_metadata?.role as UserRole) ||
-      (user.user_metadata?.role as UserRole) ||
-      'customer';
+    const role = (user.app_metadata?.role as UserRole) || 'customer';
     const fullName = (user.user_metadata?.full_name as string) || fallbackFullName;
 
     return {

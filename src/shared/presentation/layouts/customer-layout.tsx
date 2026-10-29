@@ -231,13 +231,15 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
                     <span>Verifikasi KTP (KYC)</span>
                   </Link>
 
-                  <Link
-                    href="/admin"
-                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
-                  >
-                    <User className="h-4 w-4 text-slate-400" aria-hidden="true" />
-                    <span>Konsol Kepatuhan</span>
-                  </Link>
+                  {user?.role && user.role !== 'customer' && (
+                    <Link
+                      href="/admin"
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                    >
+                      <User className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                      <span>Konsol Kepatuhan</span>
+                    </Link>
+                  )}
 
                   <div className="border-t border-slate-800 my-1" />
 
@@ -313,9 +315,6 @@ export function CustomerLayout({ children }: CustomerLayoutProps) {
           <div className="flex items-center gap-4 text-slate-400">
             <Link href="/" className="hover:text-white transition-colors">
               Halaman Depan
-            </Link>
-            <Link href="/admin" className="hover:text-white transition-colors">
-              Kepatuhan
             </Link>
             <span>&copy; 2026 Sakuin Wallet</span>
           </div>

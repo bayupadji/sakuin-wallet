@@ -3,7 +3,7 @@
 import React from 'react';
 import { Wallet } from '../../domain/entities/wallet';
 import { useWalletStore } from '../../application/stores/use-wallet-store';
-import { messages } from '@/shared/messages/en';
+import { messages } from '@/shared/messages';
 import { Eye, EyeOff, Lock } from 'lucide-react';
 
 export interface BalanceCardProps {
