@@ -20,8 +20,8 @@ export function KreditPlanner() {
   return (
     <section aria-labelledby="planner-title">
       <LandingContainer className="pb-24 pt-8">
-        <div className="lp-glow-card flex flex-wrap gap-8 rounded-2xl p-[clamp(28px,5vw,48px)]">
-          <div className="flex min-w-0 flex-[1_1_420px] flex-col gap-[18px]">
+        <div className="lp-glow-card grid grid-cols-1 lg:grid-cols-12 gap-8 items-start rounded-2xl p-6 sm:p-8 lg:p-12">
+          <div className="lg:col-span-7 flex flex-col gap-[18px]">
             <Eyebrow>{planner.eyebrow}</Eyebrow>
             <h2
               id="planner-title"
@@ -63,7 +63,7 @@ export function KreditPlanner() {
             </div>
           </div>
 
-          <div className="flex min-w-0 flex-[1_1_320px] flex-col justify-center gap-4">
+          <div className="lg:col-span-5 flex flex-col justify-center gap-4">
             <div className="flex flex-col gap-2 rounded-[14px] border border-white/8 bg-white/4 p-6">
               <span className="text-sm font-semibold text-lp-muted">{planner.totalLabel}</span>
               <span className="text-[40px] font-extrabold tracking-[-0.02em]" aria-live="polite">

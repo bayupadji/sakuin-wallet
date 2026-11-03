@@ -12,7 +12,7 @@ export function SecuritySection() {
           <Eyebrow>{security.eyebrow}</Eyebrow>
           <SectionTitle id="security-heading">{security.heading}</SectionTitle>
         </div>
-        <ul className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-5">
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {security.items.map((item) => (
             <li
               key={item.title}

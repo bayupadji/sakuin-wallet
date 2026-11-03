@@ -9,8 +9,8 @@ const { hero } = landingContent;
 export function HeroSection() {
   return (
     <section id="top" aria-labelledby="hero-heading">
-      <LandingContainer className="flex flex-wrap items-center gap-12 pb-16 pt-[72px]">
-        <div className="flex min-w-0 flex-[1_1_460px] flex-col gap-6">
+      <LandingContainer className="flex flex-col lg:flex-row items-center gap-10 lg:gap-12 pb-16 pt-10 sm:pt-14 lg:pt-[72px]">
+        <div className="w-full lg:flex-[1_1_460px] flex flex-col gap-6 max-w-2xl lg:max-w-none">
           <div className="flex items-center gap-2.5 self-start rounded-full border border-white/8 bg-white/6 py-1 pl-1 pr-3.5">
             <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-lp-body">
               {hero.badgeTag}
@@ -54,7 +54,7 @@ export function HeroSection() {
           <p className="text-sm text-lp-muted">{hero.note}</p>
         </div>
 
-        <div className="min-w-0 flex-[1_1_440px]">
+        <div className="w-full lg:flex-[1_1_440px] max-w-2xl lg:max-w-none">
           <HeroVisual />
         </div>
       </LandingContainer>

@@ -16,18 +16,18 @@ export function FeesSection() {
 
   return (
     <section id={fees.id} aria-labelledby="fees-heading" className="scroll-mt-4">
-      <LandingContainer className="flex flex-wrap items-start gap-10 pb-24 pt-12">
-        <div className="flex min-w-0 flex-[1_1_460px] flex-col gap-5">
+      <LandingContainer className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start pb-24 pt-12">
+        <div className="lg:col-span-7 flex flex-col gap-5">
           <Eyebrow>{fees.eyebrow}</Eyebrow>
           <SectionTitle id="fees-heading">{fees.heading}</SectionTitle>
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-lp-surface">
-            <table className="w-full min-w-[420px] border-collapse text-left text-[15px] text-lp-strong">
+          <div className="w-full overflow-x-auto rounded-2xl border border-white/10 bg-lp-surface">
+            <table className="w-full border-collapse text-left text-[14px] sm:text-[15px] text-lp-strong">
               <thead>
                 <tr className="bg-white/4 text-left">
-                  <th scope="col" className="px-[18px] py-3.5 font-bold">
+                  <th scope="col" className="px-4 sm:px-[18px] py-3.5 font-bold">
                     {fees.columns.service}
                   </th>
-                  <th scope="col" className="px-[18px] py-3.5 font-bold">
+                  <th scope="col" className="px-4 sm:px-[18px] py-3.5 font-bold text-right sm:text-left">
                     {fees.columns.fee}
                   </th>
                 </tr>
@@ -35,10 +35,10 @@ export function FeesSection() {
               <tbody>
                 {fees.rows.map((row) => (
                   <tr key={row.service} className="border-t border-white/8">
-                    <th scope="row" className="px-[18px] py-3.5 font-normal">
+                    <th scope="row" className="px-4 sm:px-[18px] py-3.5 font-normal">
                       {row.service}
                     </th>
-                    <td className="px-[18px] py-3.5 font-semibold">{row.fee}</td>
+                    <td className="px-4 sm:px-[18px] py-3.5 font-semibold text-right sm:text-left">{row.fee}</td>
                   </tr>
                 ))}
               </tbody>
@@ -47,7 +47,7 @@ export function FeesSection() {
           <p className="text-sm text-lp-muted">{fees.note}</p>
         </div>
 
-        <div className="lp-glow-card flex min-w-0 flex-[1_1_380px] flex-col gap-5 rounded-2xl p-8">
+        <div className="lg:col-span-5 lp-glow-card flex flex-col gap-5 rounded-2xl p-6 sm:p-8">
           <h3 className="text-[22px] font-extrabold">{sim.heading}</h3>
           <label htmlFor="amount" className="flex justify-between text-[15px] font-semibold text-lp-strong">
             <span>{sim.amountLabel}</span>

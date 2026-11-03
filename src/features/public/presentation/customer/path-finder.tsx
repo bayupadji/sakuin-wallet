@@ -12,7 +12,7 @@ export function PathFinder() {
   const [serviceId, setServiceId] = useState<string>(pathFinder.defaultService);
   const service = pathFinder.services.find((item) => item.id === serviceId) ?? pathFinder.services[0];
   const path = pathFinder.paths[service.kind];
-  const brand = 'brand' in service ? service.brand : '';
+  const brand = 'brand' in service && typeof service.brand === 'string' ? service.brand : '';
   const fill = (text: string) => text.replaceAll('{brand}', brand);
 
   return (
@@ -50,15 +50,15 @@ export function PathFinder() {
             })}
           </div>
 
-          <div className="flex flex-wrap items-stretch gap-6" aria-live="polite">
-            <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-3 rounded-2xl border border-white/8 bg-white/4 p-7">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch" aria-live="polite">
+            <div className="lg:col-span-5 flex flex-col gap-3 rounded-2xl border border-white/8 bg-white/4 p-6 sm:p-7">
               <span className="self-start rounded-full bg-lp-cyan/14 px-3 py-1.5 text-[13px] font-bold text-lp-sky-soft">
                 {path.badge}
               </span>
               <h3 className="text-2xl font-extrabold">{fill(path.title)}</h3>
               <p className="text-base leading-relaxed text-lp-muted">{path.desc}</p>
             </div>
-            <ol className="flex min-w-0 flex-[1_1_420px] list-none flex-col gap-3 p-0">
+            <ol className="lg:col-span-7 flex list-none flex-col gap-3 p-0">
               {path.steps.map((text, index) => (
                 <li
                   key={text}

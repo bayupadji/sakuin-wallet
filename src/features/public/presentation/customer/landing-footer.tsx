@@ -36,8 +36,8 @@ export function LandingFooter() {
   return (
     <footer className="border-t border-white/8">
       <LandingContainer className="flex flex-col gap-8 pb-10 pt-14">
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-8">
-          <div className="flex flex-col gap-3 md:col-span-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="sm:col-span-2 flex flex-col gap-3">
             <span className="text-[22px] font-extrabold">
               {brand.name}
               <span className="font-semibold text-lp-muted">{brand.suffix}</span>
@@ -45,8 +45,12 @@ export function LandingFooter() {
             <p className="max-w-[520px] text-sm leading-[1.7] text-lp-body">{footer.legal}</p>
             <p className="max-w-[520px] text-[13px] leading-[1.7] text-lp-muted">{footer.regulatory}</p>
           </div>
-          <FooterColumn label={a11y.footerServices} title={footer.services.title} links={footer.services.links} />
-          <FooterColumn label={a11y.footerSupport} title={footer.support.title} links={footer.support.links} />
+          <div className="col-span-1">
+            <FooterColumn label={a11y.footerServices} title={footer.services.title} links={footer.services.links} />
+          </div>
+          <div className="col-span-1">
+            <FooterColumn label={a11y.footerSupport} title={footer.support.title} links={footer.support.links} />
+          </div>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/8 pt-6">
           <span className="text-[13px] text-lp-muted">{footer.copyright}</span>

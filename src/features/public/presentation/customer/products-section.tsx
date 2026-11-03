@@ -14,7 +14,7 @@ export function ProductsSection() {
           <p className="text-lg leading-relaxed text-lp-muted">{products.body}</p>
         </div>
 
-        <ul className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-5">
+        <ul className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {products.core.map((item) => (
             <li key={item.title} className="lp-glow-card flex flex-col gap-3.5 rounded-2xl p-7">
               <IconTile name={item.icon as IconName} />
@@ -33,7 +33,7 @@ export function ProductsSection() {
         </ul>
 
         <p className="text-[15px] text-lp-muted">{products.alsoLabel}</p>
-        <ul className="-mt-6 grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-5">
+        <ul className="-mt-6 grid grid-cols-1 md:grid-cols-3 gap-5">
           {products.also.map((item) => (
             <li key={item.title} className={cn(surfaceCardClass, 'flex flex-col gap-3 p-7')}>
               <IconTile name={item.icon as IconName} />

@@ -12,7 +12,7 @@ export function HowItWorks() {
           <Eyebrow>{how.eyebrow}</Eyebrow>
           <SectionTitle id="how-heading">{how.heading}</SectionTitle>
         </div>
-        <ol className="grid list-none grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5 p-0">
+        <ol className="grid list-none grid-cols-1 md:grid-cols-3 gap-5 p-0">
           {how.steps.map((step, index) => (
             <li key={step.title} className={cn(surfaceCardClass, 'flex flex-col gap-3.5 p-7')}>
               <span
