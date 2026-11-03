@@ -1,7 +1,12 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Users, ArrowLeft } from 'lucide-react';
 import { Button } from '@/shared/presentation/ui/button';
+
+export const metadata: Metadata = {
+  title: 'Manajemen Nasabah',
+};
 
 export default function AdminCustomersPage() {
   return (

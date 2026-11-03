@@ -4,8 +4,8 @@ import { KycSubmissionForm } from '@/features/kyc';
 import { ArrowLeft, Shield } from 'lucide-react';
 
 export const metadata = {
-  title: 'Verifikasi Identitas (KYC) | Sakuin USD Wallet',
-  description: 'Upload foto KTP asli Anda untuk memverifikasi akun dan membuka fitur kartu virtual.',
+  title: 'Verifikasi Identitas (KYC)',
+  description: 'Unggah foto KTP asli Anda untuk verifikasi manual dan mengaktifkan fitur Virtual Debit Card serta top up.',
 };
 
 export default function KycSubmitPage() {

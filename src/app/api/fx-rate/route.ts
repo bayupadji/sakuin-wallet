@@ -1,22 +1,22 @@
 import { NextResponse } from 'next/server';
-import { fetchFrankfurterRate } from '@/shared/infrastructure/fx/frankfurter';
+import { getOrLockServerFxRate } from '@/shared/infrastructure/fx/server-rate-lock';
 
 export async function GET() {
   try {
-    const rateData = await fetchFrankfurterRate('USD', 'IDR');
+    const rateData = await getOrLockServerFxRate();
     return NextResponse.json(rateData, {
       status: 200,
       headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+        'Cache-Control': 'private, no-store',
       },
     });
   } catch (error) {
     return NextResponse.json(
       {
-        error: 'Failed to fetch exchange rate from Frankfurter',
+        error: 'Gagal mengambil kurs referensi Wise',
         message: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 502 }
     );
   }
 }

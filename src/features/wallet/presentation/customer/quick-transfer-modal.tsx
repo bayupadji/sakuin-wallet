@@ -1,17 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Dialog } from '@/shared/presentation/ui/dialog';
 import { Button } from '@/shared/presentation/ui/button';
 import { ArrowRight, CheckCircle2, Clock, Copy, QrCode, ShieldCheck } from 'lucide-react';
 import { useTopUpMutation } from '../../application/mutations/use-wallet-mutations';
 import { useFxRateQuery } from '@/shared/application/queries/use-fx-rate';
+import { calculateFeeIdr, DEFAULT_FEE_RULES } from '@/shared/domain';
+import { messages } from '@/shared/messages';
 
 interface QuickTransferModalProps {
   mode: 'topup' | 'receive' | null;
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+}
+
+function makeOrderIdempotencyKey(): string {
+  return typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? `topup_${crypto.randomUUID()}`
+    : `topup_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
 export function QuickTransferModal({
@@ -26,32 +34,50 @@ export function QuickTransferModal({
 
   const [amountUsd, setAmountUsd] = useState('100');
   const [method, setMethod] = useState<'va' | 'qris'>('va');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const idempotencyKeyRef = useRef<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [step, setStep] = useState<'input' | 'confirm' | 'payment_ready'>('input');
   const [copied, setCopied] = useState(false);
 
   const parsedUsd = Math.max(1, parseFloat(amountUsd) || 0);
   const totalIdr = Math.round(parsedUsd * fxRate);
-  const feeIdr = method === 'va' ? 4500 : Math.round(totalIdr * 0.007); // VA flat or QRIS 0.7%
+  const feeIdr = calculateFeeIdr(totalIdr, DEFAULT_FEE_RULES[method]);
   const grandTotalIdr = totalIdr + feeIdr;
 
   function handleProceed() {
+    setErrorMessage(null);
     setStep('confirm');
   }
 
   function handleConfirm() {
-    setIsSubmitting(true);
+    setErrorMessage(null);
+    if (mode !== 'topup') {
+      setStep('payment_ready');
+      onSuccess?.();
+      return;
+    }
+
+    if (!idempotencyKeyRef.current) {
+      idempotencyKeyRef.current = makeOrderIdempotencyKey();
+    }
+
     topUpMutation.mutate(
       {
         amountUsd: parsedUsd,
-        channel: method === 'va' ? 'BCA Virtual Account (*8924)' : 'QRIS Dynamic Merchant',
+        method,
+        channel: method === 'va' ? 'BCA Virtual Account' : 'QRIS Dinamis',
+        idempotencyKey: idempotencyKeyRef.current,
         fxRate,
       },
       {
-        onSettled: () => {
-          setIsSubmitting(false);
+        onSuccess: () => {
           setStep('payment_ready');
           onSuccess?.();
+        },
+        onError: (err) => {
+          setErrorMessage(
+            err instanceof Error ? err.message : messages.errors.genericDescription
+          );
         },
       }
     );
@@ -59,6 +85,8 @@ export function QuickTransferModal({
 
   function handleReset() {
     setStep('input');
+    setErrorMessage(null);
+    idempotencyKeyRef.current = null;
     onClose();
   }
 
@@ -75,34 +103,33 @@ export function QuickTransferModal({
       title={
         mode === 'topup'
           ? step === 'payment_ready'
-            ? 'Tagihan Pembayaran Diterbitkan'
-            : 'Isi Saldo USD (Top Up)'
+            ? messages.topUp.invoiceIssuedTitle
+            : messages.topUp.title
           : 'Terima Pembayaran Rupiah'
       }
       description={
         mode === 'topup'
-          ? 'Setor Rupiah via Virtual Account BCA/Mandiri atau QRIS dengan jaminan kurs terkunci 15 menit.'
-          : 'Buat tagihan instan atau kode QRIS. Dikonversi langsung ke saldo USD Anda saat pembayaran diterima.'
+          ? messages.topUp.subtitle
+          : 'Buat tagihan pembayaran Rupiah. Saldo USD bertambah otomatis setelah pembayaran dikonfirmasi.'
       }
       className="bg-[#050507] border-white/8 text-zinc-100"
     >
       <div className="space-y-5 pt-2 text-xs font-sans text-zinc-100">
         {step === 'input' && (
           <>
-            {/* Amount Input */}
             <div className="space-y-2">
-              <label className="font-semibold text-zinc-300">
-                Nominal {mode === 'topup' ? 'Isi Saldo' : 'Penerimaan'} (USD)
+              <label htmlFor="quick-topup-amount" className="font-semibold text-zinc-300">
+                Nominal {mode === 'topup' ? 'Top Up' : 'Tagihan'} (USD)
               </label>
               <div className="relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono font-bold text-zinc-400 text-sm">
                   $
                 </span>
                 <input
+                  id="quick-topup-amount"
                   type="number"
-                  min="5"
-                  max="1000"
-                  step="1"
+                  min="1"
+                  step="0.01"
                   value={amountUsd}
                   onChange={(e) => setAmountUsd(e.target.value)}
                   className="w-full rounded-xl border border-white/8 bg-[#12141a] pl-8 pr-16 py-2.5 font-mono text-base font-bold text-white focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0] tabular-nums"
@@ -113,15 +140,14 @@ export function QuickTransferModal({
                 </span>
               </div>
               <p className="text-[11px] text-zinc-400">
-                Batas transaksi: Min $5,00 &bull; Maks $1.000,00 per transfer
+                Tanpa batas nominal produk. Batas teknis kanal gateway tetap berlaku.
               </p>
             </div>
 
-            {/* Payment Method Selector */}
             <div className="space-y-2">
-              <label className="font-semibold text-zinc-300">
-                Kanal Pembayaran Rupiah
-              </label>
+              <span className="font-semibold text-zinc-300 block">
+                {messages.topUp.chooseMethodTitle}
+              </span>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
@@ -132,12 +158,8 @@ export function QuickTransferModal({
                       : 'border-white/8 bg-[#12141a] text-zinc-300 hover:text-white'
                   }`}
                 >
-                  <span className="font-bold text-white block">
-                    Virtual Account
-                  </span>
-                  <span className="text-[11px] text-zinc-400">
-                    BCA, Mandiri, BRI &bull; Biaya flat
-                  </span>
+                  <span className="font-bold text-white block">Virtual Account</span>
+                  <span className="text-[11px] text-zinc-400">BCA, Mandiri, BRI, BNI</span>
                 </button>
 
                 <button
@@ -149,61 +171,55 @@ export function QuickTransferModal({
                       : 'border-white/8 bg-[#12141a] text-zinc-300 hover:text-white'
                   }`}
                 >
-                  <span className="font-bold text-white block">
-                    QRIS Dinamis
-                  </span>
-                  <span className="text-[11px] text-zinc-400">
-                    GoPay, OVO, ShopeePay &bull; 0,7%
-                  </span>
+                  <span className="font-bold text-white block">QRIS Dinamis</span>
+                  <span className="text-[11px] text-zinc-400">Seluruh bank & e-wallet</span>
                 </button>
               </div>
             </div>
 
-            {/* Guaranteed Conversion Quote Box */}
             <div className="rounded-2xl border border-white/8 bg-[#12141a] p-4 space-y-2.5 text-zinc-400">
               <div className="flex items-center justify-between text-zinc-400">
                 <div className="flex items-center gap-1.5">
                   <Clock className="h-3.5 w-3.5 text-[#22D3EE]" aria-hidden="true" />
-                  <span>Garansi Kurs Valas</span>
+                  <span>{messages.topUp.rateLockedLabel}</span>
                 </div>
                 <span className="font-mono font-semibold text-white">
-                  1 USD = Rp {fxRate.toLocaleString('id-ID')}
+                  1 USD = Rp{fxRate.toLocaleString('id-ID')}
                 </span>
               </div>
 
               <div className="flex items-center justify-between text-zinc-400">
-                <span>Subtotal Konversi</span>
+                <span>{messages.topUp.subtotalLabel}</span>
                 <span className="font-mono font-medium text-zinc-200">
-                  Rp {totalIdr.toLocaleString('id-ID')}
+                  Rp{totalIdr.toLocaleString('id-ID')}
                 </span>
               </div>
 
               <div className="flex items-center justify-between text-zinc-400">
-                <span>Biaya Transaksi Kanal</span>
+                <span>{messages.topUp.channelFeeLabel}</span>
                 <span className="font-mono font-medium text-zinc-200">
-                  Rp {feeIdr.toLocaleString('id-ID')}
+                  Rp{feeIdr.toLocaleString('id-ID')}
                 </span>
               </div>
 
               <div className="border-t border-white/8 pt-2 flex items-center justify-between font-bold text-white">
-                <span>Total Pembayaran (IDR)</span>
+                <span>{messages.topUp.totalPaymentLabel}</span>
                 <span className="font-mono text-sm text-[#67E8F9] tabular-nums">
-                  Rp {grandTotalIdr.toLocaleString('id-ID')}
+                  Rp{grandTotalIdr.toLocaleString('id-ID')}
                 </span>
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex items-center justify-end gap-2 pt-2">
               <Button variant="ghost" onClick={handleReset} className="text-zinc-400 hover:text-white">
-                Batal
+                {messages.common.cancel}
               </Button>
               <Button
                 variant="primary"
                 onClick={handleProceed}
                 className="gap-2 bg-[#1D9BF0] hover:bg-[#1A8CD8] text-white font-bold border-[#1D9BF0]"
               >
-                <span>Lanjutkan</span>
+                <span>{messages.common.actions.continue}</span>
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Button>
             </div>
@@ -216,48 +232,55 @@ export function QuickTransferModal({
               <div className="flex items-start gap-3">
                 <ShieldCheck className="h-5 w-5 text-[#22D3EE] shrink-0 mt-0.5" aria-hidden="true" />
                 <div className="space-y-1">
-                  <p className="font-bold text-sky-200">
-                    Tinjau dan Kunci Transaksi
-                  </p>
+                  <p className="font-bold text-sky-200">Tinjau Rincian Transaksi</p>
                   <p className="text-[11px] text-sky-300/80 leading-relaxed">
-                    Kurs tukar Anda dikunci selama tepat 15 menit. Saldo buku besar USD akan ditambahkan seketika setelah pembayaran terverifikasi.
+                    {messages.topUp.settlementPendingNote}
                   </p>
                 </div>
               </div>
             </div>
 
+            {errorMessage && (
+              <div className="rounded-xl border border-rose-800/60 bg-rose-950/40 px-3.5 py-2.5 text-xs text-rose-300">
+                {errorMessage}
+              </div>
+            )}
+
             <div className="space-y-2 border-y border-white/8 py-3 text-xs">
               <div className="flex justify-between">
-                <span className="text-zinc-400">Saldo USD Masuk</span>
+                <span className="text-zinc-400">Nominal USD</span>
                 <span className="font-mono font-bold text-white">
                   ${parsedUsd.toFixed(2)} USD
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-400">Metode Pembayaran</span>
-                <span className="font-semibold text-white">
-                  {method === 'va' ? 'Virtual Account (BCA/Mandiri)' : 'QRIS Dinamis'}
-                </span>
+                <span className="text-zinc-400">Kurs Referensi Wise</span>
+                <span className="font-mono text-white">Rp{fxRate.toLocaleString('id-ID')}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-400">Total Nominal Tagihan</span>
+                <span className="text-zinc-400">{messages.topUp.channelFeeLabel}</span>
+                <span className="font-mono text-white">Rp{feeIdr.toLocaleString('id-ID')}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-400">{messages.topUp.totalPaymentLabel}</span>
                 <span className="font-mono font-bold text-[#67E8F9]">
-                  Rp {grandTotalIdr.toLocaleString('id-ID')} IDR
+                  Rp{grandTotalIdr.toLocaleString('id-ID')}
                 </span>
               </div>
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-2">
               <Button variant="ghost" onClick={() => setStep('input')} className="text-zinc-400 hover:text-white">
-                Kembali
+                {messages.common.back}
               </Button>
               <Button
                 variant="primary"
                 onClick={handleConfirm}
-                isLoading={isSubmitting}
+                disabled={topUpMutation.isPending}
+                isLoading={topUpMutation.isPending}
                 className="gap-2 bg-[#1D9BF0] hover:bg-[#1A8CD8] text-white font-bold border-[#1D9BF0]"
               >
-                <span>Konfirmasi & Terbitkan Tagihan</span>
+                <span>Top Up Sekarang</span>
               </Button>
             </div>
           </div>
@@ -271,10 +294,14 @@ export function QuickTransferModal({
 
             <div>
               <h3 className="font-bold text-sm text-white">
-                Tagihan Pembayaran Aktif
+                {messages.topUp.invoiceIssuedTitle}
               </h3>
               <p className="text-xs text-zinc-400 mt-1">
-                Silakan transfer tepat <span className="font-mono font-bold text-[#67E8F9]">Rp {grandTotalIdr.toLocaleString('id-ID')}</span> dalam batas waktu 15 menit.
+                Silakan transfer tepat{' '}
+                <span className="font-mono font-bold text-[#67E8F9]">
+                  Rp{grandTotalIdr.toLocaleString('id-ID')}
+                </span>{' '}
+                dalam batas waktu 15 menit.
               </p>
             </div>
 
@@ -294,7 +321,7 @@ export function QuickTransferModal({
                     className="text-xs gap-1 border-white/8 bg-black/60 text-[#1D9BF0] hover:text-[#22D3EE]"
                   >
                     <Copy className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span>{copied ? 'Tersalin' : 'Salin'}</span>
+                    <span>{copied ? messages.common.copied : messages.common.copy}</span>
                   </Button>
                 </div>
               </div>
@@ -303,16 +330,22 @@ export function QuickTransferModal({
                 <div className="flex h-36 w-36 items-center justify-center rounded-xl bg-black/60 border border-white/8">
                   <QrCode className="h-24 w-24 text-[#22D3EE]" aria-hidden="true" />
                 </div>
-                <p className="text-[11px] text-zinc-400 mt-2">Pindai QRIS dengan BCA Mobile, Livin, GoPay, OVO, atau e-wallet lainnya</p>
+                <p className="text-[11px] text-zinc-400 mt-2">
+                  Pindai QRIS dengan aplikasi perbankan atau dompet digital berlisensi.
+                </p>
               </div>
             )}
+
+            <p className="text-[11px] text-zinc-400">
+              {messages.topUp.settlementPendingNote}
+            </p>
 
             <Button
               variant="primary"
               onClick={handleReset}
               className="w-full bg-[#1D9BF0] hover:bg-[#1A8CD8] text-white font-bold border-[#1D9BF0]"
             >
-              Selesai
+              {messages.common.actions.close}
             </Button>
           </div>
         )}

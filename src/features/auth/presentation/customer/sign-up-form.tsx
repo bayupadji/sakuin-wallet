@@ -2,15 +2,15 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSignUpMutation } from '../../application/mutations/use-auth-mutations';
 import { Button } from '@/shared/presentation/ui/button';
 import { Input } from '@/shared/presentation/ui/input';
 import { messages } from '@/shared/messages';
 
-export function SignUpForm() {
+function SignUpFormFields({ initialEmail = '' }: { initialEmail?: string }) {
   const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -22,12 +22,12 @@ export function SignUpForm() {
     setErrorMessage(null);
 
     if (!fullName.trim() || !email.trim() || !password) {
-      setErrorMessage('Please fill in all required fields.');
+      setErrorMessage(messages.auth.signUpMissingFields);
       return;
     }
 
     if (password.length < 8) {
-      setErrorMessage('Password must be at least 8 characters long.');
+      setErrorMessage(messages.auth.signUpShortPassword);
       return;
     }
 
@@ -38,7 +38,7 @@ export function SignUpForm() {
       if (err instanceof Error) {
         setErrorMessage(err.message);
       } else {
-        setErrorMessage('Failed to create account. Please try again.');
+        setErrorMessage(messages.auth.signUpGenericError);
       }
     }
   }
@@ -55,13 +55,14 @@ export function SignUpForm() {
       )}
 
       <Input
-        label="Full Name"
+        label={messages.auth.fullNameLabel}
         type="text"
         id="signup-fullname"
+        name="fullName"
         autoComplete="name"
         value={fullName}
         onChange={(e) => setFullName(e.target.value)}
-        placeholder="Budi Santoso"
+        placeholder={messages.auth.fullNamePlaceholder}
         required
       />
 
@@ -69,10 +70,11 @@ export function SignUpForm() {
         label={messages.auth.emailLabel}
         type="email"
         id="signup-email"
+        name="email"
         autoComplete="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="name@company.com"
+        placeholder={messages.auth.emailPlaceholder}
         required
       />
 
@@ -80,11 +82,12 @@ export function SignUpForm() {
         label={messages.auth.passwordLabel}
         type="password"
         id="signup-password"
+        name="password"
         autoComplete="new-password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        placeholder="At least 8 characters"
-        helperText="Must be at least 8 characters."
+        placeholder={messages.auth.newPasswordPlaceholder}
+        helperText={messages.auth.newPasswordHelper}
         required
       />
 
@@ -94,11 +97,11 @@ export function SignUpForm() {
         className="w-full"
         isLoading={signUpMutation.isPending}
       >
-        Create Account
+        {messages.auth.createAccountCta}
       </Button>
 
       <p className="text-center text-xs text-slate-600 dark:text-slate-400">
-        Already have an account?{' '}
+        {messages.auth.hasAccountPrompt}{' '}
         <Link
           href="/signin"
           className="font-medium text-[#1D9BF0] hover:text-[#1A8CD8] underline dark:text-[#1D9BF0]"
@@ -107,5 +110,19 @@ export function SignUpForm() {
         </Link>
       </p>
     </form>
+  );
+}
+
+function SignUpFormWithSearchParams() {
+  const searchParams = useSearchParams();
+  const initialEmail = searchParams.get('email')?.trim() ?? '';
+  return <SignUpFormFields key={initialEmail} initialEmail={initialEmail} />;
+}
+
+export function SignUpForm() {
+  return (
+    <React.Suspense fallback={<SignUpFormFields />}>
+      <SignUpFormWithSearchParams />
+    </React.Suspense>
   );
 }

@@ -131,8 +131,8 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
         {/* Footer Support Note */}
         <p className="text-center text-xs text-zinc-500">
           Jika masalah berlanjut, hubungi dukungan prioritas kami di{' '}
-          <a href="mailto:support@sakuin.id" className="text-[#1D9BF0] hover:underline">
-            support@sakuin.id
+          <a href="mailto:support@sakuin.co.id" className="text-[#1D9BF0] hover:underline">
+            support@sakuin.co.id
           </a>
         </p>
       </div>

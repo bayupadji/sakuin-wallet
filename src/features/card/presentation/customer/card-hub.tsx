@@ -2,12 +2,14 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useAuthUser } from '@/features/auth';
 import { useKycStatus, canTransact } from '@/features/kyc';
 import { VirtualDebitCard } from './virtual-debit-card';
-import { useCardStore } from '../../application/stores/use-card-store';
 import { useCardQuery } from '../../application/queries/use-card';
+import { useUpdateCardControlsMutation } from '../../application/mutations/use-card-mutations';
 import { useTransactionsQuery } from '@/features/transactions';
 import { Button } from '@/shared/presentation/ui/button';
+import { messages } from '@/shared/messages';
 import {
   CreditCard,
   ShieldCheck,
@@ -16,16 +18,21 @@ import {
 } from 'lucide-react';
 
 export function CardHub() {
+  const { data: authUser } = useAuthUser();
   const { data: kycSubmission } = useKycStatus();
   const kycStatus = kycSubmission?.status || 'not_verified';
   const isApproved = canTransact(kycStatus);
 
   const { data: cardDetails } = useCardQuery();
+  const updateControlsMutation = useUpdateCardControlsMutation();
   const { data: cardTransactions = [] } = useTransactionsQuery({ type: 'card' });
 
-  const { monthlyLimit, setMonthlyLimit } = useCardStore();
-  const currentSpent = 105.5;
-  const percentageUsed = Math.min(100, Math.round((currentSpent / monthlyLimit) * 100));
+  const monthlyLimit = cardDetails?.monthlyLimit ?? 2000;
+  const currentSpent = cardTransactions
+    .filter((tx) => tx.status === 'success')
+    .reduce((sum, tx) => sum + Number(tx.amountUsdCents) / 100, 0);
+  const percentageUsed =
+    monthlyLimit > 0 ? Math.min(100, Math.round((currentSpent / monthlyLimit) * 100)) : 0;
 
   return (
     <div className="space-y-6 font-sans antialiased text-slate-100">
@@ -37,11 +44,11 @@ export function CardHub() {
               <CreditCard className="h-4 w-4" aria-hidden="true" />
             </span>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
-              Kartu Debit Virtual
+              {messages.card.title}
             </h1>
           </div>
           <p className="text-xs text-slate-400 mt-1.5">
-            Diterbitkan via mitra perbankan berlisensi MAS. Gunakan saldo USD untuk transaksi global online dan e-Commerce.
+            {messages.card.subtitle}
           </p>
         </div>
       </div>
@@ -52,10 +59,10 @@ export function CardHub() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-sm font-bold text-amber-200">
-                Kartu Virtual Memerlukan Verifikasi Identitas
+                {messages.card.kycNoticeTitle}
               </h2>
               <p className="text-xs text-amber-300/80 mt-1">
-                Lengkapi verifikasi KTP Anda untuk mengaktifkan kartu dan membuka detail nomor serta kode CVV.
+                {messages.card.kycNoticeDescription}
               </p>
             </div>
 
@@ -67,7 +74,7 @@ export function CardHub() {
                   className="bg-amber-600 hover:bg-amber-500 border-amber-600 text-slate-950 font-bold gap-2"
                 >
                   <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-                  <span>Verifikasi KTP Sekarang</span>
+                  <span>{messages.card.kycNoticeCta}</span>
                 </Button>
               </Link>
             )}
@@ -75,67 +82,19 @@ export function CardHub() {
         </div>
       )}
 
-      {/* 3. Bybit-Style Virtual Debit Card (Full Width) */}
+      {/* 3. Virtual Debit Card */}
       <VirtualDebitCard
-        cardholderName={cardDetails?.cardholderName || 'Bayu Prasetya Adji Sugiyarto'}
+        cardholderName={cardDetails?.cardholderName || authUser?.fullName || 'Nasabah Sakuin'}
         last4={cardDetails?.last4 || '4821'}
         expiry={cardDetails?.expiry || '08/29'}
         issuingCountry={cardDetails?.issuingCountry || 'Singapura (MAS)'}
         isFrozen={!isApproved || (cardDetails?.isFrozen ?? false)}
+        onlineTransactions={cardDetails?.onlineTransactions ?? true}
+        non3dsTransactions={cardDetails?.non3dsTransactions ?? true}
+        atmWithdrawals={cardDetails?.atmWithdrawals ?? false}
       />
 
-      {/* 4. Full-Width Apple Pay & Apple Wallet Integration Banner */}
-      {/* <div className="rounded-2xl border border-white/8 bg-[#050507] p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-black border border-white/8 p-2 flex items-center justify-center shrink-0 shadow-inner">
-            <Image
-              src="/icons/apple-wallet.png"
-              alt="Apple Wallet"
-              width={48}
-              height={36}
-              className="h-auto w-full object-contain"
-            />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm sm:text-base font-bold text-white">Mendukung Apple Pay</h3>
-              <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 border border-sky-500/30 px-2 py-0.5 text-[10px] font-semibold text-[#67E8F9]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#22D3EE]" />
-                Siap Ditambahkan
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">
-              Tambahkan kartu debit virtual ke Apple Wallet untuk pembayaran contactless global via iPhone, Apple Watch, dan Mac.
-            </p>
-          </div>
-        </div>
-
-        <div className="shrink-0 self-start sm:self-auto">
-          <button
-            type="button"
-            className="flex items-center gap-2.5 rounded-xl bg-black border border-slate-700/80 hover:border-slate-600 px-4 py-2.5 text-white shadow-lg hover:bg-slate-900 transition-colors cursor-pointer select-none"
-            aria-label="Add to Apple Wallet"
-          >
-            <Image
-              src="/icons/apple-wallet.png"
-              alt="Apple Wallet"
-              width={28}
-              height={21}
-              className="h-5 w-auto object-contain"
-            />
-            <div className="text-left">
-              <span className="block text-[9px] uppercase tracking-wider text-slate-400 leading-none">
-                Add to
-              </span>
-              <span className="block text-xs font-semibold leading-tight">
-                Apple Wallet
-              </span>
-            </div>
-          </button>
-        </div>
-      </div> */}
-
-      {/* 5. Bottom Grid: Spending Limits + Card Transactions */}
+      {/* 4. Bottom Grid: Spending Limits + Card Transactions */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Spending Limit Controller */}
         <div className="lg:col-span-6">
@@ -147,10 +106,10 @@ export function CardHub() {
                 </div>
                 <div>
                   <h2 className="text-sm font-bold text-white">
-                    Batas Belanja Bulanan
+                    {messages.card.monthlyLimitTitle}
                   </h2>
                   <p className="text-[11px] text-slate-400">
-                    Batasi total pengeluaran online dalam satu siklus billing
+                    {messages.card.monthlyLimitSubtitle}
                   </p>
                 </div>
               </div>
@@ -162,9 +121,11 @@ export function CardHub() {
             {/* Limit Progress */}
             <div className="space-y-2">
               <div className="flex justify-between text-xs">
-                <span className="text-slate-400">Terpakai: ${currentSpent.toFixed(2)}</span>
+                <span className="text-slate-400">
+                  {messages.card.spentLabel}: ${currentSpent.toFixed(2)}
+                </span>
                 <span className="font-mono font-semibold text-slate-200">
-                  Sisa ${(monthlyLimit - currentSpent).toFixed(2)}
+                  {messages.card.remainingLabel} ${Math.max(0, monthlyLimit - currentSpent).toFixed(2)}
                 </span>
               </div>
               <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
@@ -178,16 +139,19 @@ export function CardHub() {
             {/* Slider control */}
             <div className="pt-2">
               <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
-                <span>Atur Batas Maksimal:</span>
+                <label htmlFor="monthly-card-limit-range">Atur Batas Maksimal:</label>
                 <span className="font-mono font-bold text-white">${monthlyLimit} USD</span>
               </div>
               <input
+                id="monthly-card-limit-range"
                 type="range"
                 min="50"
                 max="5000"
                 step="50"
                 value={monthlyLimit}
-                onChange={(e) => setMonthlyLimit(Number(e.target.value))}
+                onChange={(e) =>
+                  updateControlsMutation.mutate({ monthlyLimit: Number(e.target.value) })
+                }
                 className="w-full accent-[#1D9BF0] cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
@@ -204,10 +168,10 @@ export function CardHub() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base font-bold tracking-tight text-white">
-                Mutasi Kartu
+                {messages.card.cardTransactionsTitle}
               </h2>
               <p className="text-xs text-slate-400">
-                Transaksi yang dipotong langsung dari saldo buku besar USD Anda.
+                {messages.card.cardTransactionsSubtitle}
               </p>
             </div>
 
@@ -215,14 +179,14 @@ export function CardHub() {
               href="/transactions"
               className="text-xs font-semibold text-[#1D9BF0] hover:text-[#22D3EE] transition-colors"
             >
-              Semua &rarr;
+              {messages.wallet.actions.history}
             </Link>
           </div>
 
           <div className="divide-y divide-slate-800/80 border-t border-white/8 pt-1">
             {cardTransactions.length === 0 ? (
               <div className="py-8 text-center text-xs text-slate-400">
-                Belum ada transaksi kartu virtual tercatat.
+                {messages.card.emptyCardTransactions}
               </div>
             ) : (
               cardTransactions.slice(0, 3).map((tx) => (
@@ -249,7 +213,7 @@ export function CardHub() {
                       -${(Number(tx.amountUsdCents) / 100).toFixed(2)}
                     </p>
                     <p className="text-[11px] text-slate-400 font-mono tabular-nums mt-0.5">
-                      Rp {tx.amountIdr.toLocaleString('id-ID')}
+                      Rp{tx.amountIdr.toLocaleString('id-ID')}
                     </p>
                   </div>
                 </div>

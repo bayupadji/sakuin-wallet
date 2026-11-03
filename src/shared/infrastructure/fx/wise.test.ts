@@ -1,20 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
+  FX_RATE_LOCK_MS,
   convertUsdToIdr,
   convertIdrToUsd,
-  fetchFrankfurterRate,
-} from './frankfurter';
+  fetchWiseRate,
+} from './wise';
 
-describe('Frankfurter FX Utilities', () => {
+describe('Wise Zero-Markup FX Utilities', () => {
   describe('convertUsdToIdr', () => {
-    it('converts USD to IDR correctly with integer rounding', () => {
+    it('converts USD to IDR with nearest-Rupiah integer rounding', () => {
       const rate = 18000;
       expect(convertUsdToIdr(100, rate)).toBe(1800000);
       expect(convertUsdToIdr(1.5, rate)).toBe(27000);
       expect(convertUsdToIdr(0.333, rate)).toBe(5994);
     });
 
-    it('handles zero and negative amounts safely', () => {
+    it('handles zero, negative, and NaN amounts safely', () => {
       const rate = 18000;
       expect(convertUsdToIdr(0, rate)).toBe(0);
       expect(convertUsdToIdr(-50, rate)).toBe(0);
@@ -23,13 +24,10 @@ describe('Frankfurter FX Utilities', () => {
   });
 
   describe('convertIdrToUsd', () => {
-    it('converts IDR to USD correctly with 2 decimal precision', () => {
+    it('converts IDR to USD rounded to the nearest cent', () => {
       const rate = 18000;
-      // 1,800,000 / 18,000 = 100
       expect(convertIdrToUsd(1800000, rate)).toBe(100);
-      // 1,000,000 / 18,000 = 55.5555... -> 55.56
       expect(convertIdrToUsd(1000000, rate)).toBe(55.56);
-      // 500,000 / 18,000 = 27.7777... -> 27.78
       expect(convertIdrToUsd(500000, rate)).toBe(27.78);
     });
 
@@ -40,42 +38,47 @@ describe('Frankfurter FX Utilities', () => {
     });
   });
 
-  describe('fetchFrankfurterRate', () => {
+  describe('fetchWiseRate', () => {
     beforeEach(() => {
       vi.restoreAllMocks();
     });
 
-    it('successfully fetches and parses rate from Frankfurter API', async () => {
-      const mockResponse = {
-        amount: 1,
-        base: 'USD',
-        date: '2026-10-16',
-        rates: { IDR: 18031 },
-      };
+    it('fetches zero-markup rate from Wise API and sets 15-minute lock window', async () => {
+      const fixedNow = 1793700000000;
+      const mockResponse = [
+        {
+          rate: 16245.5,
+          source: 'USD',
+          target: 'IDR',
+          time: '2026-11-03T14:00:00+0000',
+        },
+      ];
 
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
 
-      const result = await fetchFrankfurterRate('USD', 'IDR');
-      expect(result.rate).toBe(18031);
+      const result = await fetchWiseRate('USD', 'IDR', fixedNow);
+      expect(result.rate).toBe(16245.5);
       expect(result.base).toBe('USD');
       expect(result.target).toBe('IDR');
-      expect(result.source).toBe('frankfurter.dev');
-      expect(result.inverseRate).toBeCloseTo(1 / 18031, 6);
+      expect(result.source).toBe('wise');
+      expect(result.lockedUntil).toBe(fixedNow + FX_RATE_LOCK_MS);
+      expect(result.inverseRate).toBeCloseTo(1 / 16245.5, 6);
     });
 
-    it('throws instead of returning a made-up rate when the network fails', async () => {
+    it('throws instead of returning a fabricated rate when network fails', async () => {
       global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
-      await expect(fetchFrankfurterRate('USD', 'IDR')).rejects.toThrow('Network error');
+      await expect(fetchWiseRate('USD', 'IDR')).rejects.toThrow('Network error');
     });
 
-    it('throws when the API responds with an error status', async () => {
+    it('throws when Wise API responds with non-OK status', async () => {
       global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 503 });
 
-      await expect(fetchFrankfurterRate('USD', 'IDR')).rejects.toThrow('503');
+      await expect(fetchWiseRate('USD', 'IDR')).rejects.toThrow('503');
     });
   });
 });
+

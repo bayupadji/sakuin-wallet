@@ -62,3 +62,9 @@ export function useUpdateCardControlsMutation() {
     },
   });
 }
+
+export function useRevealCardMutation() {
+  return useMutation({
+    mutationFn: (password: string) => cardRepository.revealCardDetails(password),
+  });
+}

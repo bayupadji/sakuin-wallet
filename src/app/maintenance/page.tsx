@@ -35,7 +35,7 @@ export default function MaintenancePage() {
               Sistem Sedang Dalam Pemeliharaan
             </h1>
             <p className="text-sm text-zinc-400 leading-relaxed text-pretty max-w-md mx-auto">
-              Kami sedang melakukan peningkatan performa dan pembaruan infrastruktur rutin. Sakuin Wallet akan segera beroperasi kembali secara normal.
+              Kami sedang melakukan peningkatan performa dan pembaruan infrastruktur rutin. Layanan sakuin.co.id akan segera beroperasi kembali secara normal.
             </p>
           </div>
 
@@ -60,8 +60,8 @@ export default function MaintenancePage() {
         {/* Footer Support */}
         <p className="text-center text-xs text-zinc-500">
           Membutuhkan bantuan mendesak? Hubungi kami melalui{' '}
-          <a href="mailto:support@sakuin.id" className="text-[#1D9BF0] hover:underline">
-            support@sakuin.id
+          <a href="mailto:support@sakuin.co.id" className="text-[#1D9BF0] hover:underline">
+            support@sakuin.co.id
           </a>
         </p>
       </div>

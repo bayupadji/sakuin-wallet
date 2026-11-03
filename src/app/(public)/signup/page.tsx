@@ -1,12 +1,28 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SignUpForm } from '@/features/auth';
 import { messages } from '@/shared/messages';
 import { Lock, ShieldCheck } from 'lucide-react';
 
-export const metadata = {
-  title: 'Sign Up | Dompet Digital Dollar',
-  description: 'Create your USD digital wallet account in Indonesia.',
+export const metadata: Metadata = {
+  title: messages.auth.signUpMetaTitle,
+  description: messages.auth.signUpMetaDescription,
+  alternates: {
+    canonical: '/signup',
+  },
+  openGraph: {
+    title: `${messages.auth.signUpMetaTitle} | sakuin.co.id`,
+    description: messages.auth.signUpMetaDescription,
+    url: 'https://sakuin.co.id/signup',
+    images: ['/opengraph-image'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${messages.auth.signUpMetaTitle} | sakuin.co.id`,
+    description: messages.auth.signUpMetaDescription,
+    images: ['/opengraph-image'],
+  },
 };
 
 export default function SignUpPage() {
@@ -23,10 +39,10 @@ export default function SignUpPage() {
           <span>{messages.common.appName}</span>
         </Link>
         <h1 className="mt-6 text-2xl font-extrabold tracking-tight text-slate-950 dark:text-white">
-          Create your account
+          {messages.auth.signUpHeading}
         </h1>
         <p className="mt-1 text-xs text-slate-500 dark:text-zinc-400">
-          Get started with your USD balance and instant virtual debit card.
+          {messages.auth.signUpSubtitle}
         </p>
       </div>
 
@@ -38,12 +54,12 @@ export default function SignUpPage() {
           <div className="mt-8 pt-6 border-t border-slate-100 dark:border-white/8 flex items-center justify-center gap-4 text-[11px] text-zinc-400">
             <div className="flex items-center gap-1.5">
               <Lock className="h-3.5 w-3.5 text-[#22D3EE]" aria-hidden="true" />
-              <span>256-bit Encryption</span>
+              <span>{messages.auth.securityEncryptionBadge}</span>
             </div>
             <span>&bull;</span>
             <div className="flex items-center gap-1.5">
               <ShieldCheck className="h-3.5 w-3.5 text-[#22D3EE]" aria-hidden="true" />
-              <span>1-Doc KTP KYC</span>
+              <span>{messages.auth.securityKycBadge}</span>
             </div>
           </div>
         </div>

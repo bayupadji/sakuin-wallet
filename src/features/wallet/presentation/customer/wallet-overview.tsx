@@ -5,17 +5,14 @@ import Link from 'next/link';
 import { useWalletQuery } from '../../application/queries/use-wallet';
 import { useWalletStore } from '../../application/stores/use-wallet-store';
 import { useKycStatus, KycStatusBadge, canTransact } from '@/features/kyc';
-import {
-  TransactionReceiptDrawer,
-  TransactionItem,
-  useTransactionStore,
-  useTransactionsQuery,
-} from '@/features/transactions';
+import { useCardQuery } from '@/features/card';
+import { useTransactionsQuery } from '@/features/transactions';
 import { Button } from '@/shared/presentation/ui/button';
 import { Skeleton } from '@/shared/presentation/ui/skeleton';
 import { FxRateWidget } from '@/shared/presentation/ui/fx-rate-widget';
 import { useFxRateQuery } from '@/shared/application/queries/use-fx-rate';
 import { Money } from '@/shared/domain/money';
+import { messages } from '@/shared/messages';
 import { SpendingAnalyticsCard } from './spending-analytics-card';
 import { SecuritySettingsCard } from './security-settings-card';
 import { QuickTransferModal } from './quick-transfer-modal';
@@ -24,35 +21,20 @@ import {
   CreditCard,
   Eye,
   EyeOff,
+  History,
   Plus,
   QrCode,
-  Search,
   ShieldAlert,
   ShieldCheck,
-  ShoppingBag,
-  TrendingUp,
 } from 'lucide-react';
 
 export function WalletOverview() {
   const { data: wallet, isLoading: isWalletLoading, isError, refetch } = useWalletQuery();
   const { data: kycSubmission, isLoading: isKycLoading } = useKycStatus();
+  const { data: cardDetails } = useCardQuery();
   const { isBalanceHidden, toggleBalanceHidden, modalMode, setModalMode } = useWalletStore();
-  const {
-    activeTab,
-    setActiveTab,
-    searchQuery,
-    setSearchQuery,
-    selectedTransaction: selectedTx,
-    setSelectedTransaction: setSelectedTx,
-  } = useTransactionStore();
 
-  const { data: transactionsData } = useTransactionsQuery({
-    type: activeTab,
-    search: searchQuery,
-  });
-  const filteredTransactions = transactionsData || [];
-  // Halaman Ringkasan hanya menampilkan 5 transaksi terbaru
-  const recentTransactions = filteredTransactions.slice(0, 5);
+  const { data: transactionsData = [] } = useTransactionsQuery();
 
   const kycStatus = kycSubmission?.status || 'not_verified';
   const isApproved = canTransact(kycStatus);
@@ -60,26 +42,28 @@ export function WalletOverview() {
   const { data: fxData } = useFxRateQuery();
   const effectiveFxRate = fxData?.rate ?? 16250;
 
-  // Initial demo / realistic balance: $1,250.00 (125,000 cents) if newly created
-  const balanceCents = wallet ? wallet.balance.amount : 125000n;
+  // Honest zero fallback balance when wallet row has no settled ledger entries (AGENTS.md Section 6)
+  const balanceCents = wallet ? wallet.balance.amount : 0n;
   const currentMoney = Money.fromCents(balanceCents, 'USD');
   const balanceIdr = Math.round((Number(balanceCents) / 100) * effectiveFxRate);
 
-  function getTransactionIcon(type: TransactionItem['type']) {
-    switch (type) {
-      case 'topup':
-        return Plus;
-      case 'card':
-        return ShoppingBag;
-      case 'receive':
-        return QrCode;
-    }
-  }
+  const settledInflowCents = transactionsData
+    .filter((tx) => tx.status === 'success' && (tx.type === 'topup' || tx.type === 'receive'))
+    .reduce((sum, tx) => sum + tx.amountUsdCents, 0n);
+
+  const settledOutflowCents = transactionsData
+    .filter((tx) => tx.status === 'success' && tx.type === 'card')
+    .reduce((sum, tx) => sum + tx.amountUsdCents, 0n);
+
+  const inflowMoney = Money.fromCents(settledInflowCents, 'USD');
+  const outflowMoney = Money.fromCents(settledOutflowCents, 'USD');
 
   if (isWalletLoading || isKycLoading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-10 w-48 bg-slate-800" />
+      <div className="space-y-6 font-sans antialiased text-slate-100">
+        <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
+          {messages.wallet.title}
+        </h1>
         <Skeleton className="h-44 w-full bg-slate-800" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Skeleton className="h-64 w-full bg-slate-800" />
@@ -91,14 +75,19 @@ export function WalletOverview() {
 
   if (isError) {
     return (
-      <div className="rounded-2xl border border-rose-900 bg-rose-950/30 p-8 text-center">
-        <p className="text-sm font-semibold text-rose-300">
-          Gagal memuat data dompet digital Anda.
-        </p>
-        <div className="mt-4">
-          <Button variant="secondary" onClick={() => refetch()}>
-            Coba Lagi
-          </Button>
+      <div className="space-y-6 font-sans antialiased text-slate-100">
+        <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
+          {messages.wallet.title}
+        </h1>
+        <div className="rounded-2xl border border-rose-900 bg-rose-950/30 p-8 text-center">
+          <p className="text-sm font-semibold text-rose-300">
+            {messages.wallet.errorLoading}
+          </p>
+          <div className="mt-4">
+            <Button variant="secondary" onClick={() => refetch()}>
+              {messages.common.tryAgain}
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -106,9 +95,13 @@ export function WalletOverview() {
 
   return (
     <div className="space-y-6 font-sans antialiased text-slate-100">
+      <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
+        {messages.wallet.title}
+      </h1>
+
       {/* 1. KYC Notice Alert Banner (when unapproved) */}
       {!isApproved && (
-        <div className="rounded-2xl border border-amber-900/60 bg-amber-950/30 p-5 backdrop-blur-xs transition-colors">
+        <div className="rounded-2xl border border-amber-900/60 bg-amber-950/30 p-5 transition-colors">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-900 text-amber-200 shrink-0 mt-0.5">
@@ -117,13 +110,13 @@ export function WalletOverview() {
               <div>
                 <h2 className="text-sm font-bold text-amber-200">
                   {kycStatus === 'in_review'
-                    ? 'Verifikasi Identitas Sedang Diproses'
-                    : 'Verifikasi KTP Anda untuk membuka deposit dan kartu virtual'}
+                    ? 'Verifikasi Identitas Sedang Ditinjau'
+                    : messages.kyc.banner.title}
                 </h2>
                 <p className="text-xs text-amber-300/80 mt-1 max-w-xl leading-relaxed">
                   {kycStatus === 'in_review'
-                    ? 'Foto KTP Anda sedang diverifikasi oleh tim kepatuhan. Semua fitur dompet akan terbuka otomatis setelah disetujui.'
-                    : 'Sesuai regulasi moneter Bank Indonesia, unggah foto KTP resmi untuk mengaktifkan isi saldo Rupiah dan belanja global.'}
+                    ? 'Foto KTP Anda sedang diperiksa manual oleh tim kepatuhan. Fitur transaksi terbuka otomatis setelah disetujui.'
+                    : messages.kyc.banner.description}
                 </p>
               </div>
             </div>
@@ -136,7 +129,7 @@ export function WalletOverview() {
                   className="w-full sm:w-auto bg-amber-600 hover:bg-amber-500 border-amber-600 text-slate-950 font-bold gap-2"
                 >
                   <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-                  <span>Verifikasi KTP</span>
+                  <span>{messages.kyc.banner.cta}</span>
                 </Button>
               </Link>
             )}
@@ -144,20 +137,15 @@ export function WalletOverview() {
         </div>
       )}
 
-      {/* 2. Garansi Kurs Valas (Full-Width di Atas Saldo Utama) */}
+      {/* 2. Wise Zero-Markup FX Rate Lock Banner */}
       <FxRateWidget rateIdr={effectiveFxRate} guaranteedMinutes={15} />
 
-      {/* 3. Hero Saldo Utama (Full-Width Header) */}
+      {/* 3. Hero Unified Balance Card */}
       <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 sm:p-7 shadow-xl relative overflow-hidden">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10">
           <div>
-            {/* Account identifier */}
             <div className="flex items-center gap-2.5 text-xs font-semibold text-zinc-400">
-              <span>Saldo Utama USD</span>
-              <span className="h-1 w-1 rounded-full bg-zinc-700" />
-              <span className="font-mono text-zinc-300">
-                ACC-8924-ID
-              </span>
+              <span>{messages.wallet.currentBalance}</span>
               <button
                 type="button"
                 onClick={toggleBalanceHidden}
@@ -172,47 +160,46 @@ export function WalletOverview() {
               </button>
             </div>
 
-            {/* High-contrast monetary display */}
             <div className="mt-3 flex items-baseline gap-2">
               <span className="font-mono text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white tabular-nums">
-                {isBalanceHidden ? '••••••' : currentMoney.format()}
+                {isBalanceHidden ? messages.wallet.balanceHidden : currentMoney.format()}
               </span>
               <span className="text-xs font-bold uppercase tracking-wider text-[#22D3EE]">
                 USD
               </span>
             </div>
 
-            {/* Approximate IDR value */}
             <p className="mt-1 font-mono text-xs text-zinc-400">
               {isBalanceHidden
                 ? '••••••••••••'
-                : `≈ Rp ${balanceIdr.toLocaleString('id-ID')} IDR`}
+                : `≈ Rp${balanceIdr.toLocaleString('id-ID')}`}
               <span className="ml-2 inline-flex items-center rounded-sm bg-sky-950 px-1.5 py-0.5 text-[10px] font-medium text-[#67E8F9] border border-sky-800/40">
-                Kurs {effectiveFxRate.toLocaleString('id-ID')}
+                Kurs Wise Rp{effectiveFxRate.toLocaleString('id-ID')}
               </span>
             </p>
           </div>
 
-          {/* Quick Action Pill Buttons */}
           <div className="flex flex-wrap items-center gap-3">
             <Button
               variant="primary"
               size="md"
+              disabled={!isApproved}
               onClick={() => setModalMode('topup')}
               className="gap-2 shadow-md font-bold bg-[#1D9BF0] hover:bg-[#1A8CD8] text-white border-[#1D9BF0]"
             >
               <Plus className="h-4 w-4" aria-hidden="true" />
-              <span>Isi Saldo USD</span>
+              <span>{messages.wallet.actions.topUp}</span>
             </Button>
 
             <Button
               variant="outline"
               size="md"
+              disabled={!isApproved}
               onClick={() => setModalMode('receive')}
               className="gap-2 font-medium border-white/8 bg-[#12141a] text-zinc-200 hover:bg-white/6"
             >
               <QrCode className="h-4 w-4 text-[#22D3EE]" aria-hidden="true" />
-              <span>Terima IDR</span>
+              <span>{messages.wallet.actions.receive}</span>
             </Button>
 
             <Link href="/card">
@@ -222,43 +209,37 @@ export function WalletOverview() {
                 className="gap-2 font-medium border-white/8 bg-[#12141a] text-zinc-200 hover:bg-white/6"
               >
                 <CreditCard className="h-4 w-4 text-[#22D3EE]" aria-hidden="true" />
-                <span>Kelola Kartu</span>
+                <span>{messages.wallet.actions.manageCard}</span>
               </Button>
             </Link>
           </div>
         </div>
 
-        {/* Financial Stat Sub-Cards */}
+        {/* Real Ledger-Derived Sub-Cards */}
         <div className="mt-7 pt-6 border-t border-white/8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
           <div>
-            <span className="text-zinc-400 block">Dana Tersedia</span>
+            <span className="text-zinc-400 block">{messages.wallet.availableFunds}</span>
             <span className="font-mono font-bold text-white mt-0.5 block tabular-nums text-sm">
-              {isBalanceHidden ? '••••' : '$1,250.00'}
+              {isBalanceHidden ? '••••' : currentMoney.format()}
             </span>
           </div>
 
           <div>
-            <span className="text-zinc-400 block">Pengeluaran Bulan Ini</span>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="font-mono font-bold text-white block tabular-nums text-sm">
-                {isBalanceHidden ? '••••' : '$105.50'}
-              </span>
-              <span className="text-[11px] text-[#22D3EE] font-mono">(-14%)</span>
-            </div>
+            <span className="text-zinc-400 block">{messages.wallet.monthlySpending}</span>
+            <span className="font-mono font-bold text-white mt-0.5 block tabular-nums text-sm">
+              {isBalanceHidden ? '••••' : outflowMoney.format()}
+            </span>
           </div>
 
           <div>
-            <span className="text-zinc-400 block">Total Arus Masuk</span>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="font-mono font-bold text-[#67E8F9] block tabular-nums text-sm">
-                {isBalanceHidden ? '••••' : '+$620.00'}
-              </span>
-              <TrendingUp className="h-3.5 w-3.5 text-[#22D3EE]" aria-hidden="true" />
-            </div>
+            <span className="text-zinc-400 block">{messages.wallet.totalInflow}</span>
+            <span className="font-mono font-bold text-[#67E8F9] mt-0.5 block tabular-nums text-sm">
+              {isBalanceHidden ? '••••' : `+${inflowMoney.format()}`}
+            </span>
           </div>
 
           <div>
-            <span className="text-zinc-400 block">Verifikasi Identitas</span>
+            <span className="text-zinc-400 block">{messages.wallet.identityVerification}</span>
             <div className="mt-1">
               <KycStatusBadge status={kycStatus} />
             </div>
@@ -266,181 +247,61 @@ export function WalletOverview() {
         </div>
       </div>
 
-      {/* 4. Banner Promo & Fitur Unggulan (Full-Width Carousel) */}
+      {/* 4. Promo Banner Carousel */}
       <PromoBannerCarousel
-        onTopUpClick={() => setModalMode('topup')}
-        onReceiveClick={() => setModalMode('receive')}
+        onTopUpClick={() => {
+          if (isApproved) setModalMode('topup');
+        }}
+        onReceiveClick={() => {
+          if (isApproved) setModalMode('receive');
+        }}
       />
 
+      {/* 5. Security & Spending Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-6">
           <SecuritySettingsCard kycStatus={kycStatus} />
         </div>
         <div className="lg:col-span-6">
-          <SpendingAnalyticsCard />
+          <SpendingAnalyticsCard
+            transactions={transactionsData}
+            monthlyLimitUsd={cardDetails?.monthlyLimit ?? 2000}
+          />
         </div>
       </div>
 
-      {/* 4. Baris Keempat: Riwayat Transaksi & Buku Besar (Full Width 12-cols) */}
-      <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 sm:p-7 shadow-xl space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* 6. Shortcut to Dedicated Transaction History (DU-04 excluded per AGENTS.md Section 5) */}
+      <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 sm:p-7 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-start gap-3.5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-950/60 text-[#22D3EE] border border-sky-800/40 shrink-0">
+            <History className="h-5 w-5" aria-hidden="true" />
+          </div>
           <div>
             <h2 className="text-base font-bold tracking-tight text-white">
-              Aktivitas Transaksi Terakhir
+              {messages.wallet.ledgerShortcutTitle}
             </h2>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              Buku besar append-only tercatat dalam format waktu lokal Jakarta (WIB). Klik baris untuk melihat tanda terima kriptografis.
+            <p className="text-xs text-zinc-400 mt-0.5 max-w-xl">
+              {messages.wallet.ledgerShortcutDescription}
             </p>
           </div>
+        </div>
 
-          <Link
-            href="/transactions"
-            className="text-xs font-semibold text-[#1D9BF0] hover:text-[#22D3EE] transition-colors inline-flex items-center gap-1 self-start sm:self-auto"
+        <Link href="/transactions" className="shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-white/8 bg-[#12141a] text-zinc-200 hover:bg-white/6 font-semibold"
           >
-            <span>Semua Transaksi</span>
-            <span>&rarr;</span>
-          </Link>
-        </div>
-
-        {/* Search & Filter Controls */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" aria-hidden="true" />
-            <input
-              type="text"
-              placeholder="Cari transaksi..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-white/8 bg-[#12141a] pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0]"
-            />
-          </div>
-
-          {/* Filter Tabs */}
-          <div className="flex items-center gap-1 rounded-lg bg-[#050507] p-1 border border-white/8 text-xs shrink-0">
-            <button
-              type="button"
-              onClick={() => setActiveTab('all')}
-              className={`rounded-md px-3 py-1 font-medium transition-colors cursor-pointer ${
-                activeTab === 'all'
-                  ? 'bg-white/10 text-white font-semibold'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              Semua
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('topup')}
-              className={`rounded-md px-3 py-1 font-medium transition-colors cursor-pointer ${
-                activeTab === 'topup'
-                  ? 'bg-white/10 text-white font-semibold'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              Isi Saldo
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('card')}
-              className={`rounded-md px-3 py-1 font-medium transition-colors cursor-pointer ${
-                activeTab === 'card'
-                  ? 'bg-white/10 text-white font-semibold'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              Kartu
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('receive')}
-              className={`rounded-md px-3 py-1 font-medium transition-colors cursor-pointer ${
-                activeTab === 'receive'
-                  ? 'bg-white/10 text-white font-semibold'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              Terima Dana
-            </button>
-          </div>
-        </div>
-
-        {/* Transaction List */}
-        <div className="divide-y divide-white/6 border-t border-white/8 pt-1">
-          {recentTransactions.length === 0 ? (
-            <div className="py-8 text-center text-xs text-zinc-400">
-              Tidak ada transaksi yang cocok dengan kriteria pencarian Anda.
-            </div>
-          ) : (
-            recentTransactions.map((tx) => {
-              const Icon = getTransactionIcon(tx.type);
-              const isCredit = tx.type === 'topup' || tx.type === 'receive';
-              const formattedUsd = `$${(Number(tx.amountUsdCents) / 100).toFixed(2)}`;
-              const displayUsd = isCredit ? `+${formattedUsd}` : `-${formattedUsd}`;
-              const displayIdr = `Rp ${tx.amountIdr.toLocaleString('id-ID')}`;
-
-              return (
-                <div
-                  key={tx.id}
-                  onClick={() => setSelectedTx(tx)}
-                  className="flex items-center justify-between p-3.5 sm:px-4 hover:bg-[#12141a] rounded-xl cursor-pointer transition-colors"
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') setSelectedTx(tx);
-                  }}
-                  aria-label={`Lihat tanda terima transaksi untuk ${tx.title}`}
-                >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-xl shrink-0 ${
-                        isCredit
-                          ? 'bg-sky-950 text-[#22D3EE] border border-sky-800/40'
-                          : 'bg-[#12141a] text-zinc-300 border border-white/8'
-                      }`}
-                    >
-                      <Icon className="h-5 w-5" aria-hidden="true" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-sm text-white truncate">
-                        {tx.title}
-                      </p>
-                      <p className="text-xs text-zinc-400 mt-0.5">
-                        {tx.category} &bull; {tx.timestampWib}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="text-right shrink-0">
-                    <p
-                      className={`font-mono text-sm font-bold tabular-nums ${
-                        isCredit ? 'text-[#7CE8C8]' : 'text-white'
-                      }`}
-                    >
-                      {isBalanceHidden ? '••••••' : displayUsd}
-                    </p>
-                    <p className="text-[11px] text-zinc-400 font-mono tabular-nums mt-0.5">
-                      {isBalanceHidden ? '••••••' : displayIdr}
-                    </p>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
+            {messages.wallet.ledgerShortcutCta}
+          </Button>
+        </Link>
       </div>
 
-      {/* Quick Transfer & Deposit Modal */}
+      {/* Quick Top-Up & Receive Modal */}
       <QuickTransferModal
         mode={modalMode}
         isOpen={modalMode !== null}
         onClose={() => setModalMode(null)}
-      />
-
-      {/* Transaction Receipt Drawer */}
-      <TransactionReceiptDrawer
-        transaction={selectedTx}
-        isOpen={selectedTx !== null}
-        onClose={() => setSelectedTx(null)}
       />
     </div>
   );

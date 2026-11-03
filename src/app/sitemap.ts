@@ -1,25 +1,19 @@
 import type { MetadataRoute } from 'next';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://sakuin.co.id';
-  const lastModified = new Date();
+const BASE_URL = 'https://sakuin.co.id';
+const LAST_MODIFIED = new Date('2026-11-03T00:00:00.000Z');
 
+export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: baseUrl,
-      lastModified,
-      changeFrequency: 'daily',
+      url: BASE_URL,
+      lastModified: LAST_MODIFIED,
+      changeFrequency: 'weekly',
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/signin`,
-      lastModified,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/signup`,
-      lastModified,
+      url: `${BASE_URL}/signup`,
+      lastModified: LAST_MODIFIED,
       changeFrequency: 'monthly',
       priority: 0.9,
     },

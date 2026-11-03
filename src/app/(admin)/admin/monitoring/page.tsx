@@ -1,6 +1,11 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Activity, ArrowLeft } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Monitoring & Rekonsiliasi',
+};
 
 export default function AdminMonitoringPage() {
   return (

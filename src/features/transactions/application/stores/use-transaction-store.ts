@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { safeLocalStorage } from '@/shared/stores/safe-storage';
-import { TransactionItem, TransactionType } from '../../domain/entities/transaction';
+import { TransactionType } from '../../domain/entities/transaction';
 
 interface TransactionUIState {
   activeTab: 'all' | TransactionType;
@@ -10,10 +10,6 @@ interface TransactionUIState {
   setSelectedMonth: (month: string) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  selectedTransaction: TransactionItem | null;
-  setSelectedTransaction: (tx: TransactionItem | null) => void;
-  openReceipt: (tx: TransactionItem) => void;
-  closeReceipt: () => void;
 }
 
 export const useTransactionStore = create<TransactionUIState>()(
@@ -25,10 +21,6 @@ export const useTransactionStore = create<TransactionUIState>()(
       setSelectedMonth: (selectedMonth) => set({ selectedMonth }),
       searchQuery: '',
       setSearchQuery: (searchQuery) => set({ searchQuery }),
-      selectedTransaction: null,
-      setSelectedTransaction: (selectedTransaction) => set({ selectedTransaction }),
-      openReceipt: (tx) => set({ selectedTransaction: tx }),
-      closeReceipt: () => set({ selectedTransaction: null }),
     }),
     {
       name: 'sakuin-transaction-ui',

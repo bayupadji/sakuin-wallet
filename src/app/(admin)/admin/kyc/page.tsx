@@ -2,8 +2,8 @@ import React from 'react';
 import { KycReviewQueue } from '@/features/kyc';
 
 export const metadata = {
-  title: 'KYC Review Queue | Admin Console',
-  description: 'Review pending customer identity verification submissions.',
+  title: 'Antrean Verifikasi KYC',
+  description: 'Tinjau pengajuan foto KTP nasabah secara manual sesuai aturan kepatuhan.',
 };
 
 export default function AdminKycPage() {

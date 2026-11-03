@@ -20,7 +20,7 @@ const PROMO_BANNERS: PromoImageBanner[] = [
   {
     id: 'banner-visa-platinum',
     title: 'Kartu Debit Virtual VISA Platinum',
-    alt: 'Promo Kartu Debit Virtual VISA Platinum Sakuin Dompet Digital Dollar untuk Transaksi Global',
+    alt: 'Promo Kartu Debit Virtual VISA Platinum sakuin.co.id untuk Transaksi Global',
     imageSrc: '/banners/promo-visa-card.jpg',
     ctaHref: '/card',
   },
@@ -60,8 +60,13 @@ export function PromoBannerCarousel({
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
   const storeBanners = usePromoBannerStore((state) => state.banners);
+  const hydrateFromServer = usePromoBannerStore((state) => state.hydrateFromServer);
   const recordBannerClick = usePromoBannerStore((state) => state.recordClick);
   const recordBannerView = usePromoBannerStore((state) => state.recordView);
+
+  useEffect(() => {
+    void hydrateFromServer();
+  }, [hydrateFromServer]);
 
   const activeBanners = useMemo(() => {
     const list = storeBanners

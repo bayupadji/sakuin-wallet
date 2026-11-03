@@ -5,21 +5,18 @@ import { useTransactionStore } from '../../features/transactions/application/sto
 import { usePublicStore } from '../../features/public/application/stores/use-public-store';
 import { useAdminStore } from '../../features/admin/application/stores/use-admin-store';
 
-describe('Zustand Modular Stores Suite', () => {
+describe('Zustand Modular Stores Suite (UI State Only)', () => {
   beforeEach(() => {
     useWalletStore.setState({ isBalanceHidden: false, modalMode: null });
     useCardStore.setState({
-      monthlyLimit: 2000,
-      onlineTransactions: true,
-      non3dsTransactions: true,
-      atmWithdrawals: false,
       isFreezeModalOpen: false,
       isMoreModalOpen: false,
+      isPinModalOpen: false,
     });
     useTransactionStore.setState({
       activeTab: 'all',
+      selectedMonth: 'all',
       searchQuery: '',
-      selectedTransaction: null,
     });
     usePublicStore.setState({ usdInput: '100', activeFaqIndex: null });
     useAdminStore.setState({
@@ -48,58 +45,28 @@ describe('Zustand Modular Stores Suite', () => {
   });
 
   describe('useCardStore', () => {
-    it('updates monthly spending limit and security controls', () => {
-      useCardStore.getState().setMonthlyLimit(3500);
-      expect(useCardStore.getState().monthlyLimit).toBe(3500);
-
-      useCardStore.getState().toggleAtmWithdrawals();
-      expect(useCardStore.getState().atmWithdrawals).toBe(true);
-
-      useCardStore.getState().setOnlineTransactions(false);
-      expect(useCardStore.getState().onlineTransactions).toBe(false);
-    });
-
-    it('controls freeze and more dialogs', () => {
+    it('controls freeze, more, and password re-auth dialogs without storing server data', () => {
       useCardStore.getState().setFreezeModalOpen(true);
       expect(useCardStore.getState().isFreezeModalOpen).toBe(true);
 
       useCardStore.getState().setMoreModalOpen(true);
       expect(useCardStore.getState().isMoreModalOpen).toBe(true);
+
+      useCardStore.getState().setPinModalOpen(true);
+      expect(useCardStore.getState().isPinModalOpen).toBe(true);
     });
   });
 
   describe('useTransactionStore', () => {
-    it('filters and manages receipt drawer', () => {
+    it('manages tab, month period, and search query filters', () => {
       useTransactionStore.getState().setActiveTab('card');
       expect(useTransactionStore.getState().activeTab).toBe('card');
 
+      useTransactionStore.getState().setSelectedMonth('2026-10');
+      expect(useTransactionStore.getState().selectedMonth).toBe('2026-10');
+
       useTransactionStore.getState().setSearchQuery('AWS');
       expect(useTransactionStore.getState().searchQuery).toBe('AWS');
-
-      const mockTx = {
-        id: 'tx-test',
-        title: 'Test Tx',
-        merchant: 'Test Merchant',
-        type: 'card' as const,
-        category: 'Tech',
-        status: 'success' as const,
-        amountUsdCents: 1000n,
-        amountIdr: 162500,
-        fxRate: 16250,
-        feeIdr: 0,
-        channel: 'VISA',
-        referenceId: 'REF-1',
-        idempotencyKey: 'idemp_1',
-        ledgerSequence: 'LDG-1',
-        timestampUtc: '2026-10-18',
-        timestampWib: '18 Okt 2026',
-      };
-
-      useTransactionStore.getState().openReceipt(mockTx);
-      expect(useTransactionStore.getState().selectedTransaction).toEqual(mockTx);
-
-      useTransactionStore.getState().closeReceipt();
-      expect(useTransactionStore.getState().selectedTransaction).toBeNull();
     });
   });
 

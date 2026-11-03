@@ -36,7 +36,6 @@ export class AuthSupabaseRepository implements AuthRepository {
       options: {
         data: {
           full_name: fullName,
-          role: 'customer',
         },
       },
     });
@@ -89,11 +88,23 @@ export class AuthSupabaseRepository implements AuthRepository {
     // Issue HMAC-signed session cookie with 30-min idle and 2-hour hard expiration
     if (typeof window !== 'undefined') {
       try {
-        await fetch('/api/auth/session', {
+        const res = await fetch('/api/auth/session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user }),
         });
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.session) {
+            user = {
+              id: data.session.userId,
+              email: data.session.email,
+              fullName: data.session.fullName,
+              role: data.session.role,
+              createdAt: new Date(data.session.createdAt).toISOString(),
+            };
+          }
+        }
       } catch {
         // Fallback for offline or test environments
       }

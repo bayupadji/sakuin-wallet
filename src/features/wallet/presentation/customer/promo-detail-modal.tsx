@@ -48,7 +48,7 @@ export const PROMO_DETAILS: Record<string, PromoDetail> = {
     period: 'Berlaku hingga 31 Desember 2026',
     promoCode: 'SAKUINVISA',
     imageSrc: '/banners/promo-visa-card.jpg',
-    alt: 'Promo Kartu Debit Virtual VISA Platinum Sakuin Dompet Digital Dollar untuk Transaksi Global',
+    alt: 'Promo Kartu Debit Virtual VISA Platinum sakuin.co.id untuk Transaksi Global',
     benefits: [
       {
         title: 'Diterima di Jutaan Merchant',

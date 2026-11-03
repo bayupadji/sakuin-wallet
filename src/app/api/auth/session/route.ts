@@ -37,8 +37,21 @@ export async function POST(request: NextRequest) {
 
       verifiedId = authUser.id;
       verifiedEmail = authUser.email || user.email;
-      verifiedRole = (authUser.app_metadata?.role as UserRole) || 'customer';
-      verifiedFullName = (authUser.user_metadata?.full_name as string) || verifiedFullName;
+
+      const { data: profileRow } = await supabase
+        .from('profiles')
+        .select('role, full_name')
+        .eq('id', authUser.id)
+        .maybeSingle();
+
+      verifiedRole =
+        (profileRow?.role as UserRole | undefined) ||
+        (authUser.app_metadata?.role as UserRole | undefined) ||
+        'customer';
+      verifiedFullName =
+        (profileRow?.full_name as string | undefined) ||
+        (authUser.user_metadata?.full_name as string | undefined) ||
+        verifiedFullName;
     } else {
       const seed = createSeedUser(user.email);
       verifiedRole = seed.role;

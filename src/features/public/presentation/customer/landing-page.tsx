@@ -4,7 +4,6 @@ import { DemoShowcase } from './demo-showcase';
 import { FaqSection } from './faq-section';
 import { FeesSection } from './fees-section';
 import { FinalCta } from './final-cta';
-import { jakarta, jetbrains } from './fonts';
 import { HeroSection } from './hero-section';
 import { HowItWorks } from './how-it-works';
 import { KreditPlanner } from './kredit-planner';
@@ -22,8 +21,6 @@ export function LandingPage() {
   return (
     <div
       className={cn(
-        jakarta.variable,
-        jetbrains.variable,
         'min-h-screen w-full overflow-x-hidden bg-lp-bg font-lp-sans text-white antialiased',
         '[&_a:focus-visible]:outline-[3px] [&_a:focus-visible]:outline-offset-2 [&_a:focus-visible]:outline-lp-sky',
         '[&_button:focus-visible]:outline-[3px] [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-lp-sky',

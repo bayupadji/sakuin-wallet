@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTopUpMutation } from '@/features/wallet';
 import { useFxRateQuery } from '@/shared/application/queries/use-fx-rate';
+import { calculateFeeIdr, DEFAULT_FEE_RULES } from '@/shared/domain';
 import { Button } from '@/shared/presentation/ui/button';
+import { messages } from '@/shared/messages';
 import {
   ArrowLeft,
   Building2,
@@ -18,18 +20,28 @@ import {
   Zap,
 } from 'lucide-react';
 
+function makeTopUpIdempotencyKey(): string {
+  return typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? `topup_${crypto.randomUUID()}`
+    : `topup_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
 export default function TopUpPage() {
   const [usdAmount, setUsdAmount] = useState('100');
   const [paymentMethod, setPaymentMethod] = useState<'bca' | 'mandiri' | 'qris'>('bca');
+  const idempotencyKeyRef = useRef<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [step, setStep] = useState<'input' | 'payment'>('input');
   const [copied, setCopied] = useState(false);
-  const [countdown, setCountdown] = useState(890); // ~14:50
+  const [countdown, setCountdown] = useState(900);
 
   const { data: fxData } = useFxRateQuery();
   const fxRate = fxData?.rate ?? 16250;
+  const methodCategory: 'va' | 'qris' = paymentMethod === 'qris' ? 'qris' : 'va';
+
   const parsedUsd = Math.max(1, parseFloat(usdAmount) || 0);
   const idrSubtotal = Math.round(parsedUsd * fxRate);
-  const feeIdr = paymentMethod === 'qris' ? Math.round(idrSubtotal * 0.007) : 4500;
+  const feeIdr = calculateFeeIdr(idrSubtotal, DEFAULT_FEE_RULES[methodCategory]);
   const totalIdr = idrSubtotal + feeIdr;
 
   useEffect(() => {
@@ -56,19 +68,35 @@ export default function TopUpPage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
-  function handleCompleteTopUp() {
+  function handleCreateTopUpOrder() {
+    setErrorMessage(null);
     const channelName =
       paymentMethod === 'bca'
-        ? 'BCA Virtual Account (*8201)'
+        ? 'BCA Virtual Account'
         : paymentMethod === 'mandiri'
-        ? 'Mandiri Virtual Account (*9284)'
-        : 'QRIS Dynamic Merchant';
+          ? 'Mandiri Virtual Account'
+          : 'QRIS Dinamis';
+
+    if (!idempotencyKeyRef.current) {
+      idempotencyKeyRef.current = makeTopUpIdempotencyKey();
+    }
 
     topUpMutation.mutate(
-      { amountUsd: parsedUsd, channel: channelName, fxRate },
       {
-        onSettled: () => {
-          router.push('/wallet');
+        amountUsd: parsedUsd,
+        method: methodCategory,
+        channel: channelName,
+        idempotencyKey: idempotencyKeyRef.current,
+        fxRate,
+      },
+      {
+        onSuccess: () => {
+          setStep('payment');
+        },
+        onError: (err) => {
+          setErrorMessage(
+            err instanceof Error ? err.message : messages.errors.genericDescription
+          );
         },
       }
     );
@@ -76,14 +104,13 @@ export default function TopUpPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 font-sans text-slate-100">
-      {/* Header */}
       <div>
         <Link
           href="/wallet"
           className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-          <span>Kembali ke Ringkasan Dompet</span>
+          <span>{messages.topUp.backToWallet}</span>
         </Link>
 
         <div className="mt-3 flex items-center justify-between">
@@ -92,79 +119,84 @@ export default function TopUpPage() {
               <Plus className="h-4 w-4" aria-hidden="true" />
             </span>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
-              Isi Saldo USD (Top Up)
+              {messages.topUp.title}
             </h1>
           </div>
 
           <span className="text-[11px] font-mono text-[#22D3EE] bg-sky-950/60 px-2.5 py-1 rounded-full border border-sky-800/60 tabular-nums flex items-center gap-1">
             <Clock className="h-3 w-3" aria-hidden="true" />
-            <span>Kunci Kurs {formatCountdown(countdown)}</span>
+            <span>
+              {messages.fx.lockedBadge} {formatCountdown(countdown)}
+            </span>
           </span>
         </div>
 
         <p className="mt-1 text-xs text-zinc-400">
-          Konversi Rupiah instan ke saldo USD tanpa biaya siluman. Saldo langsung masuk ke buku besar perbankan Anda.
+          {messages.topUp.subtitle}
         </p>
       </div>
 
       {step === 'input' ? (
         <div className="space-y-6">
-          {/* Amount Calculator Card */}
           <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 sm:p-7 shadow-xl space-y-5">
             <div>
               <label htmlFor="topup-usd" className="block text-xs font-semibold text-zinc-400 mb-1.5">
-                Nominal USD yang Ingin Diterima
+                {messages.topUp.amountLabel}
               </label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-sm font-bold text-zinc-400">
-                  🇺🇸 USD
+                  USD $
                 </span>
                 <input
                   id="topup-usd"
                   type="number"
-                  min="5"
-                  max="10000"
+                  min="1"
+                  step="0.01"
                   value={usdAmount}
                   onChange={(e) => setUsdAmount(e.target.value)}
-                  className="w-full rounded-2xl border border-[#1D9BF0]/40 bg-sky-950/20 pl-24 pr-4 py-3 font-mono text-xl sm:text-2xl font-extrabold text-white focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0] tabular-nums"
+                  className="w-full rounded-2xl border border-[#1D9BF0]/40 bg-sky-950/20 pl-20 pr-4 py-3 font-mono text-xl sm:text-2xl font-extrabold text-white focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0] tabular-nums"
                 />
               </div>
             </div>
 
-            {/* Breakdown */}
             <div className="space-y-2 rounded-2xl border border-white/8 bg-[#12141a] p-4 text-xs text-zinc-400">
               <div className="flex justify-between items-center">
-                <span>Kurs Terkunci (15 Menit)</span>
+                <span>{messages.topUp.rateLockedLabel}</span>
                 <span className="font-mono text-white font-medium">
-                  1 USD = Rp {fxRate.toLocaleString('id-ID')}
+                  1 USD = Rp{fxRate.toLocaleString('id-ID')}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span>Subtotal Konversi</span>
+                <span>{messages.topUp.subtotalLabel}</span>
                 <span className="font-mono text-white font-medium">
-                  Rp {idrSubtotal.toLocaleString('id-ID')}
+                  Rp{idrSubtotal.toLocaleString('id-ID')}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span>Biaya Transaksi Kanal</span>
+                <span>{messages.topUp.channelFeeLabel}</span>
                 <span className="font-mono text-[#22D3EE] font-semibold">
-                  Rp {feeIdr.toLocaleString('id-ID')} {paymentMethod === 'qris' ? '(0.7% MDR)' : '(Flat VA)'}
+                  Rp{feeIdr.toLocaleString('id-ID')}
                 </span>
               </div>
               <div className="pt-2 border-t border-white/8 flex justify-between items-center text-sm font-bold text-white">
-                <span>Total Pembayaran</span>
+                <span>{messages.topUp.totalPaymentLabel}</span>
                 <span className="font-mono text-[#67E8F9] tabular-nums">
-                  Rp {totalIdr.toLocaleString('id-ID')}
+                  Rp{totalIdr.toLocaleString('id-ID')}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Payment Method Selector */}
           <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 sm:p-7 shadow-xl space-y-4">
             <h2 className="text-sm font-bold text-white">
-              Pilih Metode Pembayaran Rupiah
+              {messages.topUp.chooseMethodTitle}
             </h2>
+
+            {errorMessage && (
+              <div className="rounded-xl border border-rose-800/60 bg-rose-950/40 px-4 py-3 text-xs text-rose-300">
+                {errorMessage}
+              </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
@@ -178,7 +210,7 @@ export default function TopUpPage() {
               >
                 <Building2 className="h-5 w-5 text-[#22D3EE] mb-2" aria-hidden="true" />
                 <span className="font-bold text-xs block text-white">BCA Virtual Account</span>
-                <span className="text-[11px] text-zinc-400 block mt-0.5">Instan 24/7 &bull; Bebas Float</span>
+                <span className="text-[11px] text-zinc-400 block mt-0.5">Otomatis 24/7</span>
               </button>
 
               <button
@@ -206,23 +238,24 @@ export default function TopUpPage() {
               >
                 <QrCode className="h-5 w-5 text-[#22D3EE] mb-2" aria-hidden="true" />
                 <span className="font-bold text-xs block text-white">QRIS Dinamis</span>
-                <span className="text-[11px] text-zinc-400 block mt-0.5">GoPay, OVO, ShopeePay</span>
+                <span className="text-[11px] text-zinc-400 block mt-0.5">Seluruh bank & e-wallet</span>
               </button>
             </div>
 
             <Button
               variant="primary"
               size="lg"
-              onClick={() => setStep('payment')}
+              disabled={topUpMutation.isPending}
+              isLoading={topUpMutation.isPending}
+              onClick={handleCreateTopUpOrder}
               className="w-full mt-4 bg-[#1D9BF0] hover:bg-[#1A8CD8] text-white font-bold border-[#1D9BF0] gap-2"
             >
               <Zap className="h-4 w-4" aria-hidden="true" />
-              <span>Lanjutkan Pembayaran Rp {totalIdr.toLocaleString('id-ID')}</span>
+              <span>Top Up Rp{totalIdr.toLocaleString('id-ID')}</span>
             </Button>
           </div>
         </div>
       ) : (
-        /* Payment Step Card */
         <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 sm:p-7 shadow-xl space-y-6 text-center">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-950/60 text-[#22D3EE] border border-sky-800/40 mx-auto">
             <CheckCircle2 className="h-6 w-6" aria-hidden="true" />
@@ -230,18 +263,18 @@ export default function TopUpPage() {
 
           <div>
             <h2 className="text-lg font-bold text-white">
-              Tagihan Pembayaran Diterbitkan
+              {messages.topUp.invoiceIssuedTitle}
             </h2>
             <p className="text-xs text-zinc-400 mt-1">
-              Selesaikan pembayaran sebelum batas waktu penguncian kurs berakhir.
+              {messages.topUp.invoiceIssuedSubtitle}
             </p>
           </div>
 
           <div className="rounded-2xl border border-white/8 bg-[#12141a] p-5 text-left space-y-4">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-zinc-400">Total Nominal Pembayaran</span>
+              <span className="text-zinc-400">{messages.topUp.totalPaymentLabel}</span>
               <span className="font-mono text-base font-bold text-[#67E8F9]">
-                Rp {totalIdr.toLocaleString('id-ID')}
+                Rp{totalIdr.toLocaleString('id-ID')}
               </span>
             </div>
 
@@ -260,7 +293,7 @@ export default function TopUpPage() {
                     className="flex items-center gap-1.5 text-xs font-semibold text-[#1D9BF0] hover:text-[#22D3EE] cursor-pointer"
                   >
                     <Copy className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span>{copied ? 'Tersalin' : 'Salin'}</span>
+                    <span>{copied ? messages.common.copied : messages.common.copy}</span>
                   </button>
                 </div>
               </div>
@@ -268,45 +301,38 @@ export default function TopUpPage() {
               <div className="text-center py-4">
                 <div className="inline-block p-4 rounded-2xl bg-white mx-auto shadow-md">
                   <div className="h-44 w-44 border-2 border-black rounded-lg flex items-center justify-center font-mono text-slate-950 font-bold text-xs p-2 text-center">
-                    [Simulasi QRIS Dinamis Rp {totalIdr.toLocaleString('id-ID')}]
+                    [QRIS Tagihan Rp{totalIdr.toLocaleString('id-ID')}]
                   </div>
                 </div>
                 <p className="text-[11px] text-zinc-400 mt-3">
-                  Pindai QRIS menggunakan BCA Mobile, Livin, GoPay, OVO, atau aplikasi e-wallet Anda.
+                  Pindai QRIS menggunakan aplikasi perbankan atau e-wallet berlisensi.
                 </p>
               </div>
             )}
 
             <div className="pt-3 border-t border-white/8 text-[11px] text-zinc-400 space-y-1">
-              <p>&bull; Saldo USD sebesar <strong>${usdAmount}.00</strong> akan otomatis masuk dalam hitungan detik setelah transfer berhasil.</p>
-              <p>&bull; Transaksi diproses melalui buku besar append-only berintegritas tinggi.</p>
+              <p>&bull; {messages.topUp.settlementPendingNote}</p>
+              <p>
+                &bull; Nominal konversi target: <strong>${parsedUsd.toFixed(2)} USD</strong>.
+              </p>
             </div>
           </div>
 
           <div className="flex items-center justify-center gap-3 pt-2">
             <Button
-              variant="outline"
-              onClick={() => setStep('input')}
-              className="border-white/8 bg-[#12141a] text-zinc-300 hover:bg-white/6"
-            >
-              Ubah Nominal
-            </Button>
-            <Button
               variant="primary"
-              onClick={handleCompleteTopUp}
-              isLoading={topUpMutation.isPending}
+              onClick={() => router.push('/wallet')}
               className="bg-[#1D9BF0] hover:bg-[#1A8CD8] text-white font-bold border-[#1D9BF0]"
             >
-              Selesai & Cek Dompet
+              {messages.topUp.doneCheckWallet}
             </Button>
           </div>
         </div>
       )}
 
-      {/* Trust Notice */}
       <div className="flex items-center justify-center gap-2 text-[11px] text-zinc-500 pt-2">
         <ShieldCheck className="h-4 w-4 text-[#22D3EE]" aria-hidden="true" />
-        <span>Terenkripsi standar perbankan &bull; Nol pembulatan floating drift</span>
+        <span>Buku besar append-only dalam integer sen &bull; Kurs referensi Wise tanpa markup</span>
       </div>
     </div>
   );

@@ -43,8 +43,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <Shield className="h-5 w-5" aria-hidden="true" />
           </div>
           <div>
-            <h1 className="text-sm font-semibold tracking-wide text-white">Admin Console</h1>
-            <span className="text-xs text-zinc-400">Dompet Digital Dollar</span>
+            <span className="block text-sm font-semibold tracking-wide text-white">
+              Konsol Admin
+            </span>
+            <span className="text-xs text-zinc-400">sakuin.co.id</span>
           </div>
         </div>
 

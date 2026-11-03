@@ -6,12 +6,16 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin/', '/api/', '/maintenance/'],
-      },
-      {
-        userAgent: ['GPTBot', 'ChatGPT-User', 'PerplexityBot', 'ClaudeBot', 'Google-Extended'],
-        allow: '/',
-        disallow: ['/admin/', '/api/'],
+        disallow: [
+          '/admin',
+          '/api/',
+          '/maintenance',
+          '/wallet',
+          '/card',
+          '/transactions',
+          '/top-up',
+          '/kyc',
+        ],
       },
     ],
     sitemap: 'https://sakuin.co.id/sitemap.xml',

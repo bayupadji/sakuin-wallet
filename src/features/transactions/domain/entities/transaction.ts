@@ -1,5 +1,5 @@
 export type TransactionType = 'topup' | 'card' | 'receive';
-export type TransactionStatus = 'success' | 'pending' | 'failed' | 'refunded';
+export type TransactionStatus = 'pending' | 'success' | 'failed' | 'expired' | 'refunded';
 
 export interface TransactionItem {
   id: string;

@@ -1,8 +1,8 @@
 import { ActivityHub } from '@/features/transactions';
 
 export const metadata = {
-  title: 'Riwayat Transaksi & Buku Besar | Sakuin - Dompet Digital Dollar',
-  description: 'Catatan mutasi buku besar append-only double-entry dan bukti settlement kriptografis.',
+  title: 'Riwayat Transaksi & Buku Besar',
+  description: 'Catatan mutasi buku besar append-only dalam zona waktu WIB dan status penyelesaian transaksi.',
 };
 
 export default function TransactionsPage() {

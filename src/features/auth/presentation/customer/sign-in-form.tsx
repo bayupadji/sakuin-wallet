@@ -9,14 +9,16 @@ import { Input } from '@/shared/presentation/ui/input';
 import { messages } from '@/shared/messages';
 import { Clock, ShieldAlert } from 'lucide-react';
 
-export function SignInForm() {
+interface SignInFormFieldsProps {
+  reason?: string | null;
+  redirectTarget?: string | null;
+}
+
+function SignInFormFields({ reason = null, redirectTarget = null }: SignInFormFieldsProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const searchParams = useSearchParams();
-  const reason = searchParams.get('reason');
-  const redirectTarget = searchParams.get('redirect');
   const signInMutation = useSignInMutation();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -24,20 +26,24 @@ export function SignInForm() {
     setErrorMessage(null);
 
     if (!email || !password) {
-      setErrorMessage('Please enter both email and password.');
+      setErrorMessage(messages.auth.signInMissingFields);
       return;
     }
 
     try {
       const user = await signInMutation.mutateAsync({ email, password });
-      const target = redirectTarget || (user.role === 'super_admin' ? '/admin' : '/wallet');
+      const safeRedirect =
+        redirectTarget && redirectTarget.startsWith('/') && !redirectTarget.startsWith('//')
+          ? redirectTarget
+          : null;
+      const target = safeRedirect || (user.role === 'super_admin' ? '/admin' : '/wallet');
       // Full navigation guarantees Safari iOS commits the HTTP cookie before loading the target page
       window.location.href = target;
     } catch (err: unknown) {
       if (err instanceof Error) {
         setErrorMessage(err.message);
       } else {
-        setErrorMessage('Failed to sign in. Please verify your credentials.');
+        setErrorMessage(messages.auth.signInGenericError);
       }
     }
   }
@@ -51,9 +57,9 @@ export function SignInForm() {
         >
           <Clock className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
           <div>
-            <p className="font-semibold">Sesi Berakhir (Idle Timeout)</p>
+            <p className="font-semibold">{messages.auth.idleTimeoutTitle}</p>
             <p className="text-[11px] text-amber-300/80 mt-0.5">
-              Tidak ada aktivitas selama 30 menit. Silakan masuk kembali untuk melanjutkan akses dompet.
+              {messages.auth.idleTimeoutDescription}
             </p>
           </div>
         </div>
@@ -66,9 +72,9 @@ export function SignInForm() {
         >
           <ShieldAlert className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" aria-hidden="true" />
           <div>
-            <p className="font-semibold">Batas Sesi 2 Jam Habis</p>
+            <p className="font-semibold">{messages.auth.expiredSessionTitle}</p>
             <p className="text-[11px] text-rose-300/80 mt-0.5">
-              Maksimum durasi sesi perbankan (2 jam) telah tercapai demi alasan keamanan. Silakan otorisasi ulang akun Anda.
+              {messages.auth.expiredSessionDescription}
             </p>
           </div>
         </div>
@@ -91,7 +97,7 @@ export function SignInForm() {
         autoComplete="username"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="name@company.com"
+        placeholder={messages.auth.emailPlaceholder}
         required
       />
 
@@ -117,7 +123,7 @@ export function SignInForm() {
       </Button>
 
       <p className="text-center text-xs text-slate-600 dark:text-slate-400">
-        Don&apos;t have an account yet?{' '}
+        {messages.auth.noAccountPrompt}{' '}
         <Link
           href="/signup"
           className="font-medium text-[#1D9BF0] hover:text-[#1A8CD8] underline dark:text-[#1D9BF0]"
@@ -126,5 +132,23 @@ export function SignInForm() {
         </Link>
       </p>
     </form>
+  );
+}
+
+function SignInFormWithSearchParams() {
+  const searchParams = useSearchParams();
+  return (
+    <SignInFormFields
+      reason={searchParams.get('reason')}
+      redirectTarget={searchParams.get('redirect')}
+    />
+  );
+}
+
+export function SignInForm() {
+  return (
+    <React.Suspense fallback={<SignInFormFields />}>
+      <SignInFormWithSearchParams />
+    </React.Suspense>
   );
 }

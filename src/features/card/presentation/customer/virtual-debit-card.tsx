@@ -4,10 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { useCardStore } from '../../application/stores/use-card-store';
 import {
   useFreezeCardMutation,
+  useRevealCardMutation,
   useUpdateCardControlsMutation,
 } from '../../application/mutations/use-card-mutations';
 import { Button } from '@/shared/presentation/ui/button';
 import { Dialog } from '@/shared/presentation/ui/dialog';
+import { messages } from '@/shared/messages';
 import { cn } from '@/shared/utils/cn';
 import {
   Bell,
@@ -21,14 +23,11 @@ import {
   Globe,
   KeyRound,
   Mail,
-  Palette,
-  Power,
   Shield,
   ShieldAlert,
   ShieldCheck,
   Sliders,
   Snowflake,
-  Unlock,
   Wifi,
 } from 'lucide-react';
 
@@ -38,58 +37,63 @@ export interface VirtualDebitCardProps {
   expiry?: string;
   issuingCountry?: string;
   isFrozen?: boolean;
+  onlineTransactions?: boolean;
+  non3dsTransactions?: boolean;
+  atmWithdrawals?: boolean;
   onToggleFreeze?: () => void;
   className?: string;
 }
 
 export function VirtualDebitCard({
-  cardholderName = 'Bayu Prasetya Adji Sugiyarto',
-  last4 = '9109',
-  expiry = '05/29',
+  cardholderName = 'Nasabah Sakuin',
+  last4 = '4821',
+  expiry = '08/29',
   issuingCountry = 'Singapura (MAS)',
-  isFrozen: initialFrozen = false,
+  isFrozen = false,
+  onlineTransactions = true,
+  non3dsTransactions = true,
+  atmWithdrawals = false,
   onToggleFreeze,
   className,
 }: VirtualDebitCardProps) {
-  const [isFrozen, setIsFrozen] = useState(initialFrozen);
-  const [showDetails, setShowDetails] = useState(false);
+  const [revealedSecrets, setRevealedSecrets] = useState<{
+    cardNumberFormatted: string;
+    cvv: string;
+  } | null>(null);
   const [copied, setCopied] = useState(false);
-  const [pinInput, setPinInput] = useState('');
-  const [pinError, setPinError] = useState<string | null>(null);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [reauthError, setReauthError] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(30);
 
   const freezeMutation = useFreezeCardMutation();
   const updateControlsMutation = useUpdateCardControlsMutation();
+  const revealMutation = useRevealCardMutation();
 
   const {
-    onlineTransactions,
-    non3dsTransactions,
-    atmWithdrawals,
-    setOnlineTransactions,
-    setNon3dsTransactions,
-    setAtmWithdrawals,
     isFreezeModalOpen: freezeDialogOpen,
     setFreezeModalOpen: setFreezeDialogOpen,
     isMoreModalOpen: moreModalOpen,
     setMoreModalOpen,
-    isPinModalOpen: pinDialogOpen,
-    setPinModalOpen: setPinDialogOpen,
+    isPinModalOpen: reauthDialogOpen,
+    setPinModalOpen: setReauthDialogOpen,
   } = useCardStore();
 
-  // Keamanan & Notifikasi Toggles per user request
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [largeTxNotice, setLargeTxNotice] = useState(true);
-
-  // Feedback toast for actions inside the modal
   const [actionNotice, setActionNotice] = useState<string | null>(null);
 
-  // 30-second security auto-hide countdown for revealed card details per AGENTS.md rule 8
+  const showDetails = revealedSecrets !== null;
+  const panGroups = showDetails
+    ? revealedSecrets.cardNumberFormatted.split(' ')
+    : ['••••', '••••', '••••', last4];
+
+  // Auto-hide revealed card credentials after 30 seconds (AGENTS.md Section 8)
   useEffect(() => {
     if (!showDetails) return;
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          setShowDetails(false);
+          setRevealedSecrets(null);
           return 30;
         }
         return prev - 1;
@@ -104,43 +108,52 @@ export function VirtualDebitCard({
   }
 
   function handleCopyNumber() {
-    navigator.clipboard.writeText(`411122223333${last4}`);
+    if (!revealedSecrets) return;
+    navigator.clipboard.writeText(revealedSecrets.cardNumberFormatted.replace(/\s+/g, ''));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
   function handleConfirmFreeze() {
     const nextFrozen = !isFrozen;
-    setIsFrozen(nextFrozen);
     freezeMutation.mutate(nextFrozen);
     onToggleFreeze?.();
     setFreezeDialogOpen(false);
+    if (nextFrozen) {
+      setRevealedSecrets(null);
+    }
     showActionToast(
       nextFrozen
-        ? 'Kartu virtual berhasil dibekukan untuk keamanan.'
-        : 'Kartu virtual berhasil diaktifkan kembali.'
+        ? 'Kartu debit virtual berhasil dibekukan untuk keamanan.'
+        : 'Kartu debit virtual berhasil diaktifkan kembali.'
     );
   }
 
-  function handleVerifyPin(e: React.FormEvent) {
+  async function handleVerifyPassword(e: React.FormEvent) {
     e.preventDefault();
-    setPinError(null);
-    if (pinInput === '123456') {
-      setShowDetails(true);
-      setCountdown(30);
-      setPinDialogOpen(false);
-      setPinInput('');
-    } else {
-      setPinError('PIN transaksi salah. Masukkan 6-digit PIN keamanan (demo: 123456).');
+    setReauthError(null);
+    try {
+      const secrets = await revealMutation.mutateAsync(passwordInput);
+      setRevealedSecrets({
+        cardNumberFormatted: secrets.cardNumberFormatted,
+        cvv: secrets.cvv,
+      });
+      setCountdown(secrets.expiresInSeconds || 30);
+      setReauthDialogOpen(false);
+      setPasswordInput('');
+    } catch (err) {
+      setReauthError(
+        err instanceof Error ? err.message : messages.card.reauthError
+      );
     }
   }
 
   function handleToggleDetailsClick() {
     if (showDetails) {
-      setShowDetails(false);
+      setRevealedSecrets(null);
       setCountdown(30);
     } else {
-      setPinDialogOpen(true);
+      setReauthDialogOpen(true);
     }
   }
 
@@ -151,12 +164,12 @@ export function VirtualDebitCard({
         className
       )}
     >
-      {/* 1. Card Header per reference image */}
+      {/* 1. Card Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
           <div className="flex items-center gap-2.5">
             <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white">
-              VISA Platinum Virtual
+              {messages.card.cardTypeLabel}
             </h2>
             <span
               className={cn(
@@ -166,119 +179,122 @@ export function VirtualDebitCard({
                   : 'bg-sky-500/20 text-[#67E8F9] border border-sky-500/40'
               )}
             >
-              {isFrozen ? 'Frozen' : 'Active'}
+              {isFrozen ? messages.card.statusFrozen : messages.card.statusActive}
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            You can pay directly on e-Commerce platforms &amp; global subscriptions
+            {messages.card.cardTypeSubtitle}
           </p>
         </div>
       </div>
 
-      {/* 2. Middle Row: Left Column (Spec Box + Action Buttons) & Right Column (Virtual Card) */}
+      {/* 2. Middle Row: Specification Box + Card Visual */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-        {/* Left Column: Specification Box + 3 Action Buttons */}
+        {/* Left Column: Specification Box + Action Buttons */}
         <div className="lg:col-span-7 space-y-3.5">
-          {/* Specification Box */}
           <div className="rounded-xl border border-white/8/80 bg-[#12141a]/90 p-5 sm:p-6 grid grid-cols-2 sm:grid-cols-3 gap-y-5 gap-x-6 text-xs">
             <div>
-              <span className="text-slate-400 block text-[11px] mb-1">Card Number</span>
+              <span className="text-slate-400 block text-[11px] mb-1">Nomor Kartu</span>
               <div className="flex items-center gap-2">
                 <span className="font-mono text-sm sm:text-base font-bold text-white tracking-wider tabular-nums">
-                  {showDetails ? `4111 2222 3333 ${last4}` : `•••• •••• •••• ${last4}`}
+                  {showDetails
+                    ? revealedSecrets.cardNumberFormatted
+                    : `•••• •••• •••• ${last4}`}
                 </span>
-                <button
-                  type="button"
-                  onClick={handleCopyNumber}
-                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
-                  title="Salin nomor kartu"
-                  aria-label="Salin nomor kartu"
-                >
-                  {copied ? (
-                    <Check className="h-3.5 w-3.5 text-[#22D3EE]" aria-hidden="true" />
-                  ) : (
-                    <Copy className="h-3.5 w-3.5" aria-hidden="true" />
-                  )}
-                </button>
+                {showDetails && (
+                  <button
+                    type="button"
+                    onClick={handleCopyNumber}
+                    className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+                    title="Salin nomor kartu"
+                    aria-label="Salin nomor kartu"
+                  >
+                    {copied ? (
+                      <Check className="h-3.5 w-3.5 text-[#22D3EE]" aria-hidden="true" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+                    )}
+                  </button>
+                )}
               </div>
             </div>
 
             <div>
-              <span className="text-slate-400 block text-[11px] mb-1">Expiry Date</span>
+              <span className="text-slate-400 block text-[11px] mb-1">Masa Berlaku</span>
               <span className="font-mono text-sm sm:text-base font-semibold text-white tabular-nums">
-                {expiry}
+                {showDetails ? expiry : '••/••'}
               </span>
             </div>
 
             <div>
               <span className="text-slate-400 block text-[11px] mb-1">CVC/CVV</span>
               <span className="font-mono text-sm sm:text-base font-bold text-white tabular-nums">
-                {showDetails ? '849' : '***'}
+                {showDetails ? revealedSecrets.cvv : '•••'}
               </span>
             </div>
 
             <div className="sm:col-span-2">
-              <span className="text-slate-400 block text-[11px] mb-1">Cardholder name</span>
+              <span className="text-slate-400 block text-[11px] mb-1">Nama Pemegang Kartu</span>
               <span className="font-semibold text-white text-sm block truncate">
                 {cardholderName}
               </span>
             </div>
 
             <div>
-              <span className="text-slate-400 block text-[11px] mb-1">Issuing Country</span>
+              <span className="text-slate-400 block text-[11px] mb-1">Negara Penerbit</span>
               <span className="font-semibold text-white text-sm block">
                 {issuingCountry}
               </span>
             </div>
           </div>
 
-          {/* 3 Action Buttons Row (Full width within the left column) */}
+          {/* 3 Action Buttons Row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full">
-            {/* 1. Card Details Pill */}
             <button
               type="button"
               onClick={handleToggleDetailsClick}
-              className="w-full flex items-center justify-center gap-2 rounded-full border border-white/8 bg-[#12141a] hover:bg-white/6/80 hover:text-white px-3.5 py-2.5 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+              disabled={isFrozen && !showDetails}
+              className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl border border-white/8 bg-[#12141a] hover:bg-white/6 hover:text-white px-3.5 py-2.5 text-xs font-semibold text-slate-200 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {showDetails ? (
                 <>
                   <EyeOff className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-                  <span>Hide ({countdown}s)</span>
+                  <span>
+                    {messages.card.hideDetails} ({countdown}d)
+                  </span>
                 </>
               ) : (
                 <>
                   <Eye className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-                  <span>Card Details</span>
+                  <span>{messages.card.revealDetails}</span>
                 </>
               )}
             </button>
 
-            {/* 2. Freeze / Unfreeze Pill */}
             <button
               type="button"
               onClick={() => setFreezeDialogOpen(true)}
-              className="w-full flex items-center justify-center gap-2 rounded-full border border-white/8 bg-[#12141a] hover:bg-white/6/80 hover:text-white px-3.5 py-2.5 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+              className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl border border-white/8 bg-[#12141a] hover:bg-white/6 hover:text-white px-3.5 py-2.5 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
             >
               <Snowflake
                 className={cn('h-3.5 w-3.5', isFrozen ? 'text-rose-400' : 'text-cyan-400')}
                 aria-hidden="true"
               />
-              <span>{isFrozen ? 'Unfreeze' : 'Freeze'}</span>
+              <span>{isFrozen ? messages.card.unfreeze : messages.card.freeze}</span>
             </button>
 
-            {/* 3. More Pill (Opens Card Actions & Keamanan Modal) */}
             <button
               type="button"
               onClick={() => setMoreModalOpen(true)}
-              className="w-full flex items-center justify-center gap-2 rounded-full border border-white/8 bg-[#12141a] hover:bg-white/6/80 hover:text-white px-3.5 py-2.5 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+              className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl border border-white/8 bg-[#12141a] hover:bg-white/6 hover:text-white px-3.5 py-2.5 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
             >
               <Sliders className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-              <span>More</span>
+              <span>{messages.card.moreActions}</span>
             </button>
           </div>
         </div>
 
-        {/* Right Column: Physical Simulated Card Visual */}
+        {/* Right Column: Card Visual */}
         <div className="lg:col-span-5 flex justify-center">
           <div
             className={cn(
@@ -288,20 +304,8 @@ export function VirtualDebitCard({
                 : 'bg-gradient-to-br from-black via-zinc-900 to-[#0F1115] shadow-black/40'
             )}
           >
-            {/* Subtle geometric card watermark */}
-            <div
-              className="absolute -right-12 -top-12 h-56 w-56 rounded-full bg-white/[0.03] pointer-events-none"
-              aria-hidden="true"
-            />
-            <div
-              className="absolute -left-12 -bottom-12 h-56 w-56 rounded-full bg-sky-500/[0.05] pointer-events-none"
-              aria-hidden="true"
-            />
-
-            {/* Top Header: Chip, Contactless, Status */}
             <div className="flex items-start justify-between relative z-10">
               <div className="flex items-center gap-3">
-                {/* EMV Chip Visual */}
                 <div
                   className="h-8 w-11 rounded-md bg-gradient-to-br from-amber-200 via-amber-300 to-amber-500 shadow-inner flex items-center justify-center p-1 border border-amber-400/40"
                   aria-hidden="true"
@@ -313,46 +317,40 @@ export function VirtualDebitCard({
                     <div />
                   </div>
                 </div>
-
-                {/* Contactless Wave */}
                 <Wifi className="h-5 w-5 text-white/50 rotate-90" aria-hidden="true" />
               </div>
 
-              <div className="flex items-center gap-2">
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase border',
+                  isFrozen
+                    ? 'bg-rose-500/10 text-rose-300 border-rose-500/20'
+                    : 'bg-sky-500/10 text-[#67E8F9] border-sky-500/20'
+                )}
+              >
                 <span
                   className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase border',
-                    isFrozen
-                      ? 'bg-rose-500/10 text-rose-300 border-rose-500/20'
-                      : 'bg-sky-500/10 text-[#67E8F9] border-sky-500/20'
+                    'h-1.5 w-1.5 rounded-full',
+                    isFrozen ? 'bg-rose-400' : 'bg-[#22D3EE]'
                   )}
-                >
-                  <span
-                    className={cn(
-                      'h-1.5 w-1.5 rounded-full',
-                      isFrozen ? 'bg-rose-400' : 'bg-[#22D3EE]'
-                    )}
-                  />
-                  <span>{isFrozen ? 'Frozen' : 'Active'}</span>
-                </span>
-              </div>
+                />
+                <span>{isFrozen ? messages.card.statusFrozen : messages.card.statusActive}</span>
+              </span>
             </div>
 
-            {/* Middle: Card Number */}
             <div className="my-auto py-2 relative z-10">
               <div className="font-mono text-base sm:text-lg font-bold tracking-widest text-slate-100 flex items-center justify-between tabular-nums">
-                <span>{showDetails ? '4111' : '••••'}</span>
-                <span>{showDetails ? '2222' : '••••'}</span>
-                <span>{showDetails ? '3333' : '••••'}</span>
-                <span className="text-white">{last4}</span>
+                <span>{panGroups[0] || '••••'}</span>
+                <span>{panGroups[1] || '••••'}</span>
+                <span>{panGroups[2] || '••••'}</span>
+                <span className="text-white">{panGroups[3] || last4}</span>
               </div>
             </div>
 
-            {/* Bottom: Cardholder & Expiry & Network */}
             <div className="flex items-end justify-between text-xs relative z-10">
               <div>
                 <span className="block text-[9px] uppercase tracking-wider text-slate-400">
-                  Cardholder
+                  Pemegang Kartu
                 </span>
                 <span className="font-semibold tracking-wider uppercase text-white mt-0.5 block truncate max-w-[120px] sm:max-w-[150px]">
                   {cardholderName}
@@ -361,7 +359,7 @@ export function VirtualDebitCard({
 
               <div>
                 <span className="block text-[9px] uppercase tracking-wider text-slate-400">
-                  Expires
+                  Berlaku
                 </span>
                 <span className="font-mono font-medium text-slate-200 mt-0.5 block tabular-nums">
                   {showDetails ? expiry : '••/••'}
@@ -373,11 +371,10 @@ export function VirtualDebitCard({
                   CVV
                 </span>
                 <span className="font-mono font-medium text-slate-200 mt-0.5 block tabular-nums">
-                  {showDetails ? '849' : '•••'}
+                  {showDetails ? revealedSecrets.cvv : '•••'}
                 </span>
               </div>
 
-              {/* Minimalist Card Network Monogram */}
               <div className="font-mono font-extrabold italic text-sm sm:text-base tracking-tighter text-white/80">
                 VISA
               </div>
@@ -386,7 +383,6 @@ export function VirtualDebitCard({
         </div>
       </div>
 
-      {/* Action Toast Feedback */}
       {actionNotice && (
         <div className="rounded-xl border border-sky-500/40 bg-sky-950/60 px-4 py-2.5 text-xs text-[#67E8F9] flex items-center gap-2 transition-all">
           <Check className="h-4 w-4 text-[#22D3EE] shrink-0" aria-hidden="true" />
@@ -394,181 +390,99 @@ export function VirtualDebitCard({
         </div>
       )}
 
-      {/* Modal: Card Actions */}
+      {/* Modal: Card Controls */}
       <Dialog
         isOpen={moreModalOpen}
         onClose={() => setMoreModalOpen(false)}
-        title="Card Actions"
-        description="Kelola kontrol kartu, pembatasan transaksi, dan preferensi keamanan."
+        title={messages.card.moreActions}
+        description="Kelola kontrol kartu, pembatasan transaksi online, dan preferensi keamanan."
         className="max-w-lg bg-[#050507] border-white/8 text-slate-100 max-h-[85vh] overflow-y-auto"
       >
         <div className="space-y-6 pt-2 text-sm text-slate-200">
-          {/* SECTION 1: Card control */}
           <div className="space-y-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block px-1">
-              Card control
+              Keamanan Kartu
             </span>
 
             <div className="divide-y divide-slate-800/80 rounded-xl border border-white/8 bg-[#12141a]/80 overflow-hidden">
-              {/* CVC unlock */}
-              <div
-                onClick={() => {
-                  showActionToast('Akses CVC berhasil dibuka kembali. Anda memiliki 3 kesempatan baru.');
-                }}
-                className="flex items-center justify-between p-3.5 hover:bg-white/6/40 transition-colors cursor-pointer"
-                role="button"
-                tabIndex={0}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="p-1.5 rounded-lg bg-slate-800 text-slate-300 shrink-0 mt-0.5">
-                    <Unlock className="h-4 w-4" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm text-white">CVC unlock</p>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Regain access after three failed PIN or CVC attempts.
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight className="h-4 w-4 text-slate-500 shrink-0 ml-2" aria-hidden="true" />
-              </div>
-
-              {/* Reset PIN */}
-              <div
+              <button
+                type="button"
                 onClick={() => {
                   setMoreModalOpen(false);
-                  setPinDialogOpen(true);
+                  setReauthDialogOpen(true);
                 }}
-                className="flex items-center justify-between p-3.5 hover:bg-white/6/40 transition-colors cursor-pointer"
-                role="button"
-                tabIndex={0}
+                className="w-full flex items-center justify-between p-3.5 hover:bg-white/6 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-start gap-3">
                   <div className="p-1.5 rounded-lg bg-slate-800 text-slate-300 shrink-0 mt-0.5">
                     <KeyRound className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm text-white">Reset PIN</p>
+                    <p className="font-semibold text-sm text-white">Buka Detail Kartu (30 Detik)</p>
                     <p className="text-xs text-slate-400 mt-0.5">
-                      Ubah atau perbarui 6-digit PIN keamanan otorisasi transaksi.
+                      Verifikasi ulang kata sandi akun untuk menampilkan nomor kartu dan CVV.
                     </p>
                   </div>
                 </div>
                 <ChevronRight className="h-4 w-4 text-slate-500 shrink-0 ml-2" aria-hidden="true" />
-              </div>
+              </button>
 
-              {/* Card design */}
-              <div
-                onClick={() => {
-                  showActionToast('Desain kartu saat ini: Obsidian Emerald (Sponsor Edition).');
-                }}
-                className="flex items-center justify-between p-3.5 hover:bg-white/6/40 transition-colors cursor-pointer"
-                role="button"
-                tabIndex={0}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="p-1.5 rounded-lg bg-slate-800 text-slate-300 shrink-0 mt-0.5">
-                    <Palette className="h-4 w-4" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm text-white">Card design</p>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Personalisasi tampilan dan warna kartu virtual Anda.
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight className="h-4 w-4 text-slate-500 shrink-0 ml-2" aria-hidden="true" />
-              </div>
-
-              {/* Lost/Stolen */}
-              <div
+              <button
+                type="button"
                 onClick={() => {
                   setMoreModalOpen(false);
                   setFreezeDialogOpen(true);
                 }}
-                className="flex items-center justify-between p-3.5 hover:bg-white/6/40 transition-colors cursor-pointer"
-                role="button"
-                tabIndex={0}
+                className="w-full flex items-center justify-between p-3.5 hover:bg-white/6 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-start gap-3">
                   <div className="p-1.5 rounded-lg bg-slate-800 text-slate-300 shrink-0 mt-0.5">
                     <ShieldAlert className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm text-white">Lost/Stolen</p>
+                    <p className="font-semibold text-sm text-white">Laporkan Kompromi Data</p>
                     <p className="text-xs text-slate-400 mt-0.5">
-                      Laporkan kartu hilang atau kompromi data untuk pencegahan penipuan.
+                      Bekukan kartu segera untuk menolak seluruh otorisasi pembayaran baru.
                     </p>
                   </div>
                 </div>
                 <ChevronRight className="h-4 w-4 text-slate-500 shrink-0 ml-2" aria-hidden="true" />
-              </div>
-
-              {/* Terminate */}
-              <div
-                onClick={() => {
-                  if (confirm('Apakah Anda yakin ingin menonaktifkan kartu virtual ini secara permanen?')) {
-                    setIsFrozen(true);
-                    setMoreModalOpen(false);
-                    showActionToast('Kartu virtual berhasil dinonaktifkan.');
-                  }
-                }}
-                className="flex items-center justify-between p-3.5 hover:bg-rose-950/30 transition-colors cursor-pointer text-rose-400"
-                role="button"
-                tabIndex={0}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="p-1.5 rounded-lg bg-rose-950/80 text-rose-400 shrink-0 mt-0.5 border border-rose-900/60">
-                    <Power className="h-4 w-4" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm text-rose-400">Terminate</p>
-                    <p className="text-xs text-rose-300/70 mt-0.5">
-                      Tutup kartu secara permanen. Tindakan ini tidak dapat dibatalkan.
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight className="h-4 w-4 text-rose-500 shrink-0 ml-2" aria-hidden="true" />
-              </div>
+              </button>
             </div>
           </div>
 
-          {/* SECTION 2: Transaction control */}
           <div className="space-y-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block px-1">
-              Transaction control
+              Kontrol Transaksi
             </span>
 
             <div className="divide-y divide-slate-800/80 rounded-xl border border-white/8 bg-[#12141a]/80 overflow-hidden">
-              {/* Online Transactions */}
               <div className="flex items-center justify-between p-3.5 gap-4">
                 <div className="flex items-start gap-3">
                   <div className="p-1.5 rounded-lg bg-slate-800 text-slate-300 shrink-0 mt-0.5">
                     <Globe className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm text-white">Online Transactions</p>
+                    <p className="font-semibold text-sm text-white">Transaksi Online Global</p>
                     <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
-                      Use your card for online purchases. Mobile wallets like Google Pay or Apple Pay will remain unaffected.
+                      Izinkan pembayaran e-commerce dan langganan SaaS internasional.
                     </p>
                   </div>
                 </div>
 
-                {/* Orange/Amber toggle per reference screenshot */}
                 <button
                   type="button"
                   role="switch"
                   aria-checked={onlineTransactions}
-                  aria-label="Online Transactions"
+                  aria-label="Transaksi Online Global"
                   onClick={() => {
                     const next = !onlineTransactions;
-                    setOnlineTransactions(next);
                     updateControlsMutation.mutate({ onlineTransactions: next });
                     showActionToast(`Transaksi online ${next ? 'diaktifkan' : 'dinonaktifkan'}.`);
                   }}
                   className={cn(
-                    'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500',
-                    onlineTransactions ? 'bg-amber-500' : 'bg-slate-700'
+                    'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D9BF0]',
+                    onlineTransactions ? 'bg-[#1D9BF0]' : 'bg-slate-700'
                   )}
                 >
                   <span
@@ -581,16 +495,15 @@ export function VirtualDebitCard({
                 </button>
               </div>
 
-              {/* Non-3DS online transactions */}
               <div className="flex items-center justify-between p-3.5 gap-4">
                 <div className="flex items-start gap-3">
                   <div className="p-1.5 rounded-lg bg-slate-800 text-slate-300 shrink-0 mt-0.5">
                     <Shield className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm text-white">Non-3DS online transactions</p>
+                    <p className="font-semibold text-sm text-white">Transaksi Tanpa 3D Secure</p>
                     <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
-                      Allow online payments without 3D Secure (3DS). This may increase fraud risk.
+                      Izinkan penagihan berulang merchant yang tidak meminta OTP 3D Secure.
                     </p>
                   </div>
                 </div>
@@ -599,16 +512,15 @@ export function VirtualDebitCard({
                   type="button"
                   role="switch"
                   aria-checked={non3dsTransactions}
-                  aria-label="Non-3DS online transactions"
+                  aria-label="Transaksi Tanpa 3D Secure"
                   onClick={() => {
                     const next = !non3dsTransactions;
-                    setNon3dsTransactions(next);
                     updateControlsMutation.mutate({ non3dsTransactions: next });
-                    showActionToast(`Transaksi Non-3DS ${next ? 'diizinkan' : 'dinonaktifkan'}.`);
+                    showActionToast(`Transaksi non-3DS ${next ? 'diizinkan' : 'dinonaktifkan'}.`);
                   }}
                   className={cn(
-                    'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500',
-                    non3dsTransactions ? 'bg-amber-500' : 'bg-slate-700'
+                    'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D9BF0]',
+                    non3dsTransactions ? 'bg-[#1D9BF0]' : 'bg-slate-700'
                   )}
                 >
                   <span
@@ -621,16 +533,15 @@ export function VirtualDebitCard({
                 </button>
               </div>
 
-              {/* ATM Withdrawals */}
               <div className="flex items-center justify-between p-3.5 gap-4">
                 <div className="flex items-start gap-3">
                   <div className="p-1.5 rounded-lg bg-slate-800 text-slate-300 shrink-0 mt-0.5">
                     <CreditCard className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm text-white">ATM Withdrawals</p>
+                    <p className="font-semibold text-sm text-white">Otorisasi Tarik Tunai ATM</p>
                     <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
-                      Izinkan otorisasi penarikan tunai internasional di ATM jaringan Cirrus / Mastercard.
+                      Nonaktif secara bawaan untuk kartu debit virtual.
                     </p>
                   </div>
                 </div>
@@ -639,16 +550,15 @@ export function VirtualDebitCard({
                   type="button"
                   role="switch"
                   aria-checked={atmWithdrawals}
-                  aria-label="ATM Withdrawals"
+                  aria-label="Otorisasi Tarik Tunai ATM"
                   onClick={() => {
                     const next = !atmWithdrawals;
-                    setAtmWithdrawals(next);
                     updateControlsMutation.mutate({ atmWithdrawals: next });
-                    showActionToast(`Tarik tunai ATM ${next ? 'diaktifkan' : 'dinonaktifkan'}.`);
+                    showActionToast(`Otorisasi ATM ${next ? 'diaktifkan' : 'dinonaktifkan'}.`);
                   }}
                   className={cn(
-                    'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500',
-                    atmWithdrawals ? 'bg-amber-500' : 'bg-slate-700'
+                    'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D9BF0]',
+                    atmWithdrawals ? 'bg-[#1D9BF0]' : 'bg-slate-700'
                   )}
                 >
                   <span
@@ -663,14 +573,12 @@ export function VirtualDebitCard({
             </div>
           </div>
 
-          {/* SECTION 3: Keamanan & Notifikasi (per user requirement) */}
           <div className="space-y-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block px-1">
               Keamanan & Notifikasi
             </span>
 
             <div className="divide-y divide-slate-800/80 rounded-xl border border-white/8 bg-[#12141a]/80 overflow-hidden">
-              {/* Email Alerts */}
               <div className="flex items-center justify-between p-3.5 gap-4">
                 <div className="flex items-start gap-3">
                   <div className="p-1.5 rounded-lg bg-slate-800 text-slate-300 shrink-0 mt-0.5">
@@ -679,7 +587,7 @@ export function VirtualDebitCard({
                   <div>
                     <p className="font-semibold text-sm text-white">Peringatan Transaksi Email</p>
                     <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
-                      Kirim email instan saat terjadi transaksi pembayaran atau otorisasi kartu.
+                      Kirim email instan saat terjadi otorisasi kartu debit virtual.
                     </p>
                   </div>
                 </div>
@@ -695,8 +603,8 @@ export function VirtualDebitCard({
                     showActionToast(`Notifikasi email ${next ? 'diaktifkan' : 'dinonaktifkan'}.`);
                   }}
                   className={cn(
-                    'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500',
-                    emailAlerts ? 'bg-amber-500' : 'bg-slate-700'
+                    'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D9BF0]',
+                    emailAlerts ? 'bg-[#1D9BF0]' : 'bg-slate-700'
                   )}
                 >
                   <span
@@ -709,7 +617,6 @@ export function VirtualDebitCard({
                 </button>
               </div>
 
-              {/* Large Transaction Notice */}
               <div className="flex items-center justify-between p-3.5 gap-4">
                 <div className="flex items-start gap-3">
                   <div className="p-1.5 rounded-lg bg-slate-800 text-slate-300 shrink-0 mt-0.5">
@@ -718,7 +625,7 @@ export function VirtualDebitCard({
                   <div>
                     <p className="font-semibold text-sm text-white">Peringatan Transaksi Besar (&gt; $500)</p>
                     <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
-                      Wajibkan konfirmasi otorisasi untuk setiap transaksi di atas $500 USD.
+                      Kirim peringatan keamanan untuk setiap transaksi kartu di atas $500 USD.
                     </p>
                   </div>
                 </div>
@@ -734,8 +641,8 @@ export function VirtualDebitCard({
                     showActionToast(`Peringatan transaksi besar ${next ? 'diaktifkan' : 'dinonaktifkan'}.`);
                   }}
                   className={cn(
-                    'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500',
-                    largeTxNotice ? 'bg-amber-500' : 'bg-slate-700'
+                    'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D9BF0]',
+                    largeTxNotice ? 'bg-[#1D9BF0]' : 'bg-slate-700'
                   )}
                 >
                   <span
@@ -748,39 +655,37 @@ export function VirtualDebitCard({
                 </button>
               </div>
 
-              {/* 2FA Status */}
               <div className="flex items-center justify-between p-3.5">
                 <div className="flex items-start gap-3">
                   <div className="p-1.5 rounded-lg bg-sky-950/60 text-[#22D3EE] shrink-0 mt-0.5 border border-sky-800/40">
                     <ShieldCheck className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm text-white">Otentikasi Dua Faktor (2FA)</p>
+                    <p className="font-semibold text-sm text-white">Proteksi 3D Secure</p>
                     <p className="text-xs text-slate-400 mt-0.5">
-                      Perlindungan biometrik &amp; passkey aktif di perangkat ini.
+                      Otorisasi transaksi kartu dilindungi jaringan pembayaran global.
                     </p>
                   </div>
                 </div>
-                <span className="text-[11px] font-semibold text-[#67E8F9] bg-sky-950/60/80 px-2 py-0.5 rounded border border-sky-800/60">
+                <span className="text-[11px] font-semibold text-[#67E8F9] bg-sky-950/60 px-2 py-0.5 rounded border border-sky-800/60">
                   Aktif
                 </span>
               </div>
 
-              {/* RLS Data Encryption Status */}
               <div className="flex items-center justify-between p-3.5">
                 <div className="flex items-start gap-3">
                   <div className="p-1.5 rounded-lg bg-sky-950/60 text-[#22D3EE] shrink-0 mt-0.5 border border-sky-800/40">
                     <FileCheck className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm text-white">Enkripsi KTP &amp; Otorisasi RLS</p>
+                    <p className="font-semibold text-sm text-white">Penyimpanan Tanpa PAN Penuh</p>
                     <p className="text-xs text-slate-400 mt-0.5">
-                      Data identitas tersimpan privat dengan enkripsi AES-256.
+                      Sistem hanya menyimpan referensi penerbit dan 4 digit terakhir kartu.
                     </p>
                   </div>
                 </div>
-                <span className="text-[11px] font-semibold text-[#67E8F9] bg-sky-950/60/80 px-2 py-0.5 rounded border border-sky-800/60">
-                  Terverifikasi
+                <span className="text-[11px] font-semibold text-[#67E8F9] bg-sky-950/60 px-2 py-0.5 rounded border border-sky-800/60">
+                  Terlindungi
                 </span>
               </div>
             </div>
@@ -795,8 +700,8 @@ export function VirtualDebitCard({
         title={isFrozen ? 'Aktifkan Kembali Kartu Virtual' : 'Bekukan Kartu Virtual Sementara'}
         description={
           isFrozen
-            ? 'Kartu akan segera dapat digunakan kembali untuk pembayaran global.'
-            : 'Saat dibekukan, semua otorisasi transaksi online baru akan otomatis ditolak untuk keamanan Anda.'
+            ? 'Kartu akan segera dapat digunakan kembali untuk pembayaran online global.'
+            : 'Saat dibekukan, seluruh otorisasi transaksi online baru akan ditolak otomatis untuk keamanan Anda.'
         }
         className="max-w-md bg-[#050507] border-white/8 text-slate-100"
       >
@@ -804,12 +709,12 @@ export function VirtualDebitCard({
           <div className="rounded-xl border border-white/8 bg-[#12141a] p-4 text-xs text-slate-300 space-y-2">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-white">Kartu:</span>
-              <span className="font-mono text-slate-200">Mastercard Virtual (*{last4})</span>
+              <span className="font-mono text-slate-200">VISA Virtual Debit (*{last4})</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-white">Status Sekarang:</span>
-              <span className={cn('font-bold', isFrozen ? 'text-rose-400' : 'text-amber-400')}>
-                {isFrozen ? 'Dibekukan (Frozen)' : 'Aktif (Active)'}
+              <span className="font-semibold text-white">Status Saat Ini:</span>
+              <span className={cn('font-bold', isFrozen ? 'text-rose-400' : 'text-[#22D3EE]')}>
+                {isFrozen ? messages.card.statusFrozen : messages.card.statusActive}
               </span>
             </div>
           </div>
@@ -821,7 +726,7 @@ export function VirtualDebitCard({
               onClick={() => setFreezeDialogOpen(false)}
               className="border-white/8 bg-[#12141a] text-slate-200 hover:bg-white/6"
             >
-              Batal
+              {messages.common.cancel}
             </Button>
             <Button
               variant="primary"
@@ -834,40 +739,50 @@ export function VirtualDebitCard({
                   : 'bg-rose-600 hover:bg-rose-500 text-white border-rose-600'
               )}
             >
-              {isFrozen ? 'Buka Bekukan' : 'Bekukan Kartu'}
+              {isFrozen ? messages.card.unfreeze : messages.card.freeze}
             </Button>
           </div>
         </div>
       </Dialog>
 
-      {/* Modal: PIN verification */}
+      {/* Modal: Password Re-authentication (AGENTS.md Section 8 Phase 2) */}
       <Dialog
-        isOpen={pinDialogOpen}
+        isOpen={reauthDialogOpen}
         onClose={() => {
-          setPinDialogOpen(false);
-          setPinError(null);
-          setPinInput('');
+          setReauthDialogOpen(false);
+          setReauthError(null);
+          setPasswordInput('');
         }}
-        title="Verifikasi PIN Keamanan"
-        description="Masukkan 6-digit PIN keamanan transaksi Anda untuk membuka nomor kartu dan kode CVV."
+        title={messages.card.reauthTitle}
+        description={messages.card.reauthDescription}
         className="max-w-md bg-[#050507] border-white/8 text-slate-100"
       >
-        <form onSubmit={handleVerifyPin} className="space-y-4 pt-2">
+        <form onSubmit={handleVerifyPassword} className="space-y-4 pt-2">
           <div>
-            <label htmlFor="card-security-pin" className="block text-xs font-semibold text-slate-300 mb-1.5">
-              PIN Keamanan 6 Digit (Demo: 123456)
+            <label
+              htmlFor="card-reauth-password"
+              className="block text-xs font-semibold text-slate-300 mb-1.5"
+            >
+              {messages.card.passwordLabel}
             </label>
             <input
-              id="card-security-pin"
+              id="card-reauth-password"
               type="password"
-              maxLength={6}
-              value={pinInput}
-              onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))}
-              placeholder="••••••"
+              autoComplete="current-password"
+              required
+              minLength={6}
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
+              placeholder={messages.card.passwordPlaceholder}
               autoFocus
-              className="w-full text-center font-mono text-2xl tracking-[0.5em] rounded-xl border border-white/8 bg-[#12141a] py-3 text-white focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              aria-describedby={reauthError ? 'card-reauth-error' : undefined}
+              className="w-full rounded-xl border border-white/8 bg-[#12141a] px-4 py-3 text-sm text-white focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0]"
             />
-            {pinError && <p className="mt-1.5 text-xs text-rose-400">{pinError}</p>}
+            {reauthError && (
+              <p id="card-reauth-error" className="mt-1.5 text-xs text-rose-400">
+                {reauthError}
+              </p>
+            )}
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-2">
@@ -876,21 +791,22 @@ export function VirtualDebitCard({
               variant="outline"
               size="sm"
               onClick={() => {
-                setPinDialogOpen(false);
-                setPinError(null);
-                setPinInput('');
+                setReauthDialogOpen(false);
+                setReauthError(null);
+                setPasswordInput('');
               }}
               className="border-white/8 bg-[#12141a] text-slate-200 hover:bg-white/6"
             >
-              Batal
+              {messages.common.cancel}
             </Button>
             <Button
               type="submit"
               variant="primary"
               size="sm"
-              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold border-amber-500"
+              isLoading={revealMutation.isPending}
+              className="bg-[#1D9BF0] hover:bg-[#1A8CD8] text-white font-bold border-[#1D9BF0]"
             >
-              Buka Detail Kartu
+              {messages.card.revealConfirmCta}
             </Button>
           </div>
         </form>

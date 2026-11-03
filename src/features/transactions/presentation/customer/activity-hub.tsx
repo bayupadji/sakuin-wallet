@@ -1,18 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
-import { TransactionType } from '../../domain/entities/transaction';
+import React, { useEffect, useState } from 'react';
+import { TransactionStatus, TransactionType } from '../../domain/entities/transaction';
 import { useTransactionStore } from '../../application/stores/use-transaction-store';
 import { useTransactionsQuery } from '../../application/queries/use-transactions';
-import { TransactionReceiptDrawer } from './transaction-receipt-drawer';
-import { ExportExcelModal } from './export-excel-modal';
 import { Button } from '@/shared/presentation/ui/button';
 import { Skeleton } from '@/shared/presentation/ui/skeleton';
+import { messages } from '@/shared/messages';
+import { cn } from '@/shared/utils/cn';
 import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  FileSpreadsheet,
   History,
   Plus,
   QrCode,
@@ -38,10 +37,12 @@ const MONTH_NAMES_ID = [
   'Desember',
 ];
 
-const REFERENCE_DATE = new Date('2026-10-01T00:00:00Z');
-
-export function getPast12MonthsPeriodOptions(baseDate: Date = REFERENCE_DATE): { value: string; label: string }[] {
-  const options = [{ value: 'all', label: 'Semua (1 Tahun Terakhir)' }];
+export function getPast12MonthsPeriodOptions(
+  baseDate: Date = new Date()
+): { value: string; label: string }[] {
+  const options: { value: string; label: string }[] = [
+    { value: 'all', label: messages.transactions.allPeriodLabel },
+  ];
   for (let i = 0; i < 12; i++) {
     const d = new Date(baseDate.getFullYear(), baseDate.getMonth() - i, 1);
     const year = d.getFullYear();
@@ -53,13 +54,6 @@ export function getPast12MonthsPeriodOptions(baseDate: Date = REFERENCE_DATE): {
     });
   }
   return options;
-}
-
-const PERIOD_OPTIONS = getPast12MonthsPeriodOptions();
-
-function getPeriodLabel(periodValue: string): string {
-  const match = PERIOD_OPTIONS.find((opt) => opt.value === periodValue);
-  return match ? match.label : periodValue;
 }
 
 function getPaginationRange(current: number, total: number): (number | string)[] {
@@ -75,6 +69,21 @@ function getPaginationRange(current: number, total: number): (number | string)[]
   return [1, '...', current - 1, current, current + 1, '...', total];
 }
 
+function getStatusBadgeClasses(status: TransactionStatus): string {
+  switch (status) {
+    case 'success':
+      return 'bg-sky-950/80 text-[#7CE8C8] border-sky-800/50';
+    case 'pending':
+      return 'bg-amber-950/60 text-amber-300 border-amber-800/50';
+    case 'refunded':
+      return 'bg-slate-800 text-slate-200 border-slate-700';
+    case 'failed':
+    case 'expired':
+    default:
+      return 'bg-rose-950/60 text-rose-300 border-rose-800/50';
+  }
+}
+
 export function ActivityHub() {
   const {
     activeTab,
@@ -83,11 +92,25 @@ export function ActivityHub() {
     setSelectedMonth,
     searchQuery,
     setSearchQuery,
-    selectedTransaction: selectedTx,
-    setSelectedTransaction: setSelectedTx,
   } = useTransactionStore();
 
-  const { data: transactionsData } = useTransactionsQuery({
+  const [periodOptions, setPeriodOptions] = useState<{ value: string; label: string }[]>([
+    { value: 'all', label: messages.transactions.allPeriodLabel },
+  ]);
+
+  useEffect(() => {
+    const frameId = requestAnimationFrame(() => {
+      setPeriodOptions(getPast12MonthsPeriodOptions(new Date()));
+    });
+    return () => cancelAnimationFrame(frameId);
+  }, []);
+
+  const {
+    data: transactionsData,
+    isLoading,
+    isError,
+    refetch,
+  } = useTransactionsQuery({
     type: activeTab,
     search: searchQuery,
     month: selectedMonth,
@@ -97,7 +120,6 @@ export function ActivityHub() {
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isPageLoading, setIsPageLoading] = useState<boolean>(false);
-  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
 
   const totalPages = Math.max(1, Math.ceil(filteredTransactions.length / itemsPerPage));
   const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
@@ -123,7 +145,7 @@ export function ActivityHub() {
     setCurrentPage(newPage);
     const timer = setTimeout(() => {
       setIsPageLoading(false);
-    }, 220);
+    }, 180);
     return () => clearTimeout(timer);
   };
 
@@ -133,7 +155,7 @@ export function ActivityHub() {
     setCurrentPage(1);
     const timer = setTimeout(() => {
       setIsPageLoading(false);
-    }, 220);
+    }, 180);
     return () => clearTimeout(timer);
   };
 
@@ -145,17 +167,19 @@ export function ActivityHub() {
   );
   const paginationRange = getPaginationRange(safeCurrentPage, totalPages);
 
-  // Metriks ringkasan berdasarkan transaksi yang sedang terfilter
+  // Only settled ('success') transactions affect wallet balance (AGENTS.md Section 6 Rule 11)
   const totalInflowCents = filteredTransactions
-    .filter((tx) => tx.type === 'topup' || tx.type === 'receive')
+    .filter((tx) => tx.status === 'success' && (tx.type === 'topup' || tx.type === 'receive'))
     .reduce((acc, tx) => acc + Number(tx.amountUsdCents), 0);
 
   const totalOutflowCents = filteredTransactions
-    .filter((tx) => tx.type === 'card')
+    .filter((tx) => tx.status === 'success' && tx.type === 'card')
     .reduce((acc, tx) => acc + Number(tx.amountUsdCents), 0);
 
   const netGrowthCents = totalInflowCents - totalOutflowCents;
-  const currentPeriodLabel = selectedMonth === 'all' ? '1 Tahun Terakhir' : getPeriodLabel(selectedMonth);
+  const matchedPeriod = periodOptions.find((opt) => opt.value === selectedMonth);
+  const currentPeriodLabel =
+    selectedMonth === 'all' ? '1 Tahun Terakhir' : matchedPeriod?.label || selectedMonth;
 
   function getIcon(type: TransactionType) {
     switch (type) {
@@ -179,38 +203,31 @@ export function ActivityHub() {
               <History className="h-4 w-4" aria-hidden="true" />
             </span>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
-              Riwayat Transaksi & Buku Besar
+              {messages.transactions.title}
             </h1>
           </div>
           <p className="text-xs text-zinc-400 mt-1.5">
-            Buku besar append-only double-entry. Pilih transaksi untuk melihat bukti settlement kriptografis.
+            {messages.transactions.subtitle}
           </p>
         </div>
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsExportModalOpen(true)}
-          className="gap-1.5 text-xs font-medium self-start sm:self-auto border-white/8 bg-[#050507] text-zinc-200 hover:bg-white/6 cursor-pointer"
-          aria-label="Buka dialog ekspor mutasi ke Excel"
-        >
-          <FileSpreadsheet className="h-3.5 w-3.5 text-[#22D3EE]" aria-hidden="true" />
-          <span>Ekspor Mutasi (Excel)</span>
-        </Button>
       </div>
 
-      {/* 2. Monthly Summary Metrics (Dinamis sesuai Periode) */}
+      {/* 2. Monthly Summary Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 shadow-xl space-y-1">
-          <span className="text-xs text-zinc-400">Total Arus Masuk ({currentPeriodLabel})</span>
+          <span className="text-xs text-zinc-400">
+            {messages.transactions.inflowLabel} ({currentPeriodLabel})
+          </span>
           <p className="font-mono text-2xl font-bold tracking-tight text-[#7CE8C8] tabular-nums">
             +${(totalInflowCents / 100).toFixed(2)}
           </p>
-          <span className="text-[11px] text-zinc-400 font-mono">Deposit VA & QRIS</span>
+          <span className="text-[11px] text-zinc-400 font-mono">Transaksi Berhasil</span>
         </div>
 
         <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 shadow-xl space-y-1">
-          <span className="text-xs text-zinc-400">Total Pengeluaran ({currentPeriodLabel})</span>
+          <span className="text-xs text-zinc-400">
+            {messages.transactions.outflowLabel} ({currentPeriodLabel})
+          </span>
           <p className="font-mono text-2xl font-bold tracking-tight text-white tabular-nums">
             -${(totalOutflowCents / 100).toFixed(2)}
           </p>
@@ -218,7 +235,7 @@ export function ActivityHub() {
         </div>
 
         <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 shadow-xl space-y-1">
-          <span className="text-xs text-zinc-400">Pertumbuhan Saldo Bersih</span>
+          <span className="text-xs text-zinc-400">{messages.transactions.netGrowthLabel}</span>
           <div className="flex items-center gap-1.5">
             <p
               className={`font-mono text-2xl font-bold tracking-tight tabular-nums ${
@@ -229,34 +246,33 @@ export function ActivityHub() {
             </p>
             <TrendingUp className="h-4 w-4 text-[#22D3EE]" aria-hidden="true" />
           </div>
-          <span className="text-[11px] text-zinc-400 font-mono">Delta saldo ({currentPeriodLabel})</span>
+          <span className="text-[11px] text-zinc-400 font-mono">
+            Delta buku besar ({currentPeriodLabel})
+          </span>
         </div>
       </div>
 
-      {/* 3. Ledger Transaction Hub Card (Search + Filter + Periode + Rows) */}
+      {/* 3. Ledger Transaction Hub Card */}
       <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 sm:p-7 shadow-xl space-y-4">
-        {/* Controls Container */}
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            {/* Input Pencarian */}
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" aria-hidden="true" />
               <input
                 type="text"
-                placeholder="Cari transaksi, merchant, ID ref..."
+                placeholder={messages.transactions.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
+                aria-label={messages.transactions.searchPlaceholder}
                 className="w-full rounded-xl border border-white/8 bg-[#12141a] pl-9 pr-3 py-2 text-xs text-white focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0]"
               />
             </div>
 
-            {/* Filter Periode Bulan & Dropdown Jumlah Baris */}
             <div className="flex flex-wrap items-center gap-2">
-              {/* Filter Periode per Bulan */}
               <div className="flex items-center gap-2 text-xs text-zinc-400 bg-[#12141a] px-2.5 py-1.5 rounded-lg border border-white/8">
                 <Calendar className="h-3.5 w-3.5 text-[#22D3EE]" aria-hidden="true" />
                 <label htmlFor="period-month-select" className="whitespace-nowrap text-[11px] font-medium text-zinc-400">
-                  Periode:
+                  {messages.transactions.periodLabel}
                 </label>
                 <select
                   id="period-month-select"
@@ -265,7 +281,7 @@ export function ActivityHub() {
                   className="bg-transparent text-xs font-semibold text-[#22D3EE] focus:outline-none cursor-pointer"
                   aria-label="Pilih filter periode per bulan"
                 >
-                  {PERIOD_OPTIONS.map((period) => (
+                  {periodOptions.map((period) => (
                     <option key={period.value} value={period.value} className="bg-[#050507] text-zinc-200">
                       {period.label}
                     </option>
@@ -273,10 +289,9 @@ export function ActivityHub() {
                 </select>
               </div>
 
-              {/* Dropdown Jumlah Baris (Kelipatan 10 s.d 100) */}
               <div className="flex items-center gap-2 text-xs text-zinc-400 bg-[#12141a] px-2.5 py-1.5 rounded-lg border border-white/8">
                 <label htmlFor="items-per-page-top" className="whitespace-nowrap text-[11px] font-medium text-zinc-400">
-                  Tampilkan:
+                  {messages.transactions.rowsLabel}
                 </label>
                 <select
                   id="items-per-page-top"
@@ -295,7 +310,6 @@ export function ActivityHub() {
             </div>
           </div>
 
-          {/* Kategori Tabs */}
           <div className="flex items-center gap-1 rounded-lg bg-[#050507] p-1 border border-white/8 text-xs overflow-x-auto">
             <button
               type="button"
@@ -306,7 +320,7 @@ export function ActivityHub() {
                   : 'text-zinc-400 hover:text-white'
               }`}
             >
-              Semua Buku Besar
+              {messages.transactions.tabs.all}
             </button>
             <button
               type="button"
@@ -317,7 +331,7 @@ export function ActivityHub() {
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              Isi Saldo
+              {messages.transactions.tabs.topup}
             </button>
             <button
               type="button"
@@ -328,7 +342,7 @@ export function ActivityHub() {
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              Pembelian Kartu
+              {messages.transactions.tabs.card}
             </button>
             <button
               type="button"
@@ -339,14 +353,14 @@ export function ActivityHub() {
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              Terima Dana
+              {messages.transactions.tabs.receive}
             </button>
           </div>
         </div>
 
-        {/* Ledger Transaction List with Lazy Loading */}
+        {/* 4 Screen States: Loading, Error, Empty, Success */}
         <div className="divide-y divide-slate-800/80 border-t border-slate-800 pt-1">
-          {isPageLoading ? (
+          {isLoading || isPageLoading ? (
             <div className="space-y-1.5 py-2">
               {Array.from({ length: Math.min(itemsPerPage, 5) }).map((_, idx) => (
                 <div
@@ -368,9 +382,18 @@ export function ActivityHub() {
                 </div>
               ))}
             </div>
+          ) : isError ? (
+            <div className="py-10 text-center space-y-3">
+              <p className="text-xs font-semibold text-rose-300">
+                Gagal memuat riwayat transaksi. Filter pencarian Anda tetap tersimpan.
+              </p>
+              <Button variant="secondary" size="sm" onClick={() => refetch()}>
+                {messages.common.tryAgain}
+              </Button>
+            </div>
           ) : filteredTransactions.length === 0 ? (
             <div className="py-12 text-center text-xs text-slate-400">
-              Tidak ada transaksi yang sesuai dengan pencarian Anda.
+              {messages.transactions.emptyFiltered}
             </div>
           ) : (
             <div className="transition-opacity duration-200 ease-in-out opacity-100">
@@ -378,18 +401,12 @@ export function ActivityHub() {
                 const Icon = getIcon(tx.type);
                 const isCredit = tx.type === 'topup' || tx.type === 'receive';
                 const formattedUsd = `$${(Number(tx.amountUsdCents) / 100).toFixed(2)}`;
+                const statusLabel = messages.transactions.status[tx.status] ?? tx.status;
 
                 return (
                   <div
                     key={tx.id}
-                    onClick={() => setSelectedTx(tx)}
-                    className="flex items-center justify-between p-3.5 sm:px-4 hover:bg-[#12141a] rounded-xl cursor-pointer transition-colors"
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') setSelectedTx(tx);
-                    }}
-                    aria-label={`Lihat tanda terima untuk ${tx.title}`}
+                    className="flex items-center justify-between p-3.5 sm:px-4 hover:bg-[#12141a] rounded-xl transition-colors gap-3"
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
                       <div
@@ -402,27 +419,41 @@ export function ActivityHub() {
                         <Icon className="h-5 w-5" aria-hidden="true" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-sm text-white truncate">
-                          {tx.title}
-                        </p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-semibold text-sm text-white truncate">
+                            {tx.title}
+                          </p>
+                          <span
+                            className={cn(
+                              'inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold',
+                              getStatusBadgeClasses(tx.status)
+                            )}
+                          >
+                            {statusLabel}
+                          </span>
+                        </div>
                         <p className="text-xs text-zinc-400 mt-0.5">
-                          {tx.channel} &bull; {tx.timestampWib}
+                          {tx.channel} &bull; {tx.timestampWib} &bull;{' '}
+                          <span className="font-mono text-[11px]">{tx.ledgerSequence}</span>
                         </p>
                       </div>
                     </div>
 
                     <div className="text-right shrink-0">
                       <p
-                        className={`font-mono text-sm font-bold tabular-nums ${
-                          isCredit
-                            ? 'text-[#7CE8C8]'
-                            : 'text-white'
-                        }`}
+                        className={cn(
+                          'font-mono text-sm font-bold tabular-nums',
+                          tx.status !== 'success'
+                            ? 'text-zinc-400'
+                            : isCredit
+                              ? 'text-[#7CE8C8]'
+                              : 'text-white'
+                        )}
                       >
                         {isCredit ? '+' : '-'}{formattedUsd}
                       </p>
                       <p className="text-[11px] text-zinc-400 font-mono tabular-nums mt-0.5">
-                        ≈ Rp {tx.amountIdr.toLocaleString('id-ID')}
+                        ≈ Rp{tx.amountIdr.toLocaleString('id-ID')}
                       </p>
                     </div>
                   </div>
@@ -435,22 +466,20 @@ export function ActivityHub() {
         {/* 4. Pagination Controls Footer */}
         {filteredTransactions.length > 0 && (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-white/8 pt-4 text-xs text-zinc-400">
-            {/* Status Rentang Data */}
             <div className="flex items-center gap-3">
               <span>
-                Menampilkan <span className="font-semibold text-zinc-200">{startIndex}</span> -{' '}
+                Menampilkan <span className="font-semibold text-zinc-200">{startIndex}</span> s/d{' '}
                 <span className="font-semibold text-zinc-200">{endIndex}</span> dari{' '}
                 <span className="font-semibold text-zinc-200">{filteredTransactions.length}</span> transaksi
               </span>
             </div>
 
-            {/* Tombol Navigasi Halaman */}
             <div className="flex items-center gap-1.5 self-center sm:self-auto">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage <= 1 || isPageLoading}
+                onClick={() => handlePageChange(safeCurrentPage - 1)}
+                disabled={safeCurrentPage <= 1 || isPageLoading}
                 className="h-8 px-2.5 text-xs font-medium border-white/8 bg-[#12141a] text-zinc-300 hover:bg-white/6 disabled:opacity-40 disabled:cursor-not-allowed"
                 aria-label="Halaman sebelumnya"
               >
@@ -469,7 +498,7 @@ export function ActivityHub() {
                   }
 
                   const pageNum = Number(page);
-                  const isCurrent = pageNum === currentPage;
+                  const isCurrent = pageNum === safeCurrentPage;
 
                   return (
                     <button
@@ -494,8 +523,8 @@ export function ActivityHub() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= totalPages || isPageLoading}
+                onClick={() => handlePageChange(safeCurrentPage + 1)}
+                disabled={safeCurrentPage >= totalPages || isPageLoading}
                 className="h-8 px-2.5 text-xs font-medium border-white/8 bg-[#12141a] text-zinc-300 hover:bg-white/6 disabled:opacity-40 disabled:cursor-not-allowed"
                 aria-label="Halaman berikutnya"
               >
@@ -506,20 +535,6 @@ export function ActivityHub() {
           </div>
         )}
       </div>
-
-      {/* 5. Settlement Receipt Drawer */}
-      <TransactionReceiptDrawer
-        transaction={selectedTx}
-        isOpen={selectedTx !== null}
-        onClose={() => setSelectedTx(null)}
-      />
-
-      {/* 6. Export to Excel Modal */}
-      <ExportExcelModal
-        isOpen={isExportModalOpen}
-        onClose={() => setIsExportModalOpen(false)}
-        defaultMonth={selectedMonth}
-      />
     </div>
   );
 }

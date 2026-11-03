@@ -51,7 +51,7 @@ export function FeesSection() {
           <h3 className="text-[22px] font-extrabold">{sim.heading}</h3>
           <label htmlFor="amount" className="flex justify-between text-[15px] font-semibold text-lp-strong">
             <span>{sim.amountLabel}</span>
-            <span>Rp{idr(amount)}</span>
+            <span>{`Rp${idr(amount)}`}</span>
           </label>
           <input
             id="amount"
@@ -66,15 +66,15 @@ export function FeesSection() {
           <div className="flex flex-col gap-3.5 rounded-[14px] border border-white/8 bg-white/4 p-5" aria-live="polite">
             <div className="flex justify-between gap-3 text-[15px]">
               <span className="text-lp-muted">{sim.paidLabel}</span>
-              <span className="font-bold">Rp{idr(amount)}</span>
+              <span className="font-bold">{`Rp${idr(amount + fee)}`}</span>
             </div>
             <div className="flex justify-between gap-3 text-[15px]">
               <span className="text-lp-muted">{sim.feeLabel}</span>
-              <span className="font-bold">Rp{idr(fee)}</span>
+              <span className="font-bold">{`Rp${idr(fee)}`}</span>
             </div>
             <div className="flex justify-between gap-3 border-t border-white/8 pt-3.5 text-base">
               <span className="font-bold">{sim.resultLabel}</span>
-              <span className="font-extrabold text-lp-mint">Rp{idr(amount)}</span>
+              <span className="font-extrabold text-lp-mint">{`Rp${idr(amount)}`}</span>
             </div>
           </div>
           <p className="text-sm leading-[1.55] text-lp-muted">{sim.note}</p>

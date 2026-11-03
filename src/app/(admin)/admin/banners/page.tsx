@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { PromoBannerCms } from '@/features/wallet/presentation/admin/promo-banner-cms';
 
 export const metadata = {
-  title: 'CMS Promo Banner | Admin Console Sakuin',
+  title: 'CMS Promo Banner',
   description: 'Pengelolaan konten promo banner karusel dengan sistem kompresi gambar wajib otomatis.',
 };
 

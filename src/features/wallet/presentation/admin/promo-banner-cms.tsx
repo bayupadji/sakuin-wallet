@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import {
   Megaphone,
@@ -29,6 +29,7 @@ import { Button } from '@/shared/presentation/ui/button';
 export function PromoBannerCms() {
   const {
     banners,
+    hydrateFromServer,
     addBanner,
     updateBanner,
     deleteBanner,
@@ -36,6 +37,10 @@ export function PromoBannerCms() {
     reorderBanners,
     resetToDefault,
   } = usePromoBannerStore();
+
+  useEffect(() => {
+    void hydrateFromServer();
+  }, [hydrateFromServer]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');

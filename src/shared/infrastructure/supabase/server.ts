@@ -34,7 +34,7 @@ export async function createServerSupabaseClient() {
 
 export function createAdminSupabaseClient() {
   const url = config.supabase.url;
-  const key = config.supabase.serviceRoleKey;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
   if (!url || !key) {
     throw new Error(

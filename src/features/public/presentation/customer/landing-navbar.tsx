@@ -184,9 +184,11 @@ export function LandingNavbar() {
       {/* Mobile & Tablet Drawer Slide-over Panel */}
       <div
         id="mobile-nav-drawer"
-        role="dialog"
-        aria-modal="true"
+        role={drawerOpen ? 'dialog' : undefined}
+        aria-modal={drawerOpen ? true : undefined}
         aria-label={a11y.mainNav}
+        aria-hidden={!drawerOpen}
+        inert={!drawerOpen}
         className={cn(
           'fixed inset-y-0 right-0 z-50 flex w-full max-w-[320px] sm:max-w-[360px] flex-col justify-between border-l border-white/10 bg-[#0F1115] p-6 sm:p-7 shadow-2xl transition-transform duration-300 ease-out lg:hidden',
           drawerOpen ? 'translate-x-0' : 'translate-x-full'

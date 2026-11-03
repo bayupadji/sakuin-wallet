@@ -3,7 +3,8 @@ export type UserRole =
   | 'super_admin'
   | 'kyc_reviewer'
   | 'dispute_agent'
-  | 'analyst';
+  | 'analyst'
+  | 'reconciliation';
 
 export interface User {
   id: string;

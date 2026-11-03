@@ -17,14 +17,42 @@ const PROTECTED_ROUTES = [
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  const isMetadataRoute =
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/manifest.webmanifest' ||
+    pathname === '/llms.txt' ||
+    pathname.startsWith('/icon') ||
+    pathname.startsWith('/apple-icon') ||
+    pathname.startsWith('/opengraph-image');
+
+  if (isMetadataRoute) {
+    return NextResponse.next();
+  }
+
   // Maintenance mode enforcement (bypass for admin and API routes)
   const isMaintenanceMode = process.env.MAINTENANCE_MODE === 'true';
   const isMaintenanceRoute = pathname === '/maintenance';
   const isAdminRoute = pathname.startsWith('/admin');
   const isApiRoute = pathname.startsWith('/api');
 
-  if (isMaintenanceMode && !isAdminRoute && !isMaintenanceRoute && !isApiRoute) {
-    return NextResponse.redirect(new URL('/maintenance', request.url));
+  if (isMaintenanceMode && !isAdminRoute && !isApiRoute) {
+    const maintenanceHeaders = {
+      'Retry-After': '3600',
+      'Cache-Control': 'no-store, must-revalidate',
+    };
+
+    if (isMaintenanceRoute) {
+      return NextResponse.next({
+        status: 503,
+        headers: maintenanceHeaders,
+      });
+    }
+
+    return NextResponse.rewrite(new URL('/maintenance', request.url), {
+      status: 503,
+      headers: maintenanceHeaders,
+    });
   }
 
   const isHttps =
@@ -90,7 +118,7 @@ export async function middleware(request: NextRequest) {
 
   // 2. Redirect already-authenticated users away from signin/signup
   if (isAuthRoute && result.valid) {
-    const destination = result.payload.role === 'super_admin' ? '/admin' : '/wallet';
+    const destination = result.payload.role !== 'customer' ? '/admin' : '/wallet';
     return NextResponse.redirect(new URL(destination, request.url));
   }
 
@@ -124,9 +152,8 @@ export const config = {
      * Match all request paths except for:
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico, icons, and static image files
-     * - api routes other than protected ones
+     * - crawler/metadata files, icons, and static image files
      */
-    '/((?!_next/static|_next/image|favicon.ico|icons|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|icon|apple-icon|opengraph-image|robots\\.txt|sitemap\\.xml|manifest\\.webmanifest|llms\\.txt|icons|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

@@ -1,12 +1,20 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SignInForm } from '@/features/auth';
 import { messages } from '@/shared/messages';
 import { Lock, ShieldCheck } from 'lucide-react';
 
-export const metadata = {
-  title: 'Sign In | Dompet Digital Dollar',
-  description: 'Sign in to access your USD wallet balance and cards.',
+export const metadata: Metadata = {
+  title: messages.auth.signInMetaTitle,
+  description: messages.auth.signInMetaDescription,
+  alternates: {
+    canonical: '/signin',
+  },
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 export default function SignInPage() {
@@ -23,29 +31,27 @@ export default function SignInPage() {
           <span>{messages.common.appName}</span>
         </Link>
         <h1 className="mt-6 text-2xl font-extrabold tracking-tight text-slate-950 dark:text-white">
-          Sign in to your account
+          {messages.auth.signInHeading}
         </h1>
         <p className="mt-1 text-xs text-slate-500 dark:text-zinc-400">
-          Enter your credentials to access your USD wallet and virtual cards.
+          {messages.auth.signInSubtitle}
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="rounded-3xl border border-slate-200/80 bg-white p-7 sm:p-9 shadow-xl shadow-slate-200/50 dark:border-white/8 dark:bg-[#050507] dark:shadow-none">
-          <React.Suspense fallback={<div className="py-6 text-center text-xs text-slate-400">Loading form...</div>}>
-            <SignInForm />
-          </React.Suspense>
+          <SignInForm />
 
           {/* Security Assurance Footer */}
           <div className="mt-8 pt-6 border-t border-slate-100 dark:border-white/8 flex items-center justify-center gap-4 text-[11px] text-zinc-400">
             <div className="flex items-center gap-1.5">
               <Lock className="h-3.5 w-3.5 text-[#22D3EE]" aria-hidden="true" />
-              <span>256-bit Encryption</span>
+              <span>{messages.auth.securityEncryptionBadge}</span>
             </div>
             <span>&bull;</span>
             <div className="flex items-center gap-1.5">
               <ShieldCheck className="h-3.5 w-3.5 text-[#22D3EE]" aria-hidden="true" />
-              <span>Bank-grade RLS</span>
+              <span>{messages.auth.securityRlsBadge}</span>
             </div>
           </div>
         </div>

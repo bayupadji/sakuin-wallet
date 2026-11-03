@@ -203,7 +203,7 @@ function BannerFormContent({
       ctaText: ctaText.trim() || 'Lihat Promo',
       ctaHref: actionType === 'card' ? '/card' : actionType === 'custom' ? ctaHref.trim() : undefined,
       imageSrc,
-      alt: `Promo ${title.trim()} Sakuin Dompet Digital Dollar`,
+      alt: `Promo ${title.trim()} sakuin.co.id`,
       steps: filteredSteps.length > 0 ? filteredSteps : ['Selesaikan transaksi melalui aplikasi.'],
       terms: filteredTerms.length > 0 ? filteredTerms : ['Syarat dan ketentuan umum berlaku.'],
       isActive,

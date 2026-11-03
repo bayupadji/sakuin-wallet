@@ -1,0 +1,27 @@
+# sakuin.co.id
+
+> Platform layanan keuangan digital oleh PT Anugrah Sejahtera Teknologi yang menyediakan Satu Saldo Terpadu untuk Virtual Debit Card global, pembayaran instan QRIS nasional, dan produk digital PPOB 24/7 di Indonesia. Didukung infrastruktur mitra berlisensi Penyedia Jasa Pembayaran (PJP) Kategori 1 Bank Indonesia.
+
+## Layanan Utama
+
+- **Virtual Debit Card (Kartu Debit Virtual)**: Instrumen kartu debit virtual resmi (bukan kartu kredit atau VCC) berproteksi OTP 3D Secure untuk pembayaran langganan SaaS, AI tools, cloud server, streaming, gaming, dan belanja online internasional tanpa kartu kredit bank fisik.
+- **Top Up Rupiah & Kurs Referensi Wise Tanpa Markup**: Pengisian saldo melalui QRIS dan Virtual Account bank nasional (BCA, Mandiri, BRI, BNI). Konversi valuta menggunakan kurs referensi pasar tengah Wise tanpa margin tambahan, dikunci selama 15 menit saat halaman pembayaran dibuka.
+- **Bayar Instan QRIS**: Pembayaran real-time di merchant bertanda QRIS di seluruh Indonesia langsung dari saldo terpadu.
+- **Produk Digital & PPOB 24/7**: Pembelian pulsa, paket data seluruh operator, token listrik PLN, dan voucher game otomatis sepanjang hari.
+
+## Keamanan & Kepatuhan
+
+- **Infrastruktur Berizin**: Diselenggarakan bekerja sama dengan mitra berlisensi resmi PJP Kategori 1 Bank Indonesia.
+- **Verifikasi Identitas (KYC) 1 Dokumen**: Cukup unggah foto e-KTP asli tanpa kewajiban swafoto (selfie) atau liveness test; seluruh pengajuan diverifikasi manual oleh tim kepatuhan.
+- **Buku Besar Append-Only & Privasi Kartu**: Mutasi saldo dicatat secara append-only dalam zona waktu WIB (Asia/Jakarta) dengan proteksi Row Level Security (RLS). Nomor kartu penuh dan CVV tidak disimpan di server aplikasi.
+
+## Halaman Publik Resmi
+
+- [Beranda sakuin.co.id](https://sakuin.co.id): Informasi layanan Virtual Debit Card, QRIS, PPOB, cara kerja, transparansi biaya, keamanan, dan FAQ.
+- [Daftar Akun Gratis](https://sakuin.co.id/signup): Pendaftaran akun baru pengguna Sakuin.
+
+## Kontak Dukungan
+
+- Email: support@sakuin.co.id
+- Pengelola: PT Anugrah Sejahtera Teknologi
+

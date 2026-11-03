@@ -1,13 +1,16 @@
 import { createClient } from '@/shared/infrastructure/supabase/client';
 import { config } from '@/shared/config';
 import { CardDetails } from '../domain/entities/card-details';
-import { CardRepository } from '../domain/repository';
+import { CardRepository, RevealedCardSecrets } from '../domain/repository';
 import { SEED_CARD } from './seed';
-
-let inMemoryCard: CardDetails = { ...SEED_CARD };
 
 export class CardSupabaseRepository implements CardRepository {
   private _client?: ReturnType<typeof createClient>;
+  private instanceFallback: CardDetails;
+
+  constructor(initialCard?: CardDetails) {
+    this.instanceFallback = { ...(initialCard ?? SEED_CARD) };
+  }
 
   private get client() {
     if (!this._client) {
@@ -16,52 +19,105 @@ export class CardSupabaseRepository implements CardRepository {
     return this._client;
   }
 
-  async getCardDetails(): Promise<CardDetails> {
-    if (!config.supabase.isConfigured) {
-      return inMemoryCard;
+  async getCardDetails(userId?: string): Promise<CardDetails> {
+    if (typeof window !== 'undefined') {
+      const res = await fetch('/api/card');
+      if (res.ok) {
+        const payload = (await res.json()) as { card?: CardDetails };
+        if (payload.card) {
+          this.instanceFallback = { ...payload.card };
+          return payload.card;
+        }
+      }
+      return { ...this.instanceFallback };
     }
+
+    if (!config.supabase.isConfigured) {
+      return { ...this.instanceFallback };
+    }
+
     try {
-      const { data: authData } = await this.client.auth.getUser();
-      const userId = authData.user?.id;
-      if (!userId) return inMemoryCard;
+      const resolvedUserId = userId ?? (await this.client.auth.getUser()).data.user?.id;
+      if (!resolvedUserId) return { ...this.instanceFallback };
 
       const { data, error } = await this.client
-        .from('wallets')
-        .select('is_frozen')
-        .eq('user_id', userId)
-        .limit(1);
+        .from('cards')
+        .select(
+          'id, cardholder_name, last4, expiry, issuing_country, is_frozen, monthly_limit_cents, online_transactions, non_3ds_transactions, atm_withdrawals'
+        )
+        .eq('user_id', resolvedUserId)
+        .maybeSingle();
 
-      if (!error && data && data.length > 0) {
+      if (!error && data) {
         return {
-          ...inMemoryCard,
-          isFrozen: data[0].is_frozen ?? inMemoryCard.isFrozen,
+          id: data.id,
+          cardholderName: data.cardholder_name,
+          last4: data.last4,
+          expiry: data.expiry,
+          issuingCountry: data.issuing_country,
+          isFrozen: Boolean(data.is_frozen),
+          monthlyLimit: Math.round(Number(data.monthly_limit_cents) / 100),
+          onlineTransactions: Boolean(data.online_transactions),
+          non3dsTransactions: Boolean(data.non_3ds_transactions),
+          atmWithdrawals: Boolean(data.atm_withdrawals),
         };
       }
-      return inMemoryCard;
+      return { ...this.instanceFallback };
     } catch {
-      return inMemoryCard;
+      return { ...this.instanceFallback };
     }
   }
 
   async toggleFreezeCard(isFrozen: boolean): Promise<boolean> {
-    inMemoryCard = { ...inMemoryCard, isFrozen };
-    if (!config.supabase.isConfigured) {
-      return isFrozen;
-    }
-    try {
-      const { data: authData } = await this.client.auth.getUser();
-      const userId = authData.user?.id;
-      if (userId) {
-        await this.client.from('wallets').update({ is_frozen: isFrozen }).eq('user_id', userId);
-      }
-    } catch {
-      // Continue offline fallback
-    }
-    return isFrozen;
+    const updated = await this.updateCardControls({ isFrozen });
+    return updated.isFrozen;
   }
 
   async updateCardControls(controls: Partial<CardDetails>): Promise<CardDetails> {
-    inMemoryCard = { ...inMemoryCard, ...controls };
-    return inMemoryCard;
+    this.instanceFallback = { ...this.instanceFallback, ...controls };
+
+    if (typeof window !== 'undefined') {
+      const res = await fetch('/api/card', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(controls),
+      });
+      if (res.ok) {
+        const payload = (await res.json()) as { card?: CardDetails };
+        if (payload.card) {
+          this.instanceFallback = { ...payload.card };
+          return payload.card;
+        }
+      }
+    }
+
+    return { ...this.instanceFallback };
+  }
+
+  async revealCardDetails(password: string): Promise<RevealedCardSecrets> {
+    if (!password || password.trim().length < 6) {
+      throw new Error('Kata sandi tidak valid. Periksa kembali kata sandi akun Anda.');
+    }
+
+    if (typeof window !== 'undefined') {
+      const res = await fetch('/api/card/reveal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const payload = (await res.json()) as Partial<RevealedCardSecrets> & { error?: string };
+      if (!res.ok || !payload.cardNumberFormatted || !payload.cvv) {
+        throw new Error(
+          payload.error || 'Kata sandi tidak valid. Periksa kembali kata sandi akun Anda.'
+        );
+      }
+      return {
+        cardNumberFormatted: payload.cardNumberFormatted,
+        cvv: payload.cvv,
+        expiresInSeconds: payload.expiresInSeconds ?? 30,
+      };
+    }
+
+    throw new Error('Pembukaan detail kartu memerlukan sesi server aktif.');
   }
 }

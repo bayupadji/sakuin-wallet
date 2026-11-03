@@ -4,12 +4,13 @@ import { KycSubmission, KycStatus } from '../domain/entities/kyc-submission';
 import { KycRepository, ReviewKycParams, SubmitKycParams } from '../domain/repository';
 import { KycMaxAttemptsExceededError, KycSubmissionError } from '../domain/errors';
 import { maskNik, validateIdCardFile, validateNik } from '../domain/rules/kyc-rules';
-import { SEED_KYC_SUBMISSION, SEED_KYC_QUEUE } from './seed';
+import { SEED_KYC_QUEUE } from './seed';
 
 interface KycRow {
   id: string;
   user_id: string;
   nik_encrypted: string;
+  nik_masked?: string | null;
   id_card_photo_url: string;
   status: KycStatus;
   rejection_reason?: string;
@@ -19,8 +20,8 @@ interface KycRow {
   created_at: string;
 }
 
-let inMemoryKyc: KycSubmission | null = { ...SEED_KYC_SUBMISSION };
-let inMemoryPendingList: KycSubmission[] = [...SEED_KYC_QUEUE];
+const offlineSubmissionsByUser = new Map<string, KycSubmission>();
+let offlineReviewQueue: KycSubmission[] = [...SEED_KYC_QUEUE];
 
 export class KycSupabaseRepository implements KycRepository {
   private _client?: ReturnType<typeof createClient>;
@@ -32,37 +33,54 @@ export class KycSupabaseRepository implements KycRepository {
     return this._client;
   }
 
-  async getLatestSubmission(userId?: string): Promise<KycSubmission | null> {
-    if (!config.supabase.isConfigured) {
-      return inMemoryKyc;
+  private async resolveCurrentUserId(): Promise<string | null> {
+    if (typeof window !== 'undefined') {
+      try {
+        const res = await fetch('/api/auth/session');
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.valid && data?.user?.userId) {
+            return data.user.userId as string;
+          }
+        }
+      } catch {
+        // Fallback to Supabase Auth
+      }
     }
 
-    let targetUserId = userId;
-    if (!targetUserId) {
+    if (config.supabase.isConfigured) {
       const { data: authData } = await this.client.auth.getUser();
-      targetUserId = authData.user?.id;
+      return authData.user?.id ?? null;
     }
 
+    return null;
+  }
+
+  async getLatestSubmission(userId?: string): Promise<KycSubmission | null> {
+    const targetUserId = userId || (await this.resolveCurrentUserId());
     if (!targetUserId) {
-      return inMemoryKyc;
+      return null;
+    }
+
+    if (!config.supabase.isConfigured) {
+      return offlineSubmissionsByUser.get(targetUserId) ?? null;
     }
 
     const { data, error } = await this.client
       .from('kyc_submissions')
-      .select('*')
+      .select('id, user_id, nik_encrypted, nik_masked, id_card_photo_url, status, rejection_reason, reviewed_by, reviewed_at, attempt_count, created_at')
       .eq('user_id', targetUserId)
       .order('created_at', { ascending: false })
       .limit(1);
 
     if (error || !data || data.length === 0) {
-      return inMemoryKyc;
+      return null;
     }
 
     return this.mapRowToEntity(data[0] as KycRow);
   }
 
   async submitKyc({ nik, photoFile }: SubmitKycParams): Promise<KycSubmission> {
-    // 1. Client-side rules check
     const nikValidation = validateNik(nik);
     if (!nikValidation.valid) {
       throw new KycSubmissionError(nikValidation.error);
@@ -76,132 +94,115 @@ export class KycSupabaseRepository implements KycRepository {
       throw new KycSubmissionError(fileValidation.error);
     }
 
-    // 2. Auth check
-    let userId = 'user-01';
-    if (config.supabase.isConfigured) {
-      const { data: authData } = await this.client.auth.getUser();
-      if (!authData.user) {
-        throw new KycSubmissionError('User must be signed in to submit KYC.');
-      }
-      userId = authData.user.id;
+    const userId = await this.resolveCurrentUserId();
+    if (!userId) {
+      throw new KycSubmissionError('Sesi berakhir. Silakan masuk terlebih dahulu untuk mengunggah KTP.');
     }
 
-    // 3. Attempt check
     const latest = await this.getLatestSubmission(userId);
     const nextAttempt = latest ? latest.attemptCount + 1 : 1;
     if (nextAttempt > 3) {
       throw new KycMaxAttemptsExceededError();
     }
 
+    let photoPath = `private/${userId}/${Date.now()}.jpg`;
+    if (config.supabase.isConfigured) {
+      const ext = photoFile.name.split('.').pop() || 'jpg';
+      photoPath = `${userId}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await this.client.storage
+        .from('kyc-documents')
+        .upload(photoPath, photoFile, {
+          upsert: false,
+        });
+
+      if (uploadError) {
+        throw new KycSubmissionError(`Gagal mengunggah foto KTP: ${uploadError.message}`);
+      }
+    }
+
+    const response = await fetch('/api/kyc/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nik, photoPath }),
+    });
+
+    const payload = await response.json();
+    if (!response.ok) {
+      if (response.status === 422) {
+        throw new KycMaxAttemptsExceededError();
+      }
+      throw new KycSubmissionError(payload?.error || 'Gagal menyimpan pengajuan KYC.');
+    }
+
+    const submission: KycSubmission = {
+      ...payload.submission,
+      attemptCount: payload.submission.attemptCount ?? nextAttempt,
+    };
+
     if (!config.supabase.isConfigured) {
-      const newSubmission: KycSubmission = {
-        id: `kyc-${Date.now()}`,
-        userId,
-        nikMasked: maskNik(nik),
-        idCardPhotoUrl: '/demo/ktp-sample.jpg',
-        status: 'in_review',
-        attemptCount: nextAttempt,
-        createdAt: new Date().toISOString(),
-      };
-      inMemoryKyc = newSubmission;
-      inMemoryPendingList = [newSubmission, ...inMemoryPendingList];
-      return newSubmission;
+      offlineSubmissionsByUser.set(userId, submission);
+      offlineReviewQueue = [submission, ...offlineReviewQueue];
     }
 
-    // 4. Upload photo to private storage bucket 'kyc-documents'
-    const ext = photoFile.name.split('.').pop() || 'jpg';
-    const filePath = `${userId}/${Date.now()}.${ext}`;
-
-    const { error: uploadError } = await this.client.storage
-      .from('kyc-documents')
-      .upload(filePath, photoFile, {
-        upsert: false,
-      });
-
-    if (uploadError) {
-      throw new KycSubmissionError(`Gagal mengunggah foto KTP: ${uploadError.message}`);
-    }
-
-    // 5. Insert record (Store masked NIK on client side; full encryption handled server-side)
-    const { data, error } = await this.client
-      .from('kyc_submissions')
-      .insert({
-        user_id: userId,
-        nik_encrypted: maskNik(nik),
-        id_card_photo_url: filePath,
-        status: 'in_review',
-        attempt_count: nextAttempt,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      throw new KycSubmissionError(error.message);
-    }
-
-    return this.mapRowToEntity(data as KycRow);
+    return submission;
   }
 
   async getPendingSubmissions(): Promise<KycSubmission[]> {
     if (!config.supabase.isConfigured) {
-      return inMemoryPendingList.filter((s) => s.status === 'in_review');
+      return offlineReviewQueue.filter((s) => s.status === 'in_review');
     }
 
     const { data, error } = await this.client
       .from('kyc_submissions')
-      .select('*')
+      .select('id, user_id, nik_encrypted, nik_masked, id_card_photo_url, status, rejection_reason, reviewed_by, reviewed_at, attempt_count, created_at')
       .eq('status', 'in_review')
       .order('created_at', { ascending: true });
 
     if (error || !data) {
-      return inMemoryPendingList.filter((s) => s.status === 'in_review');
+      return [];
     }
 
     return data.map((row) => this.mapRowToEntity(row as KycRow));
   }
 
   async reviewSubmission({ submissionId, decision, reason }: ReviewKycParams): Promise<void> {
-    if (!config.supabase.isConfigured) {
-      inMemoryPendingList = inMemoryPendingList.map((item) =>
-        item.id === submissionId
-          ? {
-              ...item,
-              status: decision,
-              rejectionReason: reason || undefined,
-              reviewedAt: new Date().toISOString(),
-            }
-          : item
-      );
-      if (inMemoryKyc && inMemoryKyc.id === submissionId) {
-        inMemoryKyc.status = decision;
-        inMemoryKyc.rejectionReason = reason || undefined;
-      }
-      return;
+    const response = await fetch('/api/kyc/review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ submissionId, decision, reason }),
+    });
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}));
+      throw new Error(payload?.error || 'Gagal menyimpan keputusan peninjauan KYC.');
     }
 
-    const { data: authData } = await this.client.auth.getUser();
-    const reviewerId = authData.user?.id;
-
-    const { error } = await this.client
-      .from('kyc_submissions')
-      .update({
-        status: decision,
-        rejection_reason: reason || null,
-        reviewed_by: reviewerId,
-        reviewed_at: new Date().toISOString(),
-      })
-      .eq('id', submissionId);
-
-    if (error) {
-      throw new Error(error.message);
+    if (!config.supabase.isConfigured) {
+      const reviewedAt = new Date().toISOString();
+      offlineReviewQueue = offlineReviewQueue.map((item) => {
+        if (item.id !== submissionId) return item;
+        const updated: KycSubmission = {
+          ...item,
+          status: decision,
+          rejectionReason: reason || undefined,
+          reviewedAt,
+        };
+        offlineSubmissionsByUser.set(item.userId, updated);
+        return updated;
+      });
     }
   }
 
   private mapRowToEntity(row: KycRow): KycSubmission {
+    const safeMasked =
+      row.nik_masked ||
+      (row.nik_encrypted.startsWith('v1:') ? '****************' : maskNik(row.nik_encrypted));
+
     return {
       id: row.id,
       userId: row.user_id,
-      nikMasked: maskNik(row.nik_encrypted),
+      nikMasked: safeMasked,
       idCardPhotoUrl: row.id_card_photo_url,
       status: row.status,
       rejectionReason: row.rejection_reason,

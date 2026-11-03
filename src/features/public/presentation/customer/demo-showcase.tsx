@@ -12,7 +12,6 @@ const { demo, a11y } = landingContent;
 export function DemoShowcase() {
   const [playing, setPlaying] = useState(false);
   const [step, setStep] = useState(0);
-  const current = demo.steps[step];
 
   return (
     <section id="demo" aria-label={a11y.demoSection} className="scroll-mt-4">
@@ -54,36 +53,55 @@ export function DemoShowcase() {
             {demo.heading}
           </h2>
 
-          {playing ? (
-            <div className="flex w-full max-w-[760px] flex-col gap-4">
-              <div className="grid grid-cols-3 gap-2.5">
-                {demo.steps.map((item, index) => (
-                  <Button
-                    key={item.short}
-                    type="button"
-                    variant={step === index ? 'primary' : 'outline'}
-                    size="md"
-                    aria-pressed={step === index}
-                    onClick={() => setStep(index)}
-                    className={cn(
-                      'min-h-[44px] rounded-[10px] text-[15px] font-bold',
-                      step === index
-                        ? 'shadow-md shadow-[#1D9BF0]/20'
-                        : 'border-white/12 bg-transparent text-lp-muted hover:text-white hover:bg-white/5',
-                    )}
-                  >
-                    {item.short}
-                  </Button>
-                ))}
-              </div>
-              <div role="status" className="flex flex-col gap-2 rounded-[14px] border border-white/8 bg-white/4 px-[22px] py-5">
-                <span className="text-lg font-bold">{current.title}</span>
-                <span className="text-base leading-relaxed text-lp-muted">{current.text}</span>
-              </div>
+          <p
+            hidden={playing}
+            className={cn('max-w-[560px] text-center text-base text-lp-muted', playing && 'hidden')}
+          >
+            {demo.idleText}
+          </p>
+
+          <div
+            hidden={!playing}
+            className={cn('w-full max-w-[760px] flex-col gap-4', playing ? 'flex' : 'hidden')}
+          >
+            <div className="grid grid-cols-3 gap-2.5">
+              {demo.steps.map((item, index) => (
+                <Button
+                  key={item.short}
+                  type="button"
+                  variant={step === index ? 'primary' : 'outline'}
+                  size="md"
+                  aria-pressed={step === index}
+                  onClick={() => setStep(index)}
+                  className={cn(
+                    'min-h-[44px] rounded-[10px] text-[15px] font-bold',
+                    step === index
+                      ? 'shadow-md shadow-[#1D9BF0]/20'
+                      : 'border-white/12 bg-transparent text-lp-muted hover:text-white hover:bg-white/5',
+                  )}
+                >
+                  {item.short}
+                </Button>
+              ))}
             </div>
-          ) : (
-            <p className="max-w-[560px] text-center text-base text-lp-muted">{demo.idleText}</p>
-          )}
+            {demo.steps.map((item, index) => {
+              const isCurrent = step === index;
+              return (
+                <div
+                  key={item.short}
+                  role={isCurrent && playing ? 'status' : undefined}
+                  hidden={!isCurrent}
+                  className={cn(
+                    'flex-col gap-2 rounded-[14px] border border-white/8 bg-white/4 px-[22px] py-5',
+                    isCurrent ? 'flex' : 'hidden',
+                  )}
+                >
+                  <h3 className="text-lg font-bold">{item.title}</h3>
+                  <p className="text-base leading-relaxed text-lp-muted">{item.text}</p>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </LandingContainer>
     </section>

@@ -1,17 +1,67 @@
 import { createClient } from '@/shared/infrastructure/supabase/client';
 import { config } from '@/shared/config';
-import { TransactionItem } from '../domain/entities/transaction';
-import {
-  TransactionRepository,
-  TransactionFilter,
-  CreateTransactionParams,
-} from '../domain/repository';
-import { SEED_TRANSACTIONS } from './seed';
+import { formatWibTimestamp } from '@/shared/infrastructure/ledger/server-ledger';
+import { TransactionItem, TransactionStatus, TransactionType } from '../domain/entities/transaction';
+import { TransactionRepository, TransactionFilter } from '../domain/repository';
 
-let inMemoryTransactions = [...SEED_TRANSACTIONS];
+interface TransactionRow {
+  id: string;
+  user_id: string;
+  title: string;
+  merchant: string;
+  type: TransactionType;
+  category: string;
+  status: TransactionStatus;
+  amount_usd_cents: number | string | bigint;
+  amount_idr: number | string;
+  fx_rate: number | string;
+  fee_idr: number | string;
+  channel: string;
+  reference_id: string;
+  idempotency_key: string;
+  ledger_sequence: string;
+  created_at: string;
+}
+
+function applyClientFilter(items: TransactionItem[], filter?: TransactionFilter): TransactionItem[] {
+  const now = new Date();
+  const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+
+  let result = items.filter((tx) => {
+    const normalizedIso = tx.timestampUtc.replace(' UTC', 'Z').replace(' ', 'T');
+    const txDate = new Date(normalizedIso);
+    return !Number.isNaN(txDate.getTime()) ? txDate >= oneYearAgo : true;
+  });
+
+  if (filter?.type && filter.type !== 'all') {
+    result = result.filter((tx) => tx.type === filter.type);
+  }
+
+  if (filter?.month && filter.month !== 'all') {
+    result = result.filter((tx) => tx.timestampUtc.startsWith(filter.month!));
+  }
+
+  if (filter?.search && filter.search.trim() !== '') {
+    const q = filter.search.toLowerCase();
+    result = result.filter(
+      (tx) =>
+        tx.title.toLowerCase().includes(q) ||
+        tx.merchant.toLowerCase().includes(q) ||
+        tx.referenceId.toLowerCase().includes(q) ||
+        tx.channel.toLowerCase().includes(q)
+    );
+  }
+
+  return result;
+}
 
 export class TransactionSupabaseRepository implements TransactionRepository {
   private _client?: ReturnType<typeof createClient>;
+  private readonly scopedFallback?: TransactionItem[];
+
+  constructor(scopedFallback?: TransactionItem[]) {
+    this.scopedFallback = scopedFallback ? [...scopedFallback] : undefined;
+  }
 
   private get client() {
     if (!this._client) {
@@ -21,92 +71,81 @@ export class TransactionSupabaseRepository implements TransactionRepository {
   }
 
   async getTransactions(filter?: TransactionFilter): Promise<TransactionItem[]> {
-    if (!config.supabase.isConfigured) {
-      return this.filterInMemory(filter);
+    // 1. In unit tests injected with an isolated per-user fixture, filter that isolated list only
+    if (this.scopedFallback) {
+      return applyClientFilter(this.scopedFallback, filter);
     }
-    try {
-      const { data, error } = await this.client
-        .from('audit_logs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
 
-      if (error || !data || data.length === 0) {
-        return this.filterInMemory(filter);
+    // 2. In browser runtime, fetch strictly authenticated user-scoped transactions via server API
+    if (typeof window !== 'undefined') {
+      const res = await fetch('/api/transactions');
+      if (!res.ok) {
+        if (res.status === 401) return [];
+        throw new Error('Gagal memuat riwayat transaksi.');
       }
-      return this.filterInMemory(filter);
-    } catch {
-      return this.filterInMemory(filter);
-    }
-  }
-
-  async createTransaction(params: CreateTransactionParams): Promise<TransactionItem> {
-    const newTx: TransactionItem = {
-      id: `tx-${Date.now()}`,
-      title: params.title,
-      merchant: params.merchant,
-      type: params.type,
-      category: params.category,
-      status: params.status,
-      amountUsdCents: params.amountUsdCents,
-      amountIdr: params.amountIdr,
-      fxRate: params.fxRate,
-      feeIdr: params.feeIdr,
-      channel: params.channel,
-      referenceId: params.referenceId,
-      idempotencyKey: params.idempotencyKey,
-      ledgerSequence: `LDG-2026-${String(inMemoryTransactions.length + 1).padStart(5, '0')}`,
-      timestampUtc: new Date().toISOString(),
-      timestampWib: 'Baru saja',
-    };
-
-    inMemoryTransactions = [newTx, ...inMemoryTransactions];
-
-    if (config.supabase.isConfigured) {
-      try {
-        await this.client.from('audit_logs').insert({
-          action: `TRANSACTION_${params.type.toUpperCase()}`,
-          entity: 'transaction',
-          entity_id: newTx.id,
-          after_state: { amountUsdCents: Number(params.amountUsdCents), channel: params.channel },
-        });
-      } catch {
-        // Offline fallback continues
-      }
-    }
-
-    return newTx;
-  }
-
-  private filterInMemory(filter?: TransactionFilter): TransactionItem[] {
-    let result = inMemoryTransactions;
-
-    // Batasi transaksi maksimal 1 tahun ke belakang (12 bulan dari awal bulan tahun lalu)
-    const now = new Date();
-    const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1);
-
-    result = result.filter((tx) => {
-      const normalizedIso = tx.timestampUtc.replace(' UTC', 'Z').replace(' ', 'T');
-      const txDate = new Date(normalizedIso);
-      return !isNaN(txDate.getTime()) ? txDate >= oneYearAgo : true;
-    });
-
-    if (filter?.type && filter.type !== 'all') {
-      result = result.filter((tx) => tx.type === filter.type);
-    }
-    if (filter?.search && filter.search.trim() !== '') {
-      const q = filter.search.toLowerCase();
-      result = result.filter(
-        (tx) =>
-          tx.title.toLowerCase().includes(q) ||
-          tx.merchant.toLowerCase().includes(q) ||
-          tx.referenceId.toLowerCase().includes(q) ||
-          tx.category.toLowerCase().includes(q)
+      const payload = await res.json();
+      const mapped: TransactionItem[] = (payload?.transactions || []).map(
+        (raw: Record<string, unknown>) => ({
+          id: String(raw.id),
+          title: String(raw.title),
+          merchant: String(raw.merchant ?? ''),
+          type: raw.type as TransactionType,
+          category: String(raw.category ?? ''),
+          status: raw.status as TransactionStatus,
+          amountUsdCents: BigInt(String(raw.amountUsdCents ?? '0')),
+          amountIdr: Number(raw.amountIdr ?? 0),
+          fxRate: Number(raw.fxRate ?? 0),
+          feeIdr: Number(raw.feeIdr ?? 0),
+          channel: String(raw.channel ?? ''),
+          referenceId: String(raw.referenceId ?? ''),
+          idempotencyKey: String(raw.idempotencyKey ?? ''),
+          ledgerSequence: String(raw.ledgerSequence ?? 'LDG-PENDING'),
+          timestampUtc: String(raw.timestampUtc ?? ''),
+          timestampWib: String(raw.timestampWib ?? ''),
+        })
       );
+      return applyClientFilter(mapped, filter);
     }
-    if (filter?.month && filter.month !== 'all') {
-      result = result.filter((tx) => tx.timestampUtc.startsWith(filter.month!));
+
+    // 3. Direct Supabase query when running server-side with explicit userId
+    if (!config.supabase.isConfigured || !filter?.userId) {
+      return [];
     }
-    return result;
+
+    const now = new Date();
+    const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1).toISOString();
+
+    const { data, error } = await this.client
+      .from('transactions')
+      .select('*')
+      .eq('user_id', filter.userId)
+      .gte('created_at', oneYearAgo)
+      .order('created_at', { ascending: false })
+      .limit(200);
+
+    if (error || !data) {
+      return [];
+    }
+
+    const mapped: TransactionItem[] = (data as TransactionRow[]).map((row) => ({
+      id: row.id,
+      title: row.title,
+      merchant: row.merchant,
+      type: row.type,
+      category: row.category,
+      status: row.status,
+      amountUsdCents: BigInt(row.amount_usd_cents),
+      amountIdr: Number(row.amount_idr),
+      fxRate: Number(row.fx_rate),
+      feeIdr: Number(row.fee_idr),
+      channel: row.channel,
+      referenceId: row.reference_id,
+      idempotencyKey: row.idempotency_key,
+      ledgerSequence: row.ledger_sequence,
+      timestampUtc: row.created_at,
+      timestampWib: formatWibTimestamp(row.created_at),
+    }));
+
+    return applyClientFilter(mapped, filter);
   }
 }

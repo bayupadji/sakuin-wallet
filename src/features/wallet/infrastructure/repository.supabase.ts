@@ -24,6 +24,26 @@ export class WalletSupabaseRepository implements WalletRepository {
   }
 
   async getWallet(userId?: string): Promise<Wallet | null> {
+    if (!userId && typeof window !== 'undefined') {
+      try {
+        const res = await fetch('/api/wallet');
+        if (res.ok) {
+          const payload = await res.json();
+          if (payload?.wallet) {
+            return {
+              id: payload.wallet.id,
+              userId: payload.wallet.userId,
+              balance: Money.fromCents(BigInt(payload.wallet.balanceCents), 'USD'),
+              isFrozen: Boolean(payload.wallet.isFrozen),
+              updatedAt: payload.wallet.updatedAt,
+            };
+          }
+        }
+      } catch {
+        // Fallback to direct Supabase query if configured
+      }
+    }
+
     if (!config.supabase.isConfigured) {
       return null;
     }

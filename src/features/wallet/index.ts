@@ -14,6 +14,7 @@ export * from './presentation/customer/landing-converter';
 export * from './presentation/customer/promo-banner-carousel';
 export * from './presentation/customer/promo-detail-modal';
 export * from './domain/entities/promo-banner';
+export * from './infrastructure/promo-banner-seed';
 export * from './application/stores/use-promo-banner-store';
 export * from './application/services/image-compressor';
 export * from './presentation/admin/promo-banner-cms';

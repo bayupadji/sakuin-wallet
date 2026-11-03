@@ -8,10 +8,11 @@ import { Eyebrow, LandingContainer, SectionTitle } from './landing-ui';
 
 const { pathFinder, a11y } = landingContent;
 
+const PATH_KINDS = ['card', 'qris', 'ppob'] as const;
+
 export function PathFinder() {
   const [serviceId, setServiceId] = useState<string>(pathFinder.defaultService);
   const service = pathFinder.services.find((item) => item.id === serviceId) ?? pathFinder.services[0];
-  const path = pathFinder.paths[service.kind];
   const brand = 'brand' in service && typeof service.brand === 'string' ? service.brand : '';
   const fill = (text: string) => text.replaceAll('{brand}', brand);
 
@@ -50,33 +51,48 @@ export function PathFinder() {
             })}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch" aria-live="polite">
-            <div className="lg:col-span-5 flex flex-col gap-3 rounded-2xl border border-white/8 bg-white/4 p-6 sm:p-7">
-              <span className="self-start rounded-full bg-lp-cyan/14 px-3 py-1.5 text-[13px] font-bold text-lp-sky-soft">
-                {path.badge}
-              </span>
-              <h3 className="text-2xl font-extrabold">{fill(path.title)}</h3>
-              <p className="text-base leading-relaxed text-lp-muted">{path.desc}</p>
-            </div>
-            <ol className="lg:col-span-7 flex list-none flex-col gap-3 p-0">
-              {path.steps.map((text, index) => (
-                <li
-                  key={text}
-                  className="flex items-start gap-4 rounded-[14px] border border-white/8 bg-white/4 px-5 py-[18px]"
+          <div aria-live="polite">
+            {PATH_KINDS.map((kind) => {
+              const path = pathFinder.paths[kind];
+              const isActive = service.kind === kind;
+              return (
+                <div
+                  key={kind}
+                  hidden={!isActive}
+                  className={cn(
+                    'grid-cols-1 lg:grid-cols-12 gap-6 items-stretch',
+                    isActive ? 'grid' : 'hidden',
+                  )}
                 >
-                  <span
-                    aria-hidden="true"
-                    className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-lp-accent text-[15px] font-extrabold text-lp-bg"
-                  >
-                    {index + 1}
-                  </span>
-                  <span className="pt-1 text-base leading-[1.55] text-lp-strong">
-                    <span className="sr-only">{`Langkah ${index + 1}: `}</span>
-                    {fill(text)}
-                  </span>
-                </li>
-              ))}
-            </ol>
+                  <div className="lg:col-span-5 flex flex-col gap-3 rounded-2xl border border-white/8 bg-white/4 p-6 sm:p-7">
+                    <span className="self-start rounded-full bg-lp-cyan/14 px-3 py-1.5 text-[13px] font-bold text-lp-sky-soft">
+                      {path.badge}
+                    </span>
+                    <h3 className="text-2xl font-extrabold">{fill(path.title)}</h3>
+                    <p className="text-base leading-relaxed text-lp-muted">{path.desc}</p>
+                  </div>
+                  <ol className="lg:col-span-7 flex list-none flex-col gap-3 p-0">
+                    {path.steps.map((text, index) => (
+                      <li
+                        key={text}
+                        className="flex items-start gap-4 rounded-[14px] border border-white/8 bg-white/4 px-5 py-[18px]"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-lp-accent text-[15px] font-extrabold text-lp-bg"
+                        >
+                          {index + 1}
+                        </span>
+                        <span className="pt-1 text-base leading-[1.55] text-lp-strong">
+                          <span className="sr-only">{`Langkah ${index + 1}: `}</span>
+                          {fill(text)}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              );
+            })}
           </div>
         </div>
       </LandingContainer>

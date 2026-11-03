@@ -24,9 +24,9 @@ export interface FooterLink {
 
 export const landingContent = {
   meta: {
-    title: 'sakuin.co.id — Satu Saldo Terpadu untuk Transaksi Global & Kebutuhan Harian',
+    title: 'Virtual Debit Card & Saldo Terpadu Indonesia | sakuin.co.id',
     description:
-      'Platform fintech terpadu untuk menerbitkan Virtual Debit Card (belanja online global & langganan SaaS tanpa kartu kredit bank), bayar instan QRIS, dan produk digital PPOB 24/7.',
+      'Platform Satu Saldo Terpadu untuk menerbitkan Virtual Debit Card berproteksi 3D Secure, konversi kurs Wise tanpa markup, bayar instan QRIS, dan PPOB 24/7.',
   },
 
   a11y: {
@@ -54,9 +54,9 @@ export const landingContent = {
     services: {
       label: 'Layanan',
       links: [
-        { label: 'Virtual Debit Card', href: '#produk' },
-        { label: 'Bayar Instan QRIS', href: '#produk' },
-        { label: 'Produk Digital & PPOB', href: '#produk' },
+        { label: 'Virtual Debit Card', href: '#produk-kartu' },
+        { label: 'Bayar Instan QRIS', href: '#produk-qris' },
+        { label: 'Produk Digital & PPOB', href: '#produk-ppob' },
       ] satisfies NavLink[],
     },
     links: [
@@ -248,6 +248,7 @@ export const landingContent = {
     body: 'Sakuin menyatukan kemudahan pembayaran global dan kebutuhan transaksi lokal ke dalam satu dompet digital yang aman, transparan, dan patuh regulasi.',
     core: [
       {
+        id: 'produk-kartu',
         icon: 'card',
         title: 'Virtual Debit Card Global',
         body: 'Bayar langganan SaaS, AI tools, cloud server, dan belanja online internasional tanpa kartu kredit fisik.',
@@ -259,6 +260,7 @@ export const landingContent = {
         ],
       },
       {
+        id: 'produk-qris',
         icon: 'qr',
         title: 'Bayar Instan QRIS Nasional',
         body: 'Pindai dan bayar QRIS secara real-time di seluruh merchant bertanda QRIS di Indonesia dari saldo yang sama.',
@@ -269,6 +271,7 @@ export const landingContent = {
         ],
       },
       {
+        id: 'produk-ppob',
         icon: 'bolt',
         title: 'Produk Digital & PPOB 24/7',
         body: 'Pulsa, paket data semua operator, token listrik PLN, hingga voucher game favorit non-stop 24 jam.',
@@ -322,9 +325,9 @@ export const landingContent = {
       feeRate: 0.01,
       minFee: 3000,
       paidLabel: 'Total Dana yang Ditransfer',
-      feeLabel: 'Biaya Pemrosesan Transaksi',
+      feeLabel: 'Estimasi Biaya Pemrosesan (Simulasi)',
       resultLabel: 'Saldo Terpadu yang Diterima',
-      note: 'Dana masuk langsung ke saldo dompetmu. Kurs acuan pasar real-time tanpa penambahan markup tersembunyi.',
+      note: 'Angka biaya di atas merupakan ilustrasi simulasi. Rincian biaya aktual dan kurs referensi Wise tanpa markup selalu ditampilkan sebelum konfirmasi pembayaran.',
     },
   },
 
@@ -431,9 +434,9 @@ export const landingContent = {
     services: {
       title: 'Layanan',
       links: [
-        { label: 'Virtual Debit Card', href: '#produk' },
-        { label: 'Bayar Instan QRIS', href: '#produk' },
-        { label: 'Produk Digital & PPOB', href: '#produk' },
+        { label: 'Virtual Debit Card', href: '#produk-kartu' },
+        { label: 'Bayar Instan QRIS', href: '#produk-qris' },
+        { label: 'Produk Digital & PPOB', href: '#produk-ppob' },
         { label: 'Top-up Saldo', href: '#cara-kerja' },
         { label: 'Simulasi Biaya & Kurs', href: '#biaya' },
       ] satisfies FooterLink[],
@@ -445,7 +448,7 @@ export const landingContent = {
         { label: 'Syarat dan Ketentuan' },
         { label: 'Biaya & Limit', href: '#biaya' },
         { label: 'FAQ', href: '#faq' },
-        { label: 'Hubungi Kami' },
+        { label: 'Hubungi Kami', href: 'mailto:support@sakuin.co.id' },
       ] satisfies FooterLink[],
     },
     soon: 'Segera',

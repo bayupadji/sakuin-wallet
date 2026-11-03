@@ -32,7 +32,9 @@ CREATE POLICY "Users can read own profile"
 
 CREATE POLICY "Users can update own profile"
   ON public.profiles FOR UPDATE
-  USING (auth.uid() = id);
+  TO authenticated
+  USING ((select auth.uid()) = id)
+  WITH CHECK ((select auth.uid()) = id AND role = 'customer');
 
 CREATE POLICY "Admins can read all profiles"
   ON public.profiles FOR SELECT

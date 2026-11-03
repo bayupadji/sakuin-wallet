@@ -2,10 +2,11 @@ import type { Metadata } from 'next';
 import { LandingPage, landingContent } from '@/features/public';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://sakuin.co.id'),
-  title: 'sakuin.co.id — Satu Saldo Terpadu untuk Virtual Debit Card & Kebutuhan Harian',
+  title: {
+    absolute: 'Virtual Debit Card & Saldo Terpadu Indonesia | sakuin.co.id',
+  },
   description:
-    'Platform fintech terpadu untuk menerbitkan Virtual Debit Card (belanja online global & langganan SaaS tanpa kartu kredit bank), bayar instan QRIS, dan produk digital PPOB 24/7.',
+    'Platform Satu Saldo Terpadu untuk menerbitkan Virtual Debit Card berproteksi 3D Secure, konversi kurs Wise tanpa markup, bayar instan QRIS, dan PPOB 24/7.',
   keywords: [
     'virtual debit card indonesia',
     'kartu debit virtual',
@@ -14,15 +15,15 @@ export const metadata: Metadata = {
     'qris instan',
     'ppob 24 jam',
     'sakuin',
-    'sakuin wallet',
+    'sakuin.co.id',
   ],
   alternates: {
-    canonical: 'https://sakuin.co.id',
+    canonical: '/',
   },
   openGraph: {
-    title: 'sakuin.co.id — Satu Saldo Terpadu untuk Transaksi Global & Kebutuhan Harian',
+    title: 'Virtual Debit Card & Satu Saldo Terpadu | sakuin.co.id',
     description:
-      'Akses instan ke Virtual Debit Card untuk belanja internasional, pembayaran QRIS, serta pulsa dan token PLN dari satu saldo rupiah.',
+      'Akses instan ke Virtual Debit Card untuk belanja internasional, pembayaran QRIS nasional, serta pulsa dan token PLN 24/7 dari satu saldo terpadu.',
     url: 'https://sakuin.co.id',
     siteName: 'sakuin.co.id',
     locale: 'id_ID',
@@ -30,9 +31,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'sakuin.co.id — Satu Saldo Terpadu Transaksi Global',
+    title: 'Virtual Debit Card & Satu Saldo Terpadu | sakuin.co.id',
     description:
-      'Virtual Debit Card untuk langganan tools global dan belanja online tanpa kartu kredit, plus bayar QRIS & PPOB.',
+      'Virtual Debit Card berproteksi 3D Secure untuk langganan tools global dan belanja online tanpa kartu kredit bank, plus QRIS & PPOB 24/7.',
   },
   robots: {
     index: true,
@@ -45,12 +46,34 @@ export default function Home() {
     '@context': 'https://schema.org',
     '@graph': [
       {
+        '@type': 'WebSite',
+        '@id': 'https://sakuin.co.id/#website',
+        name: 'Sakuin',
+        alternateName: 'sakuin.co.id',
+        url: 'https://sakuin.co.id',
+        inLanguage: 'id-ID',
+        publisher: {
+          '@id': 'https://sakuin.co.id/#organization',
+        },
+      },
+      {
         '@type': 'Organization',
         '@id': 'https://sakuin.co.id/#organization',
         name: 'PT Anugrah Sejahtera Teknologi',
         alternateName: 'Sakuin',
         url: 'https://sakuin.co.id',
-        logo: 'https://sakuin.co.id/logo.png',
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://sakuin.co.id/icon',
+          width: 512,
+          height: 512,
+        },
+        contactPoint: {
+          '@type': 'ContactPoint',
+          email: 'support@sakuin.co.id',
+          contactType: 'customer support',
+          availableLanguage: ['Indonesian'],
+        },
         description:
           'Penyedia platform Satu Saldo Terpadu untuk Virtual Debit Card global, QRIS, dan produk digital PPOB di Indonesia.',
       },

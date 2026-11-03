@@ -1,4 +1,5 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/shared/presentation/ui/button';
 import {
@@ -11,6 +12,10 @@ import {
   ShieldAlert,
   Users,
 } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Ringkasan Konsol',
+};
 
 export default function AdminDashboardPage() {
   const complianceStats = [

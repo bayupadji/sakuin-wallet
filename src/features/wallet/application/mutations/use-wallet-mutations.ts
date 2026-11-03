@@ -1,78 +1,77 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { walletKeys } from '../queries/keys';
-import { transactionKeys } from '@/features/transactions/application/queries/keys';
-import { transactionRepository } from '@/features/transactions';
-import { Wallet } from '../../domain/entities/wallet';
+import { transactionKeys } from '@/features/transactions';
 import { Money } from '@/shared/domain/money';
 
 export interface TopUpParams {
-  amountUsd: number;
+  amountUsd: number | string;
+  method: 'va' | 'qris';
   channel: string;
+  idempotencyKey: string;
   fxRate?: number;
 }
 
+export interface PendingTopUpOrder {
+  id: string;
+  status: 'pending' | 'success' | 'failed' | 'expired' | 'refunded';
+  amountUsdCents: bigint;
+  amountIdr: number;
+  feeIdr: number;
+  fxRate: number;
+  channel: string;
+  referenceId: string;
+  idempotencyKey: string;
+  expiresAt?: string;
+}
+
+/**
+ * Issues a server-side PENDING top-up order with a required idempotency key.
+ * Wallet balance is NEVER credited by the browser; balance updates occur only
+ * after a verified payment gateway webhook settles the order server-side (AGENTS.md Rule 2 & 5).
+ */
 export function useTopUpMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: TopUpParams) => {
-      const amountUsdCents = BigInt(Math.round(params.amountUsd * 100));
-      const fxRate = params.fxRate && params.fxRate > 0 ? params.fxRate : 16250;
-      const amountIdr = Math.round(params.amountUsd * fxRate);
+    mutationFn: async (params: TopUpParams): Promise<PendingTopUpOrder> => {
+      const money = Money.fromDecimal(params.amountUsd, 'USD');
+      if (!money.isPositive()) {
+        throw new Error('Nominal isi saldo harus lebih besar dari $0.00.');
+      }
+      if (!params.idempotencyKey || !params.idempotencyKey.trim()) {
+        throw new Error('Idempotency key wajib disertakan.');
+      }
 
-      const createdTx = await transactionRepository.createTransaction({
-        title: `Top Up via ${params.channel}`,
-        merchant: 'PT Bank Central Asia Tbk',
-        type: 'topup',
-        category: 'Deposit Saldo',
-        status: 'success',
-        amountUsdCents,
-        amountIdr,
-        fxRate,
-        feeIdr: 0,
-        channel: params.channel,
-        referenceId: `REF-TOPUP-${Date.now()}`,
-        idempotencyKey: `idemp_topup_${Date.now()}`,
+      const res = await fetch('/api/top-up', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amountUsdCents: money.amount.toString(),
+          method: params.method,
+          channel: params.channel,
+          idempotencyKey: params.idempotencyKey,
+          fxRate: params.fxRate,
+        }),
       });
 
+      const payload = await res.json();
+      if (!res.ok || !payload?.order) {
+        throw new Error(payload?.error || 'Gagal menerbitkan tagihan isi saldo.');
+      }
+
+      const order = payload.order;
       return {
-        amountUsd: params.amountUsd,
-        channel: params.channel,
-        transaction: createdTx,
+        id: order.id,
+        status: order.status,
+        amountUsdCents: BigInt(order.amountUsdCents),
+        amountIdr: Number(order.amountIdr),
+        feeIdr: Number(order.feeIdr),
+        fxRate: Number(order.fxRate),
+        channel: order.channel,
+        referenceId: order.referenceId,
+        idempotencyKey: order.idempotencyKey,
+        expiresAt: order.expiresAt,
       };
-    },
-    onMutate: async (newTopUp) => {
-      await queryClient.cancelQueries({ queryKey: walletKeys.all });
-
-      const previousWallet = queryClient.getQueryData<Wallet | null>(walletKeys.current());
-      const addedCents = BigInt(Math.round(newTopUp.amountUsd * 100));
-
-      if (previousWallet) {
-        const updatedBalance = Money.fromCents(
-          previousWallet.balance.amount + addedCents,
-          'USD'
-        );
-        queryClient.setQueryData<Wallet>(walletKeys.current(), {
-          ...previousWallet,
-          balance: updatedBalance,
-        });
-      } else {
-        const initialCents = 125000n; // Default base balance ($1,250.00)
-        queryClient.setQueryData<Wallet>(walletKeys.current(), {
-          id: 'wallet_user_01',
-          userId: 'user_01',
-          balance: Money.fromCents(initialCents + addedCents, 'USD'),
-          isFrozen: false,
-          updatedAt: new Date().toISOString(),
-        });
-      }
-
-      return { previousWallet };
-    },
-    onError: (_err, _newTopUp, context) => {
-      if (context?.previousWallet) {
-        queryClient.setQueryData(walletKeys.current(), context.previousWallet);
-      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: walletKeys.all });

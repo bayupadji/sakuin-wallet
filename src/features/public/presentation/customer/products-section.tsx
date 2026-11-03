@@ -16,7 +16,11 @@ export function ProductsSection() {
 
         <ul className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {products.core.map((item) => (
-            <li key={item.title} className="lp-glow-card flex flex-col gap-3.5 rounded-2xl p-7">
+            <li
+              key={item.id}
+              id={item.id}
+              className="lp-glow-card flex flex-col gap-3.5 rounded-2xl p-7 scroll-mt-24"
+            >
               <IconTile name={item.icon as IconName} />
               <h3 className="text-[22px] font-extrabold">{item.title}</h3>
               <p className="text-base leading-relaxed text-lp-muted">{item.body}</p>

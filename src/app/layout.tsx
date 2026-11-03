@@ -13,8 +13,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dompet Digital Dollar | USD Digital Wallet",
-  description: "Hold USD balance, spend with virtual debit cards, and top up via Rupiah.",
+  metadataBase: new URL("https://sakuin.co.id"),
+  applicationName: "sakuin.co.id",
+  title: {
+    default: "Virtual Debit Card & Saldo Terpadu Indonesia | sakuin.co.id",
+    template: "%s | sakuin.co.id",
+  },
+  description:
+    "Platform Satu Saldo Terpadu untuk Virtual Debit Card berproteksi 3D Secure, konversi kurs Wise tanpa markup, bayar instan QRIS, dan PPOB 24/7.",
+  openGraph: {
+    siteName: "sakuin.co.id",
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 import { AppProviders } from "@/shared/application/providers";
@@ -26,7 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="id"
       data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased scroll-smooth`}
     >
