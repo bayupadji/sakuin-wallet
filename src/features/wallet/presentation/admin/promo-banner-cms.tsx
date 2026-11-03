@@ -122,10 +122,10 @@ export function PromoBannerCms() {
   return (
     <div className="space-y-6 pb-12">
       {/* CMS Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-5">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-950 text-teal-400 border border-teal-800/40">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-950 text-[#22D3EE] border border-sky-800/40">
               <Megaphone className="h-4 w-4" aria-hidden="true" />
             </span>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
@@ -152,7 +152,7 @@ export function PromoBannerCms() {
           <button
             type="button"
             onClick={handleCreateNew}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 px-4 py-2.5 text-xs font-bold text-slate-950 transition-colors shadow-lg shadow-teal-500/20 cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#1D9BF0] hover:bg-[#1A8CD8] px-4 py-2.5 text-xs font-bold text-slate-950 transition-colors shadow-lg shadow-[#1D9BF0]/20 cursor-pointer"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
             <span>Tambah Banner Baru</span>
@@ -162,30 +162,30 @@ export function PromoBannerCms() {
 
       {/* Overview Analytics Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-2xl border border-slate-800 bg-[#111726] p-4 sm:p-5">
+        <div className="rounded-2xl border border-white/8 bg-[#050507] p-4 sm:p-5">
           <span className="text-xs font-medium text-slate-400 block">Total Banner</span>
           <div className="flex items-baseline gap-2 mt-2">
             <span className="text-2xl font-bold text-white font-mono">{metrics.total}</span>
-            <span className="text-[11px] text-teal-400 font-medium">
+            <span className="text-[11px] text-[#22D3EE] font-medium">
               ({metrics.active} aktif)
             </span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-[#111726] p-4 sm:p-5">
+        <div className="rounded-2xl border border-white/8 bg-[#050507] p-4 sm:p-5">
           <span className="text-xs font-medium text-slate-400 block">Rata-rata Kompresi</span>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-2xl font-bold text-teal-400 font-mono">
+            <span className="text-2xl font-bold text-[#22D3EE] font-mono">
               -{metrics.avgSavings}%
             </span>
             <span className="text-[11px] text-slate-400 flex items-center gap-0.5">
-              <Zap className="h-3 w-3 text-teal-400" aria-hidden="true" />
+              <Zap className="h-3 w-3 text-[#22D3EE]" aria-hidden="true" />
               <span>WebP 1440px</span>
             </span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-[#111726] p-4 sm:p-5">
+        <div className="rounded-2xl border border-white/8 bg-[#050507] p-4 sm:p-5">
           <span className="text-xs font-medium text-slate-400 block">Total Tayangan</span>
           <div className="flex items-baseline gap-2 mt-2">
             <span className="text-2xl font-bold text-white font-mono">
@@ -195,10 +195,10 @@ export function PromoBannerCms() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-[#111726] p-4 sm:p-5">
+        <div className="rounded-2xl border border-white/8 bg-[#050507] p-4 sm:p-5">
           <span className="text-xs font-medium text-slate-400 block">Total Klik / Interaksi</span>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-2xl font-bold text-teal-300 font-mono">
+            <span className="text-2xl font-bold text-[#67E8F9] font-mono">
               {metrics.totalClicks.toLocaleString('id-ID')}
             </span>
             <span className="text-[11px] text-slate-400">
@@ -213,7 +213,7 @@ export function PromoBannerCms() {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-[#0e1422] p-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[#0e1422] p-3">
         <div className="relative flex-1 min-w-[220px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
           <input
@@ -221,11 +221,11 @@ export function PromoBannerCms() {
             placeholder="Cari banner berdasarkan judul, kode promo, lencana..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-slate-800 bg-[#080d18] pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+            className="w-full rounded-xl border border-white/8 bg-[#12141a] pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0]"
           />
         </div>
 
-        <div className="flex items-center gap-1 bg-[#080d18] p-1 rounded-xl border border-slate-800 text-xs shrink-0">
+        <div className="flex items-center gap-1 bg-[#12141a] p-1 rounded-xl border border-white/8 text-xs shrink-0">
           <button
             type="button"
             onClick={() => setStatusFilter('all')}
@@ -242,7 +242,7 @@ export function PromoBannerCms() {
             onClick={() => setStatusFilter('active')}
             className={`rounded-lg px-3 py-1.5 font-medium transition-colors cursor-pointer ${
               statusFilter === 'active'
-                ? 'bg-slate-800 text-teal-400 font-semibold'
+                ? 'bg-slate-800 text-[#22D3EE] font-semibold'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -265,7 +265,7 @@ export function PromoBannerCms() {
       {/* Banner Cards List */}
       <div className="space-y-4">
         {filteredBanners.length === 0 ? (
-          <div className="rounded-2xl border border-slate-800 bg-[#111726] p-12 text-center space-y-3">
+          <div className="rounded-2xl border border-white/8 bg-[#050507] p-12 text-center space-y-3">
             <Megaphone className="h-10 w-10 text-slate-600 mx-auto" aria-hidden="true" />
             <h3 className="text-sm font-semibold text-white">
               Tidak Ada Promo Banner
@@ -276,7 +276,7 @@ export function PromoBannerCms() {
             <button
               type="button"
               onClick={handleCreateNew}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 px-4 py-2 text-xs font-bold text-slate-950 transition-colors cursor-pointer mt-2"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#1D9BF0] hover:bg-[#1A8CD8] px-4 py-2 text-xs font-bold text-slate-950 transition-colors cursor-pointer mt-2"
             >
               <Plus className="h-3.5 w-3.5" aria-hidden="true" />
               <span>Buat Banner Baru</span>
@@ -289,14 +289,14 @@ export function PromoBannerCms() {
                 key={banner.id}
                 className={`relative flex flex-col lg:flex-row lg:items-center justify-between gap-5 rounded-2xl border p-4 sm:p-5 transition-all ${
                   banner.isActive
-                    ? 'border-slate-800 bg-[#111726] hover:border-slate-700'
-                    : 'border-slate-800/60 bg-[#0a0f1d]/70 opacity-75'
+                    ? 'border-white/8 bg-[#050507] hover:border-slate-700'
+                    : 'border-white/8/60 bg-[#0a0f1d]/70 opacity-75'
                 }`}
               >
                 {/* Visual Thumbnail & Order Indicator */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
                   {/* Order Controls */}
-                  <div className="flex sm:flex-col items-center gap-1 shrink-0 bg-slate-900/80 p-1 rounded-xl border border-slate-800">
+                  <div className="flex sm:flex-col items-center gap-1 shrink-0 bg-slate-900/80 p-1 rounded-xl border border-white/8">
                     <button
                       type="button"
                       disabled={index === 0}
@@ -307,7 +307,7 @@ export function PromoBannerCms() {
                     >
                       <ArrowUp className="h-3.5 w-3.5" aria-hidden="true" />
                     </button>
-                    <span className="font-mono text-xs font-bold text-teal-400 px-1.5">
+                    <span className="font-mono text-xs font-bold text-[#22D3EE] px-1.5">
                       #{index + 1}
                     </span>
                     <button
@@ -332,8 +332,8 @@ export function PromoBannerCms() {
                       className="object-cover object-left sm:object-center"
                     />
                     {banner.compressionSavingsPercent && (
-                      <div className="absolute bottom-1.5 left-1.5 flex items-center gap-1 rounded bg-slate-950/80 px-1.5 py-0.5 text-[9px] font-bold text-teal-300 border border-teal-800/50 backdrop-blur-md">
-                        <Sparkles className="h-2.5 w-2.5 text-teal-400" aria-hidden="true" />
+                      <div className="absolute bottom-1.5 left-1.5 flex items-center gap-1 rounded bg-slate-950/80 px-1.5 py-0.5 text-[9px] font-bold text-[#67E8F9] border border-sky-800/50 backdrop-blur-md">
+                        <Sparkles className="h-2.5 w-2.5 text-[#22D3EE]" aria-hidden="true" />
                         <span>Hemat {banner.compressionSavingsPercent}%</span>
                       </div>
                     )}
@@ -342,13 +342,13 @@ export function PromoBannerCms() {
                   {/* Metadata and Details */}
                   <div className="space-y-1.5 min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center rounded-md bg-teal-950/80 px-2 py-0.5 text-[10px] font-bold text-teal-300 border border-teal-800/40">
+                      <span className="inline-flex items-center rounded-md bg-sky-950/80 px-2 py-0.5 text-[10px] font-bold text-[#67E8F9] border border-sky-800/40">
                         {banner.badge}
                       </span>
 
                       {banner.promoCode && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-slate-300 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
-                          <Tag className="h-2.5 w-2.5 text-teal-400" aria-hidden="true" />
+                        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-slate-300 bg-slate-900 px-2 py-0.5 rounded border border-white/8">
+                          <Tag className="h-2.5 w-2.5 text-[#22D3EE]" aria-hidden="true" />
                           <span>{banner.promoCode}</span>
                         </span>
                       )}
@@ -380,7 +380,7 @@ export function PromoBannerCms() {
                       {banner.compressedImageSizeFormatted && (
                         <>
                           <span>&bull;</span>
-                          <span className="text-teal-400/90 font-mono font-medium">
+                          <span className="text-[#22D3EE]/90 font-mono font-medium">
                             {banner.compressedImageSizeFormatted}
                             {banner.originalImageSizeFormatted && (
                               <span className="text-slate-500 line-through ml-1 text-[10px]">
@@ -395,14 +395,14 @@ export function PromoBannerCms() {
                 </div>
 
                 {/* Right Control Actions */}
-                <div className="flex items-center justify-between lg:justify-end gap-3 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-800 shrink-0">
+                <div className="flex items-center justify-between lg:justify-end gap-3 pt-3 lg:pt-0 border-t lg:border-t-0 border-white/8 shrink-0">
                   {/* Status Toggle */}
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => toggleBannerStatus(banner.id)}
                       className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                        banner.isActive ? 'bg-teal-500' : 'bg-slate-700'
+                        banner.isActive ? 'bg-[#1D9BF0]' : 'bg-slate-700'
                       }`}
                       role="switch"
                       aria-checked={banner.isActive}
@@ -423,7 +423,7 @@ export function PromoBannerCms() {
                     <button
                       type="button"
                       onClick={() => handleEdit(banner)}
-                      className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                      className="p-2 rounded-xl bg-slate-900 border border-white/8 text-slate-300 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
                       title="Ubah rincian banner"
                       aria-label="Ubah rincian banner"
                     >
@@ -433,7 +433,7 @@ export function PromoBannerCms() {
                     <button
                       type="button"
                       onClick={() => setDeleteConfirmId(banner.id)}
-                      className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 hover:border-rose-900/50 transition-colors cursor-pointer"
+                      className="p-2 rounded-xl bg-slate-900 border border-white/8 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 hover:border-rose-900/50 transition-colors cursor-pointer"
                       title="Hapus banner"
                       aria-label="Hapus banner"
                     >

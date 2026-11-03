@@ -35,16 +35,16 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#0F1115] text-zinc-100 flex flex-col md:flex-row">
       {/* Admin Sidebar */}
-      <aside className="w-full md:w-64 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950 p-4 sm:p-6 flex flex-col shrink-0">
+      <aside className="w-full md:w-64 border-b md:border-b-0 md:border-r border-white/8 bg-[#050507] p-4 sm:p-6 flex flex-col shrink-0">
         <div className="flex items-center gap-2 mb-8">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-600 text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1D9BF0] text-white">
             <Shield className="h-5 w-5" aria-hidden="true" />
           </div>
           <div>
             <h1 className="text-sm font-semibold tracking-wide text-white">Admin Console</h1>
-            <span className="text-xs text-slate-400">Dompet Digital Dollar</span>
+            <span className="text-xs text-zinc-400">Dompet Digital Dollar</span>
           </div>
         </div>
 
@@ -59,8 +59,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors min-h-[44px]',
                   isActive
-                    ? 'bg-slate-800 text-teal-400 font-semibold'
-                    : 'text-slate-400 hover:bg-slate-850 hover:text-slate-200'
+                    ? 'bg-white/10 text-[#22D3EE] font-semibold border border-[#1D9BF0]/30'
+                    : 'text-zinc-400 hover:bg-white/6 hover:text-zinc-200'
                 )}
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />
@@ -70,10 +70,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           })}
         </nav>
 
-        <div className="pt-6 border-t border-slate-850 mt-auto space-y-3">
-          <div className="flex items-center justify-between text-xs text-slate-500">
+        <div className="pt-6 border-t border-white/8 mt-auto space-y-3">
+          <div className="flex items-center justify-between text-xs text-zinc-400">
             <span>Role: {user?.role || 'Super Admin'}</span>
-            <span className="rounded bg-teal-950 px-1.5 py-0.5 text-teal-400 border border-teal-800">
+            <span className="rounded bg-sky-950/80 px-1.5 py-0.5 text-[#67E8F9] border border-sky-800/60 font-mono text-[10px]">
               2FA Active
             </span>
           </div>

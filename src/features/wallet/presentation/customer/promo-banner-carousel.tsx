@@ -154,7 +154,7 @@ export function PromoBannerCarousel({
         onTouchEnd={handleTouchEnd}
         tabIndex={0}
         className={cn(
-          'group relative w-full overflow-hidden rounded-2xl border border-slate-800 bg-[#0c121e] shadow-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500',
+          'group relative w-full overflow-hidden rounded-2xl border border-white/8 bg-[#12141a] shadow-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1D9BF0]',
           className
         )}
       >
@@ -171,7 +171,7 @@ export function PromoBannerCarousel({
           <button
             type="button"
             onClick={prevSlide}
-            className="pointer-events-auto flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-slate-950/70 text-white backdrop-blur-md border border-slate-700/60 shadow-lg opacity-80 sm:opacity-0 group-hover:opacity-100 hover:bg-slate-900 hover:scale-105 transition-all cursor-pointer focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-teal-400"
+            className="pointer-events-auto flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-slate-950/70 text-white backdrop-blur-md border border-white/10 shadow-lg opacity-80 sm:opacity-0 group-hover:opacity-100 hover:bg-slate-900 hover:scale-105 transition-all cursor-pointer focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[#1D9BF0]"
             aria-label="Slide banner sebelumnya"
           >
             <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -182,7 +182,7 @@ export function PromoBannerCarousel({
           <button
             type="button"
             onClick={nextSlide}
-            className="pointer-events-auto flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-slate-950/70 text-white backdrop-blur-md border border-slate-700/60 shadow-lg opacity-80 sm:opacity-0 group-hover:opacity-100 hover:bg-slate-900 hover:scale-105 transition-all cursor-pointer focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-teal-400"
+            className="pointer-events-auto flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-slate-950/70 text-white backdrop-blur-md border border-white/10 shadow-lg opacity-80 sm:opacity-0 group-hover:opacity-100 hover:bg-slate-900 hover:scale-105 transition-all cursor-pointer focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[#1D9BF0]"
             aria-label="Slide banner berikutnya"
           >
             <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -190,7 +190,7 @@ export function PromoBannerCarousel({
         </div>
 
         {/* Floating Bottom Center Bar: Dot Pagination */}
-        <div className="absolute bottom-2.5 sm:bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full border border-slate-700/60 bg-slate-950/80 px-2.5 py-1 backdrop-blur-md shadow-xl z-20">
+        <div className="absolute bottom-2.5 sm:bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full border border-white/10 bg-black/80 px-2.5 py-1 backdrop-blur-md shadow-xl z-20">
           <div className="flex items-center gap-1.5">
             {activeBanners.map((banner, index) => (
               <button
@@ -200,8 +200,8 @@ export function PromoBannerCarousel({
                 className={cn(
                   'h-1.5 rounded-full transition-all duration-300 cursor-pointer min-h-[6px]',
                   currentSlide === index
-                    ? 'w-5 bg-teal-400 shadow-sm shadow-teal-400/50'
-                    : 'w-1.5 bg-slate-600 hover:bg-slate-400'
+                    ? 'w-5 bg-[#1D9BF0] shadow-sm shadow-[#1D9BF0]/50'
+                    : 'w-1.5 bg-zinc-600 hover:bg-zinc-400'
                 )}
                 aria-label={`Lihat banner ${index + 1}: ${banner.title}`}
                 aria-current={currentSlide === index ? 'true' : 'false'}

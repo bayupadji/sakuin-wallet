@@ -66,13 +66,16 @@ describe('Frankfurter FX Utilities', () => {
       expect(result.inverseRate).toBeCloseTo(1 / 18031, 6);
     });
 
-    it('falls back to default rate if fetch fails or network errors', async () => {
+    it('throws instead of returning a made-up rate when the network fails', async () => {
       global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
-      const result = await fetchFrankfurterRate('USD', 'IDR');
-      expect(result.rate).toBe(16250);
-      expect(result.source).toBe('frankfurter.dev');
-      expect(result.inverseRate).toBeCloseTo(1 / 16250, 6);
+      await expect(fetchFrankfurterRate('USD', 'IDR')).rejects.toThrow('Network error');
+    });
+
+    it('throws when the API responds with an error status', async () => {
+      global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 503 });
+
+      await expect(fetchFrankfurterRate('USD', 'IDR')).rejects.toThrow('503');
     });
   });
 });

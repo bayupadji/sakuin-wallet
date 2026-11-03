@@ -269,7 +269,7 @@ export function PromoDetailModal({
           <button
             type="button"
             onClick={handleClose}
-            className="absolute top-3 right-3 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-slate-950/80 text-slate-300 hover:text-white backdrop-blur-md border border-slate-700/60 shadow-lg hover:bg-slate-900 transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 z-10"
+            className="absolute top-3 right-3 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-black/80 text-zinc-300 hover:text-white backdrop-blur-md border border-white/10 shadow-lg hover:bg-zinc-900 transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1D9BF0] z-10"
             aria-label="Tutup detail promo"
           >
             <X className="h-4 w-4" aria-hidden="true" />
@@ -281,12 +281,12 @@ export function PromoDetailModal({
           {/* Header Metadata */}
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-500/30 bg-teal-950/60 px-3 py-1 text-[11px] font-semibold text-teal-300">
-                <span className="h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-950/60 px-3 py-1 text-[11px] font-semibold text-[#67E8F9]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#22D3EE] animate-pulse" />
                 {promo.badge}
               </span>
-              <span className="inline-flex items-center gap-1 text-[11px] text-slate-400 bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800">
-                <Calendar className="h-3.5 w-3.5 text-teal-400" aria-hidden="true" />
+              <span className="inline-flex items-center gap-1 text-[11px] text-zinc-400 bg-[#12141a] px-2.5 py-1 rounded-full border border-white/8">
+                <Calendar className="h-3.5 w-3.5 text-[#22D3EE]" aria-hidden="true" />
                 <span>{promo.period}</span>
               </span>
             </div>
@@ -297,26 +297,26 @@ export function PromoDetailModal({
             >
               {promo.title}
             </h2>
-            <p className="text-sm font-medium text-teal-300 mt-1">
+            <p className="text-sm font-medium text-[#22D3EE] mt-1">
               {promo.headline}
             </p>
-            <p className="text-xs sm:text-sm text-slate-300 mt-3 leading-relaxed">
+            <p className="text-xs sm:text-sm text-zinc-300 mt-3 leading-relaxed">
               {promo.summary}
             </p>
           </div>
 
           {/* Promo Code Card (if available) */}
           {promo.promoCode && (
-            <div className="flex items-center justify-between rounded-xl border border-teal-800/40 bg-teal-950/30 px-4 py-3">
+            <div className="flex items-center justify-between rounded-xl border border-sky-800/40 bg-sky-950/30 px-4 py-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-900/50 text-teal-300 border border-teal-700/40">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-900/50 text-[#67E8F9] border border-sky-700/40">
                   <Tag className="h-4 w-4" aria-hidden="true" />
                 </div>
                 <div>
-                  <span className="text-[11px] text-slate-400 block font-medium">
+                  <span className="text-[11px] text-zinc-400 block font-medium">
                     Kode Promo Khusus
                   </span>
-                  <span className="font-mono text-sm sm:text-base font-bold text-teal-300 tracking-wider">
+                  <span className="font-mono text-sm sm:text-base font-bold text-[#67E8F9] tracking-wider">
                     {promo.promoCode}
                   </span>
                 </div>
@@ -324,12 +324,12 @@ export function PromoDetailModal({
               <button
                 type="button"
                 onClick={handleCopyCode}
-                className="flex items-center gap-1.5 rounded-lg border border-teal-500/40 bg-teal-900/60 px-3 py-1.5 text-xs font-semibold text-teal-200 hover:bg-teal-800 hover:text-white transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 rounded-lg border border-sky-500/40 bg-sky-900/60 px-3 py-1.5 text-xs font-semibold text-sky-200 hover:bg-sky-800 hover:text-white transition-colors cursor-pointer"
                 aria-label={copied ? 'Kode berhasil disalin' : 'Salin kode promo'}
               >
                 {copied ? (
                   <>
-                    <Check className="h-3.5 w-3.5 text-teal-300" aria-hidden="true" />
+                    <Check className="h-3.5 w-3.5 text-[#67E8F9]" aria-hidden="true" />
                     <span>Tersalin</span>
                   </>
                 ) : (
@@ -345,16 +345,16 @@ export function PromoDetailModal({
 
           {/* Step-by-Step Instructions */}
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3">
               Cara Menggunakan
             </h3>
-            <div className="rounded-xl border border-slate-800 bg-[#0f1728] p-4 space-y-3">
+            <div className="rounded-xl border border-white/8 bg-[#12141a] p-4 space-y-3">
               {promo.steps.map((step, idx) => (
                 <div key={idx} className="flex items-start gap-3 text-xs">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-800 text-teal-300 font-bold text-[10px] border border-slate-700">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-[#67E8F9] font-bold text-[10px] border border-zinc-700">
                     {idx + 1}
                   </span>
-                  <span className="text-slate-300 leading-relaxed mt-0.5">
+                  <span className="text-zinc-300 leading-relaxed mt-0.5">
                     {step}
                   </span>
                 </div>
@@ -364,15 +364,15 @@ export function PromoDetailModal({
 
           {/* Terms & Conditions */}
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-zinc-400" aria-hidden="true" />
               <span>Syarat &amp; Ketentuan</span>
             </h3>
-            <div className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-4">
-              <ul className="space-y-2 text-xs text-slate-400 list-disc list-inside">
+            <div className="rounded-xl border border-white/8 bg-[#12141a] p-4">
+              <ul className="space-y-2 text-xs text-zinc-400 list-disc list-inside">
                 {promo.terms.map((term, idx) => (
                   <li key={idx} className="leading-relaxed">
-                    <span className="text-slate-300">{term}</span>
+                    <span className="text-zinc-300">{term}</span>
                   </li>
                 ))}
               </ul>
@@ -381,12 +381,12 @@ export function PromoDetailModal({
         </div>
 
         {/* Modal Footer with Actions */}
-        <div className="flex items-center justify-between gap-3 border-t border-slate-800 bg-[#0a0f1c] px-5 sm:px-7 py-3.5 shrink-0">
+        <div className="flex items-center justify-between gap-3 border-t border-white/8 bg-[#050507] px-5 sm:px-7 py-3.5 shrink-0">
           <Button
             type="button"
             variant="ghost"
             onClick={handleClose}
-            className="text-xs text-slate-400 hover:text-white"
+            className="text-xs text-zinc-400 hover:text-white"
           >
             Tutup
           </Button>
@@ -395,7 +395,7 @@ export function PromoDetailModal({
             <Link
               href={promo.ctaHref}
               onClick={handleClose}
-              className="inline-flex items-center gap-2 rounded-xl bg-teal-500 hover:bg-teal-400 px-5 py-2.5 text-xs font-bold text-slate-950 transition-colors shadow-lg shadow-teal-500/20 cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#1D9BF0] hover:bg-[#1A8CD8] px-5 py-2.5 text-xs font-bold text-white transition-colors shadow-lg shadow-[#1D9BF0]/20 cursor-pointer"
             >
               <span>{promo.ctaText}</span>
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -404,7 +404,7 @@ export function PromoDetailModal({
             <button
               type="button"
               onClick={handleCtaClick}
-              className="inline-flex items-center gap-2 rounded-xl bg-teal-500 hover:bg-teal-400 px-5 py-2.5 text-xs font-bold text-slate-950 transition-colors shadow-lg shadow-teal-500/20 cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#1D9BF0] hover:bg-[#1A8CD8] px-5 py-2.5 text-xs font-bold text-white transition-colors shadow-lg shadow-[#1D9BF0]/20 cursor-pointer"
             >
               <span>{promo.ctaText}</span>
               <ArrowRight className="h-4 w-4" aria-hidden="true" />

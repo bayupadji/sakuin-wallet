@@ -69,7 +69,7 @@ export function Dialog({
         ref={dialogRef}
         className={cn(
           'relative w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl transition-all',
-          'dark:border-slate-800 dark:bg-[#111726]',
+          'dark:border-white/10 dark:bg-[#050507]',
           className
         )}
       >
@@ -93,7 +93,7 @@ export function Dialog({
           <button
             onClick={onClose}
             aria-label="Close dialog"
-            className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
+            className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/6 dark:hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D9BF0]"
           >
             <svg
               className="h-5 w-5"

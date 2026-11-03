@@ -30,10 +30,10 @@ export function CardHub() {
   return (
     <div className="space-y-6 font-sans antialiased text-slate-100">
       {/* 1. Header */}
-      <div className="border-b border-slate-800/80 pb-6">
+      <div className="border-b border-white/8/80 pb-6">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-950 text-teal-400 border border-teal-800/50">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-950/60 text-[#22D3EE] border border-sky-800/50">
               <CreditCard className="h-4 w-4" aria-hidden="true" />
             </span>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
@@ -85,9 +85,9 @@ export function CardHub() {
       />
 
       {/* 4. Full-Width Apple Pay & Apple Wallet Integration Banner */}
-      {/* <div className="rounded-2xl border border-slate-800 bg-[#111726] p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* <div className="rounded-2xl border border-white/8 bg-[#050507] p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-black border border-slate-800 p-2 flex items-center justify-center shrink-0 shadow-inner">
+          <div className="h-12 w-12 rounded-xl bg-black border border-white/8 p-2 flex items-center justify-center shrink-0 shadow-inner">
             <Image
               src="/icons/apple-wallet.png"
               alt="Apple Wallet"
@@ -99,8 +99,8 @@ export function CardHub() {
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm sm:text-base font-bold text-white">Mendukung Apple Pay</h3>
-              <span className="inline-flex items-center gap-1 rounded-full bg-teal-500/10 border border-teal-500/30 px-2 py-0.5 text-[10px] font-semibold text-teal-300">
-                <span className="h-1.5 w-1.5 rounded-full bg-teal-400" />
+              <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 border border-sky-500/30 px-2 py-0.5 text-[10px] font-semibold text-[#67E8F9]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#22D3EE]" />
                 Siap Ditambahkan
               </span>
             </div>
@@ -139,10 +139,10 @@ export function CardHub() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Spending Limit Controller */}
         <div className="lg:col-span-6">
-          <div className="rounded-2xl border border-slate-800 bg-[#111726] p-6 sm:p-7 shadow-xl space-y-5">
+          <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 sm:p-7 shadow-xl space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-950 text-teal-400 border border-teal-800/40">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-950/60 text-[#22D3EE] border border-sky-800/40">
                   <Sliders className="h-4 w-4" aria-hidden="true" />
                 </div>
                 <div>
@@ -154,7 +154,7 @@ export function CardHub() {
                   </p>
                 </div>
               </div>
-              <span className="font-mono text-sm font-bold text-teal-300 tabular-nums">
+              <span className="font-mono text-sm font-bold text-[#67E8F9] tabular-nums">
                 ${monthlyLimit.toFixed(2)} USD
               </span>
             </div>
@@ -169,7 +169,7 @@ export function CardHub() {
               </div>
               <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
                 <div
-                  className="h-full bg-teal-400 rounded-full transition-all duration-300"
+                  className="h-full bg-[#22D3EE] rounded-full transition-all duration-300"
                   style={{ width: `${percentageUsed}%` }}
                 />
               </div>
@@ -188,7 +188,7 @@ export function CardHub() {
                 step="50"
                 value={monthlyLimit}
                 onChange={(e) => setMonthlyLimit(Number(e.target.value))}
-                className="w-full accent-teal-400 cursor-pointer"
+                className="w-full accent-[#1D9BF0] cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
                 <span>$50</span>
@@ -200,7 +200,7 @@ export function CardHub() {
         </div>
 
         {/* Right Column: Card-Specific Transactions Section */}
-        <div className="lg:col-span-6 rounded-2xl border border-slate-800 bg-[#111726] p-6 sm:p-7 shadow-xl space-y-4">
+        <div className="lg:col-span-6 rounded-2xl border border-white/8 bg-[#050507] p-6 sm:p-7 shadow-xl space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base font-bold tracking-tight text-white">
@@ -213,13 +213,13 @@ export function CardHub() {
 
             <Link
               href="/transactions"
-              className="text-xs font-semibold text-teal-400 hover:text-teal-300 transition-colors"
+              className="text-xs font-semibold text-[#1D9BF0] hover:text-[#22D3EE] transition-colors"
             >
               Semua &rarr;
             </Link>
           </div>
 
-          <div className="divide-y divide-slate-800/80 border-t border-slate-800 pt-1">
+          <div className="divide-y divide-slate-800/80 border-t border-white/8 pt-1">
             {cardTransactions.length === 0 ? (
               <div className="py-8 text-center text-xs text-slate-400">
                 Belum ada transaksi kartu virtual tercatat.
@@ -228,10 +228,10 @@ export function CardHub() {
               cardTransactions.slice(0, 3).map((tx) => (
                 <div
                   key={tx.id}
-                  className="flex items-center justify-between p-3.5 hover:bg-[#0c121e]/80 rounded-xl transition-colors"
+                  className="flex items-center justify-between p-3.5 hover:bg-[#12141a]/80 rounded-xl transition-colors"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0 bg-slate-900 text-teal-400 border border-slate-800">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0 bg-slate-900 text-[#22D3EE] border border-white/8">
                       <ShoppingBag className="h-5 w-5" aria-hidden="true" />
                     </div>
                     <div className="min-w-0">

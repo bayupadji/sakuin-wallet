@@ -1,19 +1,21 @@
-# Design System: Dompet Digital Dollar
+# Design System: sakuin.co.id
 
-A modern, minimalist, premium fintech experience inspired by the precision and craftsmanship of **Linear, Revolut, Wise, Ramp, and Apple Wallet**.
+Platform fintech modern di bawah naungan **PT Anugrah Sejahtera Teknologi**. Menghadirkan pengalaman visual yang bersih, elegan, dan berkepastian tinggi terinspirasi oleh standar industri **Stripe, Wise, Midtrans, Linear, dan Apple Wallet**.
 
 ---
 
 ## 1. Design Direction & Character
 
-- **Aesthetic**: Minimalist, elegant, restrained, and unmistakably financial.
-- **Visual Personality**: High-trust, Swiss-style precision, calm surfaces, crisp hairline borders, and purposeful whitespace.
-- **Core Tenet**: Clear financial data over visual noise. Every number, status, and button has an intentional reason to exist.
+- **Aesthetic**: Minimalist, modern fintech, berwibawa, dan fungsional.
+- **Visual Personality**: High-trust, Swiss-style precision, calm surfaces, crisp hairline borders, dan purposeful whitespace.
+- **Trust & Compliance Badge**: "Infrastruktur Berlisensi PJP Kategori 1 Bank Indonesia" (Didukung Mitra Berlisensi PJP 1 Bank Indonesia).
+- **Core Tenet**: Kejelasan data finansial di atas dekorasi berlebih. Setiap angka, status transaksi, dan tombol aksi memiliki tujuan fungsional yang eksplisit.
+- **Instrumen Kartu**: Seluruh instrumen kartu virtual adalah **Virtual Debit Card** (bukan kartu kredit / VCC).
 - **Anti-Patterns Rejected**:
-  - No bloated multi-color gradients or neon glows.
-  - No decorative AI capsule pills without real status.
-  - No emoji as navigation icons.
-  - No floating excessive blur or glassmorphism everywhere.
+  - Tanpa gradien multi-warna mencolok atau neon glows.
+  - Tanpa pill dekoratif tanpa status riil.
+  - Tanpa emoji sebagai ikon navigasi.
+  - Tanpa efek glassmorphism berlebihan yang mengorbankan keterbacaan teks finansial.
 
 ---
 
@@ -22,48 +24,123 @@ A modern, minimalist, premium fintech experience inspired by the precision and c
 ### Spacing System (8px Grid)
 - Base Unit: `4px` / `8px`
 - Scales: `xs (4px)`, `sm (8px)`, `md (16px)`, `lg (24px)`, `xl (32px)`, `2xl (48px)`, `3xl (64px)`
-- Tap Target Minimum: `44px` on all mobile and desktop controls.
+- Tap Target Minimum: `44px` pada seluruh kontrol interaktif mobile dan desktop.
 
 ### Color Tokens
 
-| Token | Light Mode | Dark Mode | Usage |
+| Token | Light Mode | Dark Mode (Default / Landing) | Usage |
 |---|---|---|---|
-| `background` | `#F8FAFC` (Slate 50) | `#090D14` (Obsidian) | App root canvas |
-| `card` | `#FFFFFF` | `#111726` | Financial cards & modals |
-| `foreground` | `#0F172A` (Slate 900) | `#F8FAFC` (Slate 50) | Primary typography (contrast > 12:1) |
-| `muted-foreground` | `#64748B` (Slate 500) | `#94A3B8` (Slate 400) | Secondary labels (contrast > 4.5:1) |
-| `border` | `#E2E8F0` (Slate 200) | `#1E293B` (Slate 800) | Hairline 1px dividers & cards |
-| `accent` | `#0D9488` (Teal 600) | `#14B8A6` (Teal 500) | Primary financial CTA & active metrics |
-| `destructive` | `#E11D48` (Rose 600) | `#F43F5E` (Rose 500) | Freeze card, errors, negative deltas |
-| `warning` | `#D97706` (Amber 600) | `#F59E0B` (Amber 500) | Pending KYC, awaiting webhook |
-| `apple-pay-bg` | `#000000` | `#FFFFFF` | Official Apple Pay button background |
+| `background` | `#F8FAFC` (Slate 50) | `#0F1115` (Deep Charcoal / Obsidian) | Kanvas utama aplikasi |
+| `card` | `#FFFFFF` | `#050507` (Surface Dark) | Permukaan kartu finansial, modal, dan sheet |
+| `foreground` | `#0F172A` (Slate 900) | `#FFFFFF` / `#F4F4F5` | Tipografi utama (kontras > 12:1) |
+| `muted-foreground` | `#64748B` (Slate 500) | `#A1A1AA` (Zinc 400) | Label sekunder dan deskripsi (kontras > 4.5:1) |
+| `border` | `#E2E8F0` (Slate 200) | `rgba(255, 255, 255, 0.08)` / `#27272A` | Hairline 1px border dan garis pemisah |
+| `primary` / `accent` | `#1D9BF0` (Electric / Brand Blue) | `#1D9BF0` (Electric / Brand Blue) | Warna brand utama, tombol CTA finansial, ikon brand, dan aksi primer |
+| `accent-secondary`| `#0891B2` (Cyan 600)| `#22D3EE` (Cyan Glow) | Highlight visual, glow badge, dan status sekunder |
+| `destructive` | `#E11D48` (Rose 600) | `#F43F5E` (Rose 500) | Pembekuan kartu, status gagal, dan delta negatif |
+| `warning` | `#D97706` (Amber 600) | `#F59E0B` (Amber 500) | Status pending KYC dan konfirmasi verifikasi |
+| `success` | `#059669` (Emerald 600)| `#7CE8C8` (Mint / Emerald) | Saldo positif, top-up sukses, KYC disetujui |
+| `apple-pay-bg` | `#000000` | `#FFFFFF` | Latar tombol resmi Apple Pay / Apple Wallet |
 
 ### Typography Scale
-- **Headings**: `var(--font-geist-sans)` with `font-bold` or `font-semibold`, `text-balance`.
-- **Financial Values**: `var(--font-mono)` with `tabular-nums tracking-tight font-bold`.
+- **Headings**: `var(--font-geist-sans)` dengan `font-bold` atau `font-semibold`, `text-balance`.
+- **Financial Values**: `var(--font-mono)` dengan `tabular-nums tracking-tight font-bold`.
 - **Body & Labels**: `var(--font-geist-sans)`, `text-pretty`.
 
 ---
 
 ## 3. Financial Components Architecture
 
-1. **Balance & Fund Summary**:
-   - High-contrast, bold font-mono currency values (`$1,234.56`).
-   - Tactile eye toggle for balance privacy with instant state feedback.
+1. **Balance & Unified Fund Summary (Satu Saldo Terpadu)**:
+   - Penampil saldo kontras tinggi dengan tipografi font-mono (`Rp 1.500.000` / `$1,234.56`).
+   - Tactile eye toggle untuk privasi saldo dengan umpan balik instan.
 2. **Virtual Debit Card**:
-   - Sleek Apple Wallet-inspired physical simulation: metallic obsidian card finish, contactless waves, EMV chip visual, masked card number (`•••• 5678`), cardholder name, expiry date, and live freeze/unfreeze status badge.
-   - Interactive security controls: instant freeze toggle, reveal CVV modal, and spending limit slider.
-3. **Apple Pay Integration Showcase**:
-   - Native Apple Pay badge (*"Add to Apple Wallet"*) compliant with official Human Interface Guidelines (HIG).
-   - Instant provisioning status indicator (e.g., *Added to Wallet* vs. *Ready to Add*).
-4. **Quick Action Group**:
-   - Circular/pill action buttons for Top Up, Request Card, Add to Apple Pay, Receive Payment, and History.
+   - Simulasi fisik terinspirasi Apple Wallet: finishing metallic obsidian card, logo Visa/Mastercard, chip EMV, contactless waves, nomor kartu masked (`•••• 5678`), nama pemegang kartu, tanggal kedaluwarsa, dan status badge freeze/active.
+   - Kontrol keamanan instan: toggle pembekuan kartu, reveal CVV dengan autentikasi, dan slider limit belanja.
+3. **Quick Action Group**:
+   - Tombol pill atau rounded action group: [Isi Saldo] [Buat Virtual Card] [Beli Pulsa] [Scan QRIS] [Riwayat Transaksi].
+4. **Unified Balance Interactive Switch / Showcase**:
+   - Kartu interaktif yang memperlihatkan fleksibilitas saldo terpadu yang dapat dialokasikan dinamis untuk transaksi global (Virtual Debit Card) maupun kebutuhan lokal (PPOB dan QRIS).
 5. **FX Rate & Exchange Ticker**:
-   - Live USD/IDR conversion indicator with guaranteed 15-minute rate lock countdown.
+   - Indikator kurs konversi real-time dengan garansi 15-minute rate lock countdown.
 6. **Activity Ledger**:
-   - High-contrast transaction rows displaying merchant name, category icon, WIB date, payment method tag (*Virtual Card*, *Apple Pay*), and color-coded tabular amounts (`+$50.00` in teal, `-$12.00` in slate).
+   - Daftar transaksi kontras tinggi memuat nama merchant / produk, kategori ikon, cap waktu WIB, tag metode pembayaran (*Virtual Debit Card*, *QRIS*, *PPOB*), dan format angka tabular dengan penanda warna.
 7. **Accessible States**:
-   - Every view must provide: loading (skeleton), empty (clear cause and single action), error (cause + retry), and success.
+   - Setiap tampilan wajib menyediakan 4 status: loading (skeleton), empty (penyebab jelas + satu tombol aksi), error (penyebab + tombol coba lagi), dan success.
+
+---
+
+## 4. Landing Page Specifications (sakuin.co.id)
+
+### 1. Navbar / Header
+- **Logo Brand**: sakuin.co.id (tipografi modern sans-serif dengan aksen visual wallet/card).
+- **Nav Links**:
+  - Layanan (Dropdown: Virtual Debit Card, Produk Digital & PPOB, Bayar QRIS)
+  - Cara Kerja
+  - Keamanan & Regulasi
+  - Bantuan & FAQ
+- **CTA Actions**:
+  - Tombol secondary: "Masuk"
+  - Tombol primary: "Buat Akun / Mulai"
+
+### 2. Hero Section
+- **Badge Trust**: "Infrastruktur Berlisensi PJP Kategori 1 Bank Indonesia"
+- **Headline Utama**: "Satu Saldo Terpadu untuk Transaksi Global & Kebutuhan Harian"
+- **Subheadline**: "Akses instan ke Virtual Debit Card untuk belanja internasional, pembayaran QRIS, serta pengisian pulsa, paket data, dan voucher game favorit dalam hitungan detik."
+- **CTA Buttons**:
+  - Primary: "Dapatkan Virtual Card Instan"
+  - Secondary: "Lihat Demo Transaksi"
+- **Visual Mockup**:
+  - Mockup smartphone / 3D card menampilkan sakuin Virtual Debit Card (Visa/Mastercard), tampilan saldo terpadu ("Saldo Aktif: Rp 1.500.000"), dan quick actions menu ([Isi Saldo] [Buat Virtual Card] [Beli Pulsa] [Scan QRIS]).
+- **Partner & Trust Bar**:
+  - Logo QRIS, GPN, Virtual Account perbankan (BCA, Mandiri, BRI, BNI), serta badge resmi "Didukung Mitra Berlisensi PJP 1 Bank Indonesia".
+
+### 3. Fitur Utama & Produk (3 Core Pillars)
+Tata letak grid 3 kolom interaktif:
+1. **Virtual Debit Card Global**:
+   - Deskripsi: Pembayaran online fleksibel untuk langganan tools SaaS, streaming, game, dan belanja luar negeri tanpa kartu kredit fisik konvensional.
+   - Poin Unggulan: Otomatis terbit, nomor kartu instan, batas limit fleksibel, keamanan 3D Secure.
+2. **Produk Digital & PPOB Lengkap**:
+   - Deskripsi: Beli pulsa reguler, paket kuota internet semua operator, token listrik PLN, hingga voucher game (Steam, Mobile Legends, Roblox, dll.) dengan harga kompetitif.
+   - Poin Unggulan: Transaksi otomatis 24/7, status transaksi real-time, riwayat faktur rapi.
+3. **Bayar Instan QRIS**:
+   - Deskripsi: Gunakan saldo sakuin untuk scan bayar di seluruh merchant bertanda QRIS di seluruh Indonesia langsung dari genggaman.
+   - Poin Unggulan: Cepat, nirsentuh, otomatis terpotong dari saldo utama.
+
+### 4. Section Cara Kerja (Alur Transaksi Praktis)
+Tampilan 3 langkah berbentuk timeline atau kartu horizontal berurutan:
+- **Langkah 1: Top Up Saldo Praktis**
+  Pilih nominal saldo yang diinginkan, bayar instan menggunakan Virtual Account (VA) bank terkemuka atau scan QRIS.
+- **Langkah 2: Satu Saldo Siap Pakai**
+  Saldo masuk otomatis ke akun dompet sakuin.co.id Anda secara real-time tanpa delay.
+- **Langkah 3: Bebas Gunakan ke Mana Saja**
+  Gunakan saldo yang sama untuk mengisi Virtual Debit Card belanja online, melunasi tagihan PPOB, atau belanja di merchant QRIS.
+
+### 5. Section "Satu Saldo, Banyak Kegunaan" (Unified Balance Highlight)
+- Komponen visual interaktif yang memperlihatkan fleksibilitas satu sumber dana sakuin.co.id yang dialokasikan dinamis untuk belanja internasional maupun transaksi lokal harian tanpa perlu top up berulang kali ke platform berbeda.
+
+### 6. Section Keamanan & Regulasi (Trust & Compliance)
+- **Didukung Mitra PJP 1 Bank Indonesia**: Menggandeng institusi pemrosesan pembayaran resmi berlisensi Bank Indonesia (PJP Kategori 1) untuk menjamin kepatuhan aliran dana.
+- **Enkripsi Finansial Kelas Bank**: Data sensitif kartu dan transaksi dilindungi enkripsi AES-256 dan standar keamanan TLS termutakhir.
+- **Fraud Detection 24/7**: Pemantauan transaksi otomatis untuk melindungi akun dari risiko penyalahgunaan saldo.
+
+### 7. Call To Action (Bottom Banner)
+- **Headline**: "Mulai Nikmati Kemudahan Transaksi Digital Hari Ini"
+- **Deskripsi**: "Daftar dalam 2 menit, top up via QRIS/VA, dan langsung gunakan untuk Virtual Debit Card atau kebutuhan PPOB Anda."
+- **Tombol CTA**: "Buat Akun sakuin Sekarang"
+
+### 8. Footer Resmi
+- **Kolom 1 (Perusahaan & Legalitas)**:
+  - Brand: sakuin.co.id
+  - Keterangan Legal: "sakuin.co.id adalah platform layanan digital yang dikelola oleh PT Anugrah Sejahtera Teknologi."
+  - Regulatory Disclaimer: "Layanan infrastruktur pembayaran, pemrosesan transaksi, dan penerbitan instrumen keuangan difasilitasi melalui kemitraan strategis dengan institusi Penyedia Jasa Pembayaran (PJP) Kategori 1 yang berizin dan diawasi oleh Bank Indonesia."
+- **Kolom 2 (Layanan)**: Virtual Debit Card, Top Up Saldo, Pulsa & Paket Data, Token PLN, Voucher Game, Pembayaran QRIS.
+- **Kolom 3 (Dukungan & Legal)**: Kebijakan Privasi, Syarat & Ketentuan, Biaya Transaksi, FAQ, Hubungi Kami.
+- **Baris Bawah**:
+  - Hak Cipta (c) 2026 sakuin.co.id (PT Anugrah Sejahtera Teknologi). All rights reserved.
+  - Logo/Badges: Badge Sertifikasi Keamanan, Logo Bank Indonesia PJP 1 Partner, QRIS, GPN.
+
+---
 
 <!-- BEGIN:nextjs-agent-rules -->
 

@@ -217,11 +217,11 @@ function BannerFormContent({
 
   return (
     <div
-      className="relative flex flex-col w-full max-w-3xl max-h-[92vh] overflow-hidden rounded-2xl border border-slate-800 bg-[#0d1424] shadow-2xl text-slate-100"
+      className="relative flex flex-col w-full max-w-3xl max-h-[92vh] overflow-hidden rounded-2xl border border-white/8 bg-[#0d1424] shadow-2xl text-slate-100"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 bg-[#090e1a] px-6 py-4 shrink-0">
+      <div className="flex items-center justify-between border-b border-white/8 bg-[#090e1a] px-6 py-4 shrink-0">
         <div>
           <h2 id="banner-form-title" className="text-base font-bold text-white">
             {isEditing ? 'Ubah Promo Banner' : 'Tambah Promo Banner Baru'}
@@ -243,7 +243,7 @@ function BannerFormContent({
       {/* Form Body (Scrollable) */}
       <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
         {/* Upload Dropzone (Wajib Kompresi) */}
-        <div className="rounded-2xl border border-slate-800 bg-[#0a101d] p-4 sm:p-5">
+        <div className="rounded-2xl border border-white/8 bg-[#0a101d] p-4 sm:p-5">
           <BannerUploadDropzone
             currentImageUrl={imageSrc}
             onCompressed={handleCompressed}
@@ -262,7 +262,7 @@ function BannerFormContent({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Contoh: Kartu Virtual VISA Platinum"
-              className="w-full rounded-xl border border-slate-800 bg-[#080d18] px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full rounded-xl border border-white/8 bg-[#12141a] px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0]"
             />
             {errors.title && (
               <p className="text-[11px] text-rose-400 mt-1">{errors.title}</p>
@@ -278,7 +278,7 @@ function BannerFormContent({
               value={badge}
               onChange={(e) => setBadge(e.target.value)}
               placeholder="Contoh: KARTU DEBIT • VISA PLATINUM"
-              className="w-full rounded-xl border border-slate-800 bg-[#080d18] px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full rounded-xl border border-white/8 bg-[#12141a] px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0]"
             />
             {errors.badge && (
               <p className="text-[11px] text-rose-400 mt-1">{errors.badge}</p>
@@ -294,7 +294,7 @@ function BannerFormContent({
               value={headline}
               onChange={(e) => setHeadline(e.target.value)}
               placeholder="Contoh: Belanja Internasional Bebas Biaya Konversi Ganda"
-              className="w-full rounded-xl border border-slate-800 bg-[#080d18] px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full rounded-xl border border-white/8 bg-[#12141a] px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0]"
             />
             {errors.headline && (
               <p className="text-[11px] text-rose-400 mt-1">{errors.headline}</p>
@@ -310,7 +310,7 @@ function BannerFormContent({
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               placeholder="Jelaskan secara ringkas manfaat promo ini bagi pelanggan..."
-              className="w-full rounded-xl border border-slate-800 bg-[#080d18] px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 resize-none"
+              className="w-full rounded-xl border border-white/8 bg-[#12141a] px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0] resize-none"
             />
             {errors.summary && (
               <p className="text-[11px] text-rose-400 mt-1">{errors.summary}</p>
@@ -326,7 +326,7 @@ function BannerFormContent({
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
               placeholder="Contoh: Berlaku hingga 31 Desember 2026"
-              className="w-full rounded-xl border border-slate-800 bg-[#080d18] px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full rounded-xl border border-white/8 bg-[#12141a] px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0]"
             />
             {errors.period && (
               <p className="text-[11px] text-rose-400 mt-1">{errors.period}</p>
@@ -343,14 +343,14 @@ function BannerFormContent({
               value={promoCode}
               onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
               placeholder="Contoh: SAKUINVISA"
-              className="w-full rounded-xl border border-slate-800 bg-[#080d18] px-3.5 py-2.5 text-xs text-white placeholder-slate-500 uppercase font-mono focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full rounded-xl border border-white/8 bg-[#12141a] px-3.5 py-2.5 text-xs text-white placeholder-slate-500 uppercase font-mono focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0]"
             />
           </div>
         </div>
 
         {/* Action Destination Config */}
-        <div className="rounded-2xl border border-slate-800 bg-[#0a101d] p-4 sm:p-5 space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-teal-400">
+        <div className="rounded-2xl border border-white/8 bg-[#0a101d] p-4 sm:p-5 space-y-4">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-[#22D3EE]">
             Tindakan Aksi Tombol (CTA)
           </h3>
 
@@ -367,8 +367,8 @@ function BannerFormContent({
                 onClick={() => handleActionTypeChange(opt.type as PromoActionType)}
                 className={`rounded-xl border px-3 py-2 text-left text-xs font-semibold transition-all cursor-pointer ${
                   actionType === opt.type
-                    ? 'border-teal-500 bg-teal-950/60 text-teal-300 shadow-sm'
-                    : 'border-slate-800 bg-[#080d18] text-slate-400 hover:border-slate-700 hover:text-white'
+                    ? 'border-[#1D9BF0] bg-sky-950/60 text-[#67E8F9] shadow-sm'
+                    : 'border-white/8 bg-[#12141a] text-slate-400 hover:border-slate-700 hover:text-white'
                 }`}
               >
                 {opt.label}
@@ -386,7 +386,7 @@ function BannerFormContent({
                 value={ctaText}
                 onChange={(e) => setCtaText(e.target.value)}
                 placeholder="Contoh: Ajukan Kartu Sekarang"
-                className="w-full rounded-xl border border-slate-800 bg-[#080d18] px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full rounded-xl border border-white/8 bg-[#12141a] px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0]"
               />
             </div>
 
@@ -400,7 +400,7 @@ function BannerFormContent({
                   value={ctaHref}
                   onChange={(e) => setCtaHref(e.target.value)}
                   placeholder="https://... atau /path"
-                  className="w-full rounded-xl border border-slate-800 bg-[#080d18] px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                  className="w-full rounded-xl border border-white/8 bg-[#12141a] px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0]"
                 />
               </div>
             )}
@@ -416,7 +416,7 @@ function BannerFormContent({
             <button
               type="button"
               onClick={handleAddStep}
-              className="inline-flex items-center gap-1 text-[11px] text-teal-400 hover:text-teal-300 font-semibold cursor-pointer"
+              className="inline-flex items-center gap-1 text-[11px] text-[#1D9BF0] hover:text-[#22D3EE] font-semibold cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" aria-hidden="true" />
               <span>Tambah Langkah</span>
@@ -426,7 +426,7 @@ function BannerFormContent({
           <div className="space-y-2">
             {steps.map((step, idx) => (
               <div key={idx} className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-800 text-[10px] font-bold text-teal-300">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-800 text-[10px] font-bold text-[#67E8F9]">
                   {idx + 1}
                 </span>
                 <input
@@ -434,7 +434,7 @@ function BannerFormContent({
                   value={step}
                   onChange={(e) => handleStepChange(idx, e.target.value)}
                   placeholder={`Langkah ${idx + 1}...`}
-                  className="flex-1 rounded-xl border border-slate-800 bg-[#080d18] px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                  className="flex-1 rounded-xl border border-white/8 bg-[#12141a] px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0]"
                 />
                 {steps.length > 1 && (
                   <button
@@ -460,7 +460,7 @@ function BannerFormContent({
             <button
               type="button"
               onClick={handleAddTerm}
-              className="inline-flex items-center gap-1 text-[11px] text-teal-400 hover:text-teal-300 font-semibold cursor-pointer"
+              className="inline-flex items-center gap-1 text-[11px] text-[#1D9BF0] hover:text-[#22D3EE] font-semibold cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" aria-hidden="true" />
               <span>Tambah Ketentuan</span>
@@ -476,7 +476,7 @@ function BannerFormContent({
                   value={term}
                   onChange={(e) => handleTermChange(idx, e.target.value)}
                   placeholder={`Ketentuan ${idx + 1}...`}
-                  className="flex-1 rounded-xl border border-slate-800 bg-[#080d18] px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                  className="flex-1 rounded-xl border border-white/8 bg-[#12141a] px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0]"
                 />
                 {terms.length > 1 && (
                   <button
@@ -494,7 +494,7 @@ function BannerFormContent({
         </div>
 
         {/* Status Toggle */}
-        <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-[#0a101d] p-3.5">
+        <div className="flex items-center justify-between rounded-xl border border-white/8 bg-[#0a101d] p-3.5">
           <div>
             <span className="text-xs font-semibold text-white block">
               Status Publikasi Banner
@@ -509,7 +509,7 @@ function BannerFormContent({
             type="button"
             onClick={() => setIsActive(!isActive)}
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-              isActive ? 'bg-teal-500' : 'bg-slate-700'
+              isActive ? 'bg-[#1D9BF0]' : 'bg-slate-700'
             }`}
             role="switch"
             aria-checked={isActive}
@@ -524,7 +524,7 @@ function BannerFormContent({
       </form>
 
       {/* Footer */}
-      <div className="flex items-center justify-between border-t border-slate-800 bg-[#090e1a] px-6 py-4 shrink-0">
+      <div className="flex items-center justify-between border-t border-white/8 bg-[#090e1a] px-6 py-4 shrink-0">
         <Button
           type="button"
           variant="ghost"
@@ -537,7 +537,7 @@ function BannerFormContent({
         <button
           type="button"
           onClick={handleSubmit}
-          className="inline-flex items-center gap-2 rounded-xl bg-teal-500 hover:bg-teal-400 px-5 py-2.5 text-xs font-bold text-slate-950 transition-colors shadow-lg shadow-teal-500/20 cursor-pointer"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#1D9BF0] hover:bg-[#1A8CD8] px-5 py-2.5 text-xs font-bold text-slate-950 transition-colors shadow-lg shadow-[#1D9BF0]/20 cursor-pointer"
         >
           <Save className="h-4 w-4" aria-hidden="true" />
           <span>{isEditing ? 'Simpan Perubahan' : 'Buat Banner Promo'}</span>

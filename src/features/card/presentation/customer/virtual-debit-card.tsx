@@ -147,7 +147,7 @@ export function VirtualDebitCard({
   return (
     <div
       className={cn(
-        'rounded-2xl border border-slate-800 bg-[#111726] p-6 sm:p-7 shadow-xl space-y-6 text-slate-100',
+        'rounded-2xl border border-white/8 bg-[#050507] p-6 sm:p-7 shadow-xl space-y-6 text-slate-100',
         className
       )}
     >
@@ -163,7 +163,7 @@ export function VirtualDebitCard({
                 'text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider',
                 isFrozen
                   ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                  : 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
+                  : 'bg-sky-500/20 text-[#67E8F9] border border-sky-500/40'
               )}
             >
               {isFrozen ? 'Frozen' : 'Active'}
@@ -180,7 +180,7 @@ export function VirtualDebitCard({
         {/* Left Column: Specification Box + 3 Action Buttons */}
         <div className="lg:col-span-7 space-y-3.5">
           {/* Specification Box */}
-          <div className="rounded-xl border border-slate-800/80 bg-[#0c121e]/90 p-5 sm:p-6 grid grid-cols-2 sm:grid-cols-3 gap-y-5 gap-x-6 text-xs">
+          <div className="rounded-xl border border-white/8/80 bg-[#12141a]/90 p-5 sm:p-6 grid grid-cols-2 sm:grid-cols-3 gap-y-5 gap-x-6 text-xs">
             <div>
               <span className="text-slate-400 block text-[11px] mb-1">Card Number</span>
               <div className="flex items-center gap-2">
@@ -195,7 +195,7 @@ export function VirtualDebitCard({
                   aria-label="Salin nomor kartu"
                 >
                   {copied ? (
-                    <Check className="h-3.5 w-3.5 text-teal-400" aria-hidden="true" />
+                    <Check className="h-3.5 w-3.5 text-[#22D3EE]" aria-hidden="true" />
                   ) : (
                     <Copy className="h-3.5 w-3.5" aria-hidden="true" />
                   )}
@@ -238,7 +238,7 @@ export function VirtualDebitCard({
             <button
               type="button"
               onClick={handleToggleDetailsClick}
-              className="w-full flex items-center justify-center gap-2 rounded-full border border-slate-800 bg-[#0c121e] hover:bg-slate-800/80 hover:text-white px-3.5 py-2.5 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 rounded-full border border-white/8 bg-[#12141a] hover:bg-white/6/80 hover:text-white px-3.5 py-2.5 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
             >
               {showDetails ? (
                 <>
@@ -257,7 +257,7 @@ export function VirtualDebitCard({
             <button
               type="button"
               onClick={() => setFreezeDialogOpen(true)}
-              className="w-full flex items-center justify-center gap-2 rounded-full border border-slate-800 bg-[#0c121e] hover:bg-slate-800/80 hover:text-white px-3.5 py-2.5 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 rounded-full border border-white/8 bg-[#12141a] hover:bg-white/6/80 hover:text-white px-3.5 py-2.5 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
             >
               <Snowflake
                 className={cn('h-3.5 w-3.5', isFrozen ? 'text-rose-400' : 'text-cyan-400')}
@@ -270,7 +270,7 @@ export function VirtualDebitCard({
             <button
               type="button"
               onClick={() => setMoreModalOpen(true)}
-              className="w-full flex items-center justify-center gap-2 rounded-full border border-slate-800 bg-[#0c121e] hover:bg-slate-800/80 hover:text-white px-3.5 py-2.5 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 rounded-full border border-white/8 bg-[#12141a] hover:bg-white/6/80 hover:text-white px-3.5 py-2.5 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
             >
               <Sliders className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
               <span>More</span>
@@ -285,7 +285,7 @@ export function VirtualDebitCard({
               'relative flex flex-col justify-between aspect-[1.586/1] w-full max-w-[340px] sm:max-w-sm rounded-2xl p-6 text-white shadow-2xl transition-all duration-300 overflow-hidden select-none border border-white/10',
               isFrozen
                 ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 opacity-80 grayscale-[30%]'
-                : 'bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950 shadow-teal-950/20'
+                : 'bg-gradient-to-br from-black via-zinc-900 to-[#0F1115] shadow-black/40'
             )}
           >
             {/* Subtle geometric card watermark */}
@@ -294,7 +294,7 @@ export function VirtualDebitCard({
               aria-hidden="true"
             />
             <div
-              className="absolute -left-12 -bottom-12 h-56 w-56 rounded-full bg-teal-500/[0.04] pointer-events-none"
+              className="absolute -left-12 -bottom-12 h-56 w-56 rounded-full bg-sky-500/[0.05] pointer-events-none"
               aria-hidden="true"
             />
 
@@ -324,13 +324,13 @@ export function VirtualDebitCard({
                     'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase border',
                     isFrozen
                       ? 'bg-rose-500/10 text-rose-300 border-rose-500/20'
-                      : 'bg-teal-500/10 text-teal-300 border-teal-500/20'
+                      : 'bg-sky-500/10 text-[#67E8F9] border-sky-500/20'
                   )}
                 >
                   <span
                     className={cn(
                       'h-1.5 w-1.5 rounded-full',
-                      isFrozen ? 'bg-rose-400' : 'bg-teal-400'
+                      isFrozen ? 'bg-rose-400' : 'bg-[#22D3EE]'
                     )}
                   />
                   <span>{isFrozen ? 'Frozen' : 'Active'}</span>
@@ -388,8 +388,8 @@ export function VirtualDebitCard({
 
       {/* Action Toast Feedback */}
       {actionNotice && (
-        <div className="rounded-xl border border-teal-500/40 bg-teal-950/60 px-4 py-2.5 text-xs text-teal-300 flex items-center gap-2 transition-all">
-          <Check className="h-4 w-4 text-teal-400 shrink-0" aria-hidden="true" />
+        <div className="rounded-xl border border-sky-500/40 bg-sky-950/60 px-4 py-2.5 text-xs text-[#67E8F9] flex items-center gap-2 transition-all">
+          <Check className="h-4 w-4 text-[#22D3EE] shrink-0" aria-hidden="true" />
           <span>{actionNotice}</span>
         </div>
       )}
@@ -400,7 +400,7 @@ export function VirtualDebitCard({
         onClose={() => setMoreModalOpen(false)}
         title="Card Actions"
         description="Kelola kontrol kartu, pembatasan transaksi, dan preferensi keamanan."
-        className="max-w-lg bg-[#111726] border-slate-800 text-slate-100 max-h-[85vh] overflow-y-auto"
+        className="max-w-lg bg-[#050507] border-white/8 text-slate-100 max-h-[85vh] overflow-y-auto"
       >
         <div className="space-y-6 pt-2 text-sm text-slate-200">
           {/* SECTION 1: Card control */}
@@ -409,13 +409,13 @@ export function VirtualDebitCard({
               Card control
             </span>
 
-            <div className="divide-y divide-slate-800/80 rounded-xl border border-slate-800 bg-[#0c121e]/80 overflow-hidden">
+            <div className="divide-y divide-slate-800/80 rounded-xl border border-white/8 bg-[#12141a]/80 overflow-hidden">
               {/* CVC unlock */}
               <div
                 onClick={() => {
                   showActionToast('Akses CVC berhasil dibuka kembali. Anda memiliki 3 kesempatan baru.');
                 }}
-                className="flex items-center justify-between p-3.5 hover:bg-slate-800/40 transition-colors cursor-pointer"
+                className="flex items-center justify-between p-3.5 hover:bg-white/6/40 transition-colors cursor-pointer"
                 role="button"
                 tabIndex={0}
               >
@@ -439,7 +439,7 @@ export function VirtualDebitCard({
                   setMoreModalOpen(false);
                   setPinDialogOpen(true);
                 }}
-                className="flex items-center justify-between p-3.5 hover:bg-slate-800/40 transition-colors cursor-pointer"
+                className="flex items-center justify-between p-3.5 hover:bg-white/6/40 transition-colors cursor-pointer"
                 role="button"
                 tabIndex={0}
               >
@@ -462,7 +462,7 @@ export function VirtualDebitCard({
                 onClick={() => {
                   showActionToast('Desain kartu saat ini: Obsidian Emerald (Sponsor Edition).');
                 }}
-                className="flex items-center justify-between p-3.5 hover:bg-slate-800/40 transition-colors cursor-pointer"
+                className="flex items-center justify-between p-3.5 hover:bg-white/6/40 transition-colors cursor-pointer"
                 role="button"
                 tabIndex={0}
               >
@@ -486,7 +486,7 @@ export function VirtualDebitCard({
                   setMoreModalOpen(false);
                   setFreezeDialogOpen(true);
                 }}
-                className="flex items-center justify-between p-3.5 hover:bg-slate-800/40 transition-colors cursor-pointer"
+                className="flex items-center justify-between p-3.5 hover:bg-white/6/40 transition-colors cursor-pointer"
                 role="button"
                 tabIndex={0}
               >
@@ -539,7 +539,7 @@ export function VirtualDebitCard({
               Transaction control
             </span>
 
-            <div className="divide-y divide-slate-800/80 rounded-xl border border-slate-800 bg-[#0c121e]/80 overflow-hidden">
+            <div className="divide-y divide-slate-800/80 rounded-xl border border-white/8 bg-[#12141a]/80 overflow-hidden">
               {/* Online Transactions */}
               <div className="flex items-center justify-between p-3.5 gap-4">
                 <div className="flex items-start gap-3">
@@ -669,7 +669,7 @@ export function VirtualDebitCard({
               Keamanan & Notifikasi
             </span>
 
-            <div className="divide-y divide-slate-800/80 rounded-xl border border-slate-800 bg-[#0c121e]/80 overflow-hidden">
+            <div className="divide-y divide-slate-800/80 rounded-xl border border-white/8 bg-[#12141a]/80 overflow-hidden">
               {/* Email Alerts */}
               <div className="flex items-center justify-between p-3.5 gap-4">
                 <div className="flex items-start gap-3">
@@ -751,7 +751,7 @@ export function VirtualDebitCard({
               {/* 2FA Status */}
               <div className="flex items-center justify-between p-3.5">
                 <div className="flex items-start gap-3">
-                  <div className="p-1.5 rounded-lg bg-teal-950 text-teal-400 shrink-0 mt-0.5 border border-teal-800/40">
+                  <div className="p-1.5 rounded-lg bg-sky-950/60 text-[#22D3EE] shrink-0 mt-0.5 border border-sky-800/40">
                     <ShieldCheck className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div>
@@ -761,7 +761,7 @@ export function VirtualDebitCard({
                     </p>
                   </div>
                 </div>
-                <span className="text-[11px] font-semibold text-teal-300 bg-teal-950/80 px-2 py-0.5 rounded border border-teal-800/60">
+                <span className="text-[11px] font-semibold text-[#67E8F9] bg-sky-950/60/80 px-2 py-0.5 rounded border border-sky-800/60">
                   Aktif
                 </span>
               </div>
@@ -769,7 +769,7 @@ export function VirtualDebitCard({
               {/* RLS Data Encryption Status */}
               <div className="flex items-center justify-between p-3.5">
                 <div className="flex items-start gap-3">
-                  <div className="p-1.5 rounded-lg bg-teal-950 text-teal-400 shrink-0 mt-0.5 border border-teal-800/40">
+                  <div className="p-1.5 rounded-lg bg-sky-950/60 text-[#22D3EE] shrink-0 mt-0.5 border border-sky-800/40">
                     <FileCheck className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div>
@@ -779,7 +779,7 @@ export function VirtualDebitCard({
                     </p>
                   </div>
                 </div>
-                <span className="text-[11px] font-semibold text-teal-300 bg-teal-950/80 px-2 py-0.5 rounded border border-teal-800/60">
+                <span className="text-[11px] font-semibold text-[#67E8F9] bg-sky-950/60/80 px-2 py-0.5 rounded border border-sky-800/60">
                   Terverifikasi
                 </span>
               </div>
@@ -798,10 +798,10 @@ export function VirtualDebitCard({
             ? 'Kartu akan segera dapat digunakan kembali untuk pembayaran global.'
             : 'Saat dibekukan, semua otorisasi transaksi online baru akan otomatis ditolak untuk keamanan Anda.'
         }
-        className="max-w-md bg-[#111726] border-slate-800 text-slate-100"
+        className="max-w-md bg-[#050507] border-white/8 text-slate-100"
       >
         <div className="space-y-4 pt-2">
-          <div className="rounded-xl border border-slate-800 bg-[#0c121e] p-4 text-xs text-slate-300 space-y-2">
+          <div className="rounded-xl border border-white/8 bg-[#12141a] p-4 text-xs text-slate-300 space-y-2">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-white">Kartu:</span>
               <span className="font-mono text-slate-200">Mastercard Virtual (*{last4})</span>
@@ -819,7 +819,7 @@ export function VirtualDebitCard({
               variant="outline"
               size="sm"
               onClick={() => setFreezeDialogOpen(false)}
-              className="border-slate-800 bg-[#0c121e] text-slate-200 hover:bg-slate-800"
+              className="border-white/8 bg-[#12141a] text-slate-200 hover:bg-white/6"
             >
               Batal
             </Button>
@@ -830,7 +830,7 @@ export function VirtualDebitCard({
               className={cn(
                 'font-bold',
                 isFrozen
-                  ? 'bg-teal-500 hover:bg-teal-400 text-slate-950 border-teal-500'
+                  ? 'bg-[#1D9BF0] hover:bg-[#1A8CD8] text-white border-[#1D9BF0]'
                   : 'bg-rose-600 hover:bg-rose-500 text-white border-rose-600'
               )}
             >
@@ -850,7 +850,7 @@ export function VirtualDebitCard({
         }}
         title="Verifikasi PIN Keamanan"
         description="Masukkan 6-digit PIN keamanan transaksi Anda untuk membuka nomor kartu dan kode CVV."
-        className="max-w-md bg-[#111726] border-slate-800 text-slate-100"
+        className="max-w-md bg-[#050507] border-white/8 text-slate-100"
       >
         <form onSubmit={handleVerifyPin} className="space-y-4 pt-2">
           <div>
@@ -865,7 +865,7 @@ export function VirtualDebitCard({
               onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))}
               placeholder="••••••"
               autoFocus
-              className="w-full text-center font-mono text-2xl tracking-[0.5em] rounded-xl border border-slate-800 bg-[#0c121e] py-3 text-white focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="w-full text-center font-mono text-2xl tracking-[0.5em] rounded-xl border border-white/8 bg-[#12141a] py-3 text-white focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
             />
             {pinError && <p className="mt-1.5 text-xs text-rose-400">{pinError}</p>}
           </div>
@@ -880,7 +880,7 @@ export function VirtualDebitCard({
                 setPinError(null);
                 setPinInput('');
               }}
-              className="border-slate-800 bg-[#0c121e] text-slate-200 hover:bg-slate-800"
+              className="border-white/8 bg-[#12141a] text-slate-200 hover:bg-white/6"
             >
               Batal
             </Button>

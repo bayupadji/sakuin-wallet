@@ -14,13 +14,13 @@ export function BalanceCard({ wallet }: BalanceCardProps) {
   const { isBalanceHidden, toggleBalanceHidden } = useWalletStore();
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 transition-colors">
-      <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs dark:border-white/8 dark:bg-[#050507] transition-colors">
+      <div className="flex items-center justify-between text-sm text-slate-500 dark:text-zinc-400">
         <div className="flex items-center gap-2">
           <span>{messages.wallet.currentBalance}</span>
           <button
             onClick={toggleBalanceHidden}
-            className="rounded p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 cursor-pointer"
+            className="rounded p-1 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D9BF0] cursor-pointer"
             aria-label={isBalanceHidden ? 'Show wallet balance' : 'Hide wallet balance'}
           >
             {isBalanceHidden ? (
@@ -38,7 +38,7 @@ export function BalanceCard({ wallet }: BalanceCardProps) {
               <span>Frozen</span>
             </span>
           )}
-          <span className="font-mono text-xs font-semibold text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/60 px-2.5 py-0.5 rounded border border-teal-200 dark:border-teal-900">
+          <span className="font-mono text-xs font-semibold text-sky-700 dark:text-[#22D3EE] bg-sky-50 dark:bg-sky-950/60 px-2.5 py-0.5 rounded border border-sky-200 dark:border-sky-800/60">
             USD Wallet
           </span>
         </div>

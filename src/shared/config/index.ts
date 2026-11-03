@@ -1,5 +1,9 @@
 export const config = {
   appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  features: {
+    /** Virtual Debit Card is a Phase 2 module; the landing page shows "Coming soon" until this is true. */
+    virtualCard: process.env.NEXT_PUBLIC_FEATURE_VIRTUAL_CARD === 'true',
+  },
   supabase: {
     url: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     publishableKey:

@@ -172,17 +172,17 @@ export function ActivityHub() {
   return (
     <div className="space-y-6 font-sans antialiased text-slate-100">
       {/* 1. Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-6">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-950 text-teal-400 border border-teal-800/40">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-950/60 text-[#22D3EE] border border-sky-800/40">
               <History className="h-4 w-4" aria-hidden="true" />
             </span>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
               Riwayat Transaksi & Buku Besar
             </h1>
           </div>
-          <p className="text-xs text-slate-400 mt-1.5">
+          <p className="text-xs text-zinc-400 mt-1.5">
             Buku besar append-only double-entry. Pilih transaksi untuk melihat bukti settlement kriptografis.
           </p>
         </div>
@@ -191,82 +191,82 @@ export function ActivityHub() {
           variant="outline"
           size="sm"
           onClick={() => setIsExportModalOpen(true)}
-          className="gap-1.5 text-xs font-medium self-start sm:self-auto border-slate-800 bg-[#111726] text-slate-200 hover:bg-slate-800 cursor-pointer"
+          className="gap-1.5 text-xs font-medium self-start sm:self-auto border-white/8 bg-[#050507] text-zinc-200 hover:bg-white/6 cursor-pointer"
           aria-label="Buka dialog ekspor mutasi ke Excel"
         >
-          <FileSpreadsheet className="h-3.5 w-3.5 text-teal-400" aria-hidden="true" />
+          <FileSpreadsheet className="h-3.5 w-3.5 text-[#22D3EE]" aria-hidden="true" />
           <span>Ekspor Mutasi (Excel)</span>
         </Button>
       </div>
 
       {/* 2. Monthly Summary Metrics (Dinamis sesuai Periode) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="rounded-2xl border border-slate-800 bg-[#111726] p-6 shadow-xl space-y-1">
-          <span className="text-xs text-slate-400">Total Arus Masuk ({currentPeriodLabel})</span>
-          <p className="font-mono text-2xl font-bold tracking-tight text-teal-400 tabular-nums">
+        <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 shadow-xl space-y-1">
+          <span className="text-xs text-zinc-400">Total Arus Masuk ({currentPeriodLabel})</span>
+          <p className="font-mono text-2xl font-bold tracking-tight text-[#7CE8C8] tabular-nums">
             +${(totalInflowCents / 100).toFixed(2)}
           </p>
-          <span className="text-[11px] text-slate-400 font-mono">Deposit VA & QRIS</span>
+          <span className="text-[11px] text-zinc-400 font-mono">Deposit VA & QRIS</span>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-[#111726] p-6 shadow-xl space-y-1">
-          <span className="text-xs text-slate-400">Total Pengeluaran ({currentPeriodLabel})</span>
+        <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 shadow-xl space-y-1">
+          <span className="text-xs text-zinc-400">Total Pengeluaran ({currentPeriodLabel})</span>
           <p className="font-mono text-2xl font-bold tracking-tight text-white tabular-nums">
             -${(totalOutflowCents / 100).toFixed(2)}
           </p>
-          <span className="text-[11px] text-slate-400 font-mono">Pembelian Kartu Virtual</span>
+          <span className="text-[11px] text-zinc-400 font-mono">Pembelian Kartu Virtual</span>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-[#111726] p-6 shadow-xl space-y-1">
-          <span className="text-xs text-slate-400">Pertumbuhan Saldo Bersih</span>
+        <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 shadow-xl space-y-1">
+          <span className="text-xs text-zinc-400">Pertumbuhan Saldo Bersih</span>
           <div className="flex items-center gap-1.5">
             <p
               className={`font-mono text-2xl font-bold tracking-tight tabular-nums ${
-                netGrowthCents >= 0 ? 'text-teal-400' : 'text-rose-400'
+                netGrowthCents >= 0 ? 'text-[#7CE8C8]' : 'text-rose-400'
               }`}
             >
               {netGrowthCents >= 0 ? '+' : '-'}${Math.abs(netGrowthCents / 100).toFixed(2)}
             </p>
-            <TrendingUp className="h-4 w-4 text-teal-400" aria-hidden="true" />
+            <TrendingUp className="h-4 w-4 text-[#22D3EE]" aria-hidden="true" />
           </div>
-          <span className="text-[11px] text-slate-400 font-mono">Delta saldo ({currentPeriodLabel})</span>
+          <span className="text-[11px] text-zinc-400 font-mono">Delta saldo ({currentPeriodLabel})</span>
         </div>
       </div>
 
       {/* 3. Ledger Transaction Hub Card (Search + Filter + Periode + Rows) */}
-      <div className="rounded-2xl border border-slate-800 bg-[#111726] p-6 sm:p-7 shadow-xl space-y-4">
+      <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 sm:p-7 shadow-xl space-y-4">
         {/* Controls Container */}
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             {/* Input Pencarian */}
             <div className="relative w-full sm:w-72">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" aria-hidden="true" />
               <input
                 type="text"
                 placeholder="Cari transaksi, merchant, ID ref..."
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-[#0c121e] pl-9 pr-3 py-2 text-xs text-white focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full rounded-xl border border-white/8 bg-[#12141a] pl-9 pr-3 py-2 text-xs text-white focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0]"
               />
             </div>
 
             {/* Filter Periode Bulan & Dropdown Jumlah Baris */}
             <div className="flex flex-wrap items-center gap-2">
               {/* Filter Periode per Bulan */}
-              <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-900/80 px-2.5 py-1.5 rounded-lg border border-slate-800">
-                <Calendar className="h-3.5 w-3.5 text-teal-400" aria-hidden="true" />
-                <label htmlFor="period-month-select" className="whitespace-nowrap text-[11px] font-medium text-slate-400">
+              <div className="flex items-center gap-2 text-xs text-zinc-400 bg-[#12141a] px-2.5 py-1.5 rounded-lg border border-white/8">
+                <Calendar className="h-3.5 w-3.5 text-[#22D3EE]" aria-hidden="true" />
+                <label htmlFor="period-month-select" className="whitespace-nowrap text-[11px] font-medium text-zinc-400">
                   Periode:
                 </label>
                 <select
                   id="period-month-select"
                   value={selectedMonth}
                   onChange={(e) => handleMonthChange(e.target.value)}
-                  className="bg-transparent text-xs font-semibold text-teal-400 focus:outline-none cursor-pointer"
+                  className="bg-transparent text-xs font-semibold text-[#22D3EE] focus:outline-none cursor-pointer"
                   aria-label="Pilih filter periode per bulan"
                 >
                   {PERIOD_OPTIONS.map((period) => (
-                    <option key={period.value} value={period.value} className="bg-slate-900 text-slate-200">
+                    <option key={period.value} value={period.value} className="bg-[#050507] text-zinc-200">
                       {period.label}
                     </option>
                   ))}
@@ -274,19 +274,19 @@ export function ActivityHub() {
               </div>
 
               {/* Dropdown Jumlah Baris (Kelipatan 10 s.d 100) */}
-              <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-900/80 px-2.5 py-1.5 rounded-lg border border-slate-800">
-                <label htmlFor="items-per-page-top" className="whitespace-nowrap text-[11px] font-medium text-slate-400">
+              <div className="flex items-center gap-2 text-xs text-zinc-400 bg-[#12141a] px-2.5 py-1.5 rounded-lg border border-white/8">
+                <label htmlFor="items-per-page-top" className="whitespace-nowrap text-[11px] font-medium text-zinc-400">
                   Tampilkan:
                 </label>
                 <select
                   id="items-per-page-top"
                   value={itemsPerPage}
                   onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                  className="bg-transparent text-xs font-semibold text-teal-400 focus:outline-none cursor-pointer"
+                  className="bg-transparent text-xs font-semibold text-[#22D3EE] focus:outline-none cursor-pointer"
                   aria-label="Pilih jumlah transaksi per halaman"
                 >
                   {PAGE_SIZE_OPTIONS.map((size) => (
-                    <option key={size} value={size} className="bg-slate-900 text-slate-200">
+                    <option key={size} value={size} className="bg-[#050507] text-zinc-200">
                       {size} baris
                     </option>
                   ))}
@@ -296,14 +296,14 @@ export function ActivityHub() {
           </div>
 
           {/* Kategori Tabs */}
-          <div className="flex items-center gap-1 rounded-lg bg-slate-900 p-1 border border-slate-800 text-xs overflow-x-auto">
+          <div className="flex items-center gap-1 rounded-lg bg-[#050507] p-1 border border-white/8 text-xs overflow-x-auto">
             <button
               type="button"
               onClick={() => handleTabChange('all')}
               className={`rounded-md px-3 py-1 font-medium transition-colors cursor-pointer whitespace-nowrap ${
                 activeTab === 'all'
-                  ? 'bg-slate-800 text-white font-semibold'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-white/10 text-white font-semibold'
+                  : 'text-zinc-400 hover:text-white'
               }`}
             >
               Semua Buku Besar
@@ -383,7 +383,7 @@ export function ActivityHub() {
                   <div
                     key={tx.id}
                     onClick={() => setSelectedTx(tx)}
-                    className="flex items-center justify-between p-3.5 sm:px-4 hover:bg-[#0c121e]/80 rounded-xl cursor-pointer transition-colors"
+                    className="flex items-center justify-between p-3.5 sm:px-4 hover:bg-[#12141a] rounded-xl cursor-pointer transition-colors"
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
@@ -395,8 +395,8 @@ export function ActivityHub() {
                       <div
                         className={`flex h-10 w-10 items-center justify-center rounded-xl shrink-0 ${
                           isCredit
-                            ? 'bg-teal-950 text-teal-400 border border-teal-800/40'
-                            : 'bg-slate-900 text-slate-300 border border-slate-800'
+                            ? 'bg-sky-950 text-[#22D3EE] border border-sky-800/40'
+                            : 'bg-[#12141a] text-zinc-300 border border-white/8'
                         }`}
                       >
                         <Icon className="h-5 w-5" aria-hidden="true" />
@@ -405,7 +405,7 @@ export function ActivityHub() {
                         <p className="font-semibold text-sm text-white truncate">
                           {tx.title}
                         </p>
-                        <p className="text-xs text-slate-400 mt-0.5">
+                        <p className="text-xs text-zinc-400 mt-0.5">
                           {tx.channel} &bull; {tx.timestampWib}
                         </p>
                       </div>
@@ -415,13 +415,13 @@ export function ActivityHub() {
                       <p
                         className={`font-mono text-sm font-bold tabular-nums ${
                           isCredit
-                            ? 'text-teal-400'
+                            ? 'text-[#7CE8C8]'
                             : 'text-white'
                         }`}
                       >
                         {isCredit ? '+' : '-'}{formattedUsd}
                       </p>
-                      <p className="text-[11px] text-slate-400 font-mono tabular-nums mt-0.5">
+                      <p className="text-[11px] text-zinc-400 font-mono tabular-nums mt-0.5">
                         ≈ Rp {tx.amountIdr.toLocaleString('id-ID')}
                       </p>
                     </div>
@@ -434,13 +434,13 @@ export function ActivityHub() {
 
         {/* 4. Pagination Controls Footer */}
         {filteredTransactions.length > 0 && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-slate-800/80 pt-4 text-xs text-slate-400">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-white/8 pt-4 text-xs text-zinc-400">
             {/* Status Rentang Data */}
             <div className="flex items-center gap-3">
               <span>
-                Menampilkan <span className="font-semibold text-slate-200">{startIndex}</span> -{' '}
-                <span className="font-semibold text-slate-200">{endIndex}</span> dari{' '}
-                <span className="font-semibold text-slate-200">{filteredTransactions.length}</span> transaksi
+                Menampilkan <span className="font-semibold text-zinc-200">{startIndex}</span> -{' '}
+                <span className="font-semibold text-zinc-200">{endIndex}</span> dari{' '}
+                <span className="font-semibold text-zinc-200">{filteredTransactions.length}</span> transaksi
               </span>
             </div>
 
@@ -451,7 +451,7 @@ export function ActivityHub() {
                 size="sm"
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage <= 1 || isPageLoading}
-                className="h-8 px-2.5 text-xs font-medium border-slate-800 bg-[#0c121e] text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="h-8 px-2.5 text-xs font-medium border-white/8 bg-[#12141a] text-zinc-300 hover:bg-white/6 disabled:opacity-40 disabled:cursor-not-allowed"
                 aria-label="Halaman sebelumnya"
               >
                 <ChevronLeft className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
@@ -462,7 +462,7 @@ export function ActivityHub() {
                 {paginationRange.map((page, idx) => {
                   if (page === '...') {
                     return (
-                      <span key={`ellipsis-${idx}`} className="px-2 text-slate-500 font-mono select-none">
+                      <span key={`ellipsis-${idx}`} className="px-2 text-zinc-500 font-mono select-none">
                         ...
                       </span>
                     );
@@ -479,8 +479,8 @@ export function ActivityHub() {
                       disabled={isPageLoading}
                       className={`h-8 min-w-[32px] px-2 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer ${
                         isCurrent
-                          ? 'bg-teal-500/20 text-teal-400 border border-teal-500/40'
-                          : 'bg-[#0c121e] text-slate-400 hover:text-white border border-slate-800 hover:bg-slate-800/80'
+                          ? 'bg-[#1D9BF0]/20 text-[#1D9BF0] border border-[#1D9BF0]/40'
+                          : 'bg-[#12141a] text-zinc-400 hover:text-white border border-white/8 hover:bg-white/6'
                       }`}
                       aria-label={`Ke halaman ${pageNum}`}
                       aria-current={isCurrent ? 'page' : undefined}
@@ -496,7 +496,7 @@ export function ActivityHub() {
                 size="sm"
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage >= totalPages || isPageLoading}
-                className="h-8 px-2.5 text-xs font-medium border-slate-800 bg-[#0c121e] text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="h-8 px-2.5 text-xs font-medium border-white/8 bg-[#12141a] text-zinc-300 hover:bg-white/6 disabled:opacity-40 disabled:cursor-not-allowed"
                 aria-label="Halaman berikutnya"
               >
                 <span>Berikutnya</span>

@@ -14,27 +14,94 @@
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
   --border: #e2e8f0;
-  --accent: #0d9488;
+  --primary: #1d9bf0;
+  --primary-foreground: #ffffff;
+  --accent: #1d9bf0;
   --accent-foreground: #ffffff;
-  --ring: #0d9488;
+  --destructive: #e11d48;
+  --warning: #d97706;
+  --ring: #1d9bf0;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #090d14;
-    --foreground: #f8fafc;
-    --card: #111726;
-    --card-foreground: #f8fafc;
-    --muted: #1a2234;
-    --muted-foreground: #94a3b8;
-    --border: #1e293b;
-    --accent: #14b8a6;
+    --background: #0f1115;
+    --foreground: #ffffff;
+    --card: #050507;
+    --card-foreground: #ffffff;
+    --muted: #161920;
+    --muted-foreground: #a1a1aa;
+    --border: rgba(255, 255, 255, 0.08);
+    --primary: #1d9bf0;
+    --primary-foreground: #ffffff;
+    --accent: #1d9bf0;
     --accent-foreground: #ffffff;
-    --ring: #14b8a6;
+    --destructive: #f43f5e;
+    --warning: #f59e0b;
+    --ring: #1d9bf0;
   }
 }
 
+/* Design system theme tokens */
+@theme {
+  --color-primary: #1d9bf0;
+  --color-primary-hover: #1a8cd8;
+  --color-primary-foreground: #ffffff;
+  --color-accent: #1d9bf0;
+  --color-accent-foreground: #ffffff;
+  --color-lp-bg: #0f1115;
+  --color-lp-surface: #050507;
+  --color-lp-body: #d4d4d8;
+  --color-lp-strong: #e4e4e7;
+  --color-lp-muted: #a1a1aa;
+  --color-lp-accent: #1d9bf0;
+  --color-lp-cyan: #22d3ee;
+  --color-lp-sky: #7dd3fc;
+  --color-lp-sky-soft: #67e8f9;
+  --color-lp-mint: #7ce8c8;
+}
+
+@utility lp-glow-card {
+  background:
+    linear-gradient(#050507, #050507) padding-box,
+    linear-gradient(135deg, rgba(34, 211, 238, 0.35), rgba(99, 102, 241, 0.5)) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 0 50px -10px rgba(99, 102, 241, 0.35);
+}
+
+@utility lp-glow-card-violet {
+  background:
+    linear-gradient(#050507, #050507) padding-box,
+    linear-gradient(135deg, rgba(34, 211, 238, 0.45), rgba(168, 85, 247, 0.45)) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 0 60px -10px rgba(99, 102, 241, 0.4);
+}
+
+@utility lp-card-azure {
+  background: linear-gradient(45deg, #7ce8c8 0%, #38bdf8 50%, #2563eb 100%);
+}
+
+@utility lp-card-pearl {
+  background: radial-gradient(circle at 50% 50%, #fef3c7 0%, #e0f2fe 55%, #bae6fd 100%);
+}
+
+@utility lp-card-lavender {
+  background: linear-gradient(135deg, #c084fc 0%, #818cf8 100%);
+}
+
+@utility lp-stripes {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.07) 0px,
+    rgba(255, 255, 255, 0.07) 1px,
+    transparent 1px,
+    transparent 14px
+  );
+}
+
 @theme inline {
+  --font-lp-sans: var(--font-jakarta), system-ui, sans-serif;
+  --font-lp-mono: var(--font-jetbrains), ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -44,6 +111,9 @@
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-warning: var(--warning);
+  --color-ring: var(--ring);
   --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
@@ -57,8 +127,19 @@ body {
 }
 
 ::selection {
-  background-color: #0d948825;
-  color: #0d9488;
+  background-color: color-mix(in srgb, var(--accent) 25%, transparent);
+  color: var(--foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Tabular numerals for financial data */

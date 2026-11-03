@@ -113,12 +113,12 @@ export function ExportExcelModal({
       onClose={onClose}
       title="Ekspor Laporan Mutasi ke Excel"
       description="Pilih 1 periode bulan transaksi untuk diunduh dalam format spreadsheet Excel resmi."
-      className="max-w-md bg-[#111726] border-slate-800 text-slate-100"
+      className="max-w-md bg-[#050507] border-white/8 text-zinc-100"
     >
       <div className="space-y-4">
         {/* Aturan Wajib 1 Bulan */}
-        <div className="flex items-start gap-2.5 rounded-xl border border-teal-900/60 bg-teal-950/40 p-3 text-xs text-teal-300">
-          <Info className="h-4 w-4 shrink-0 text-teal-400 mt-0.5" aria-hidden="true" />
+        <div className="flex items-start gap-2.5 rounded-xl border border-sky-900/60 bg-sky-950/40 p-3 text-xs text-[#67E8F9]">
+          <Info className="h-4 w-4 shrink-0 text-[#22D3EE] mt-0.5" aria-hidden="true" />
           <p>
             Sesuai regulasi buku besar, ekspor rekening wajib dipilih <b>per 1 periode bulan spesifik</b> (maksimal 1 tahun ke belakang).
           </p>
@@ -126,19 +126,19 @@ export function ExportExcelModal({
 
         {/* Form Pemilihan Periode Bulan */}
         <div className="space-y-2">
-          <label htmlFor={selectId} className="block text-xs font-semibold text-slate-300">
+          <label htmlFor={selectId} className="block text-xs font-semibold text-zinc-300">
             Pilih Periode Bulan (Wajib)
           </label>
           <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-teal-400" aria-hidden="true" />
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#22D3EE]" aria-hidden="true" />
             <select
               id={selectId}
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="w-full rounded-xl border border-slate-700 bg-[#0c121e] pl-9.5 pr-4 py-2.5 text-xs font-semibold text-white focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 cursor-pointer"
+              className="w-full rounded-xl border border-white/10 bg-[#12141a] pl-9.5 pr-4 py-2.5 text-xs font-semibold text-white focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0] cursor-pointer"
             >
               {monthOptions.map((opt) => (
-                <option key={opt.value} value={opt.value} className="bg-slate-900 text-slate-100">
+                <option key={opt.value} value={opt.value} className="bg-[#050507] text-zinc-100">
                   {opt.label}
                 </option>
               ))}
@@ -147,30 +147,30 @@ export function ExportExcelModal({
         </div>
 
         {/* Ringkasan Data Bulan Terpilih */}
-        <div className="rounded-xl border border-slate-800 bg-[#0c121e]/80 p-3.5 space-y-2 text-xs">
-          <div className="flex items-center justify-between text-slate-400">
+        <div className="rounded-xl border border-white/8 bg-[#12141a] p-3.5 space-y-2 text-xs">
+          <div className="flex items-center justify-between text-zinc-400">
             <span>Periode Terpilih</span>
-            <span className="font-semibold text-slate-200">{selectedLabel}</span>
+            <span className="font-semibold text-zinc-200">{selectedLabel}</span>
           </div>
-          <div className="flex items-center justify-between text-slate-400">
+          <div className="flex items-center justify-between text-zinc-400">
             <span>Total Transaksi</span>
             {isLoading ? (
-              <span className="text-slate-500 animate-pulse">Memuat...</span>
+              <span className="text-zinc-500 animate-pulse">Memuat...</span>
             ) : (
-              <span className="font-mono font-semibold text-teal-400">
+              <span className="font-mono font-semibold text-[#22D3EE]">
                 {txList.length} transaksi
               </span>
             )}
           </div>
-          <div className="flex items-center justify-between text-slate-400 pt-1 border-t border-slate-800/80">
+          <div className="flex items-center justify-between text-zinc-400 pt-1 border-t border-white/8">
             <span>Total Arus Masuk</span>
-            <span className="font-mono text-teal-400 tabular-nums">
+            <span className="font-mono text-[#7CE8C8] tabular-nums">
               +${(totalInflow / 100).toFixed(2)}
             </span>
           </div>
-          <div className="flex items-center justify-between text-slate-400">
+          <div className="flex items-center justify-between text-zinc-400">
             <span>Total Pengeluaran</span>
-            <span className="font-mono text-slate-200 tabular-nums">
+            <span className="font-mono text-zinc-200 tabular-nums">
               -${(totalOutflow / 100).toFixed(2)}
             </span>
           </div>
@@ -185,14 +185,14 @@ export function ExportExcelModal({
         )}
 
         {/* Tombol Aksi */}
-        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-800">
+        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-white/8">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={onClose}
             disabled={isExporting}
-            className="border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 text-xs"
+            className="border-white/8 bg-black/60 text-zinc-300 hover:bg-white/6 text-xs"
           >
             Batal
           </Button>
@@ -202,7 +202,7 @@ export function ExportExcelModal({
             size="sm"
             onClick={handleDownload}
             disabled={isExporting || isLoading || txList.length === 0}
-            className="gap-1.5 bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs cursor-pointer disabled:opacity-50"
+            className="gap-1.5 bg-[#1D9BF0] hover:bg-[#1A8CD8] text-white font-semibold text-xs cursor-pointer disabled:opacity-50"
           >
             {isExporting ? (
               <>

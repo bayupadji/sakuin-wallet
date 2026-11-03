@@ -148,20 +148,20 @@ export function WalletOverview() {
       <FxRateWidget rateIdr={effectiveFxRate} guaranteedMinutes={15} />
 
       {/* 3. Hero Saldo Utama (Full-Width Header) */}
-      <div className="rounded-2xl border border-slate-800 bg-[#111726] p-6 sm:p-7 shadow-xl relative overflow-hidden">
+      <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 sm:p-7 shadow-xl relative overflow-hidden">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10">
           <div>
             {/* Account identifier */}
-            <div className="flex items-center gap-2.5 text-xs font-semibold text-slate-400">
+            <div className="flex items-center gap-2.5 text-xs font-semibold text-zinc-400">
               <span>Saldo Utama USD</span>
-              <span className="h-1 w-1 rounded-full bg-slate-700" />
-              <span className="font-mono text-slate-300">
+              <span className="h-1 w-1 rounded-full bg-zinc-700" />
+              <span className="font-mono text-zinc-300">
                 ACC-8924-ID
               </span>
               <button
                 type="button"
                 onClick={toggleBalanceHidden}
-                className="ml-1 rounded p-1 text-slate-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 cursor-pointer"
+                className="ml-1 rounded p-1 text-zinc-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D9BF0] cursor-pointer"
                 aria-label={isBalanceHidden ? 'Tampilkan saldo' : 'Sembunyikan saldo'}
               >
                 {isBalanceHidden ? (
@@ -177,17 +177,17 @@ export function WalletOverview() {
               <span className="font-mono text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white tabular-nums">
                 {isBalanceHidden ? '••••••' : currentMoney.format()}
               </span>
-              <span className="text-xs font-bold uppercase tracking-wider text-teal-400">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#22D3EE]">
                 USD
               </span>
             </div>
 
             {/* Approximate IDR value */}
-            <p className="mt-1 font-mono text-xs text-slate-400">
+            <p className="mt-1 font-mono text-xs text-zinc-400">
               {isBalanceHidden
                 ? '••••••••••••'
                 : `≈ Rp ${balanceIdr.toLocaleString('id-ID')} IDR`}
-              <span className="ml-2 inline-flex items-center rounded-sm bg-teal-950 px-1.5 py-0.5 text-[10px] font-medium text-teal-300 border border-teal-800/40">
+              <span className="ml-2 inline-flex items-center rounded-sm bg-sky-950 px-1.5 py-0.5 text-[10px] font-medium text-[#67E8F9] border border-sky-800/40">
                 Kurs {effectiveFxRate.toLocaleString('id-ID')}
               </span>
             </p>
@@ -199,7 +199,7 @@ export function WalletOverview() {
               variant="primary"
               size="md"
               onClick={() => setModalMode('topup')}
-              className="gap-2 shadow-md font-bold bg-teal-500 hover:bg-teal-400 text-slate-950 border-teal-500"
+              className="gap-2 shadow-md font-bold bg-[#1D9BF0] hover:bg-[#1A8CD8] text-white border-[#1D9BF0]"
             >
               <Plus className="h-4 w-4" aria-hidden="true" />
               <span>Isi Saldo USD</span>
@@ -209,9 +209,9 @@ export function WalletOverview() {
               variant="outline"
               size="md"
               onClick={() => setModalMode('receive')}
-              className="gap-2 font-medium border-slate-800 bg-[#0c121e] text-slate-200 hover:bg-slate-800"
+              className="gap-2 font-medium border-white/8 bg-[#12141a] text-zinc-200 hover:bg-white/6"
             >
-              <QrCode className="h-4 w-4 text-teal-400" aria-hidden="true" />
+              <QrCode className="h-4 w-4 text-[#22D3EE]" aria-hidden="true" />
               <span>Terima IDR</span>
             </Button>
 
@@ -219,9 +219,9 @@ export function WalletOverview() {
               <Button
                 variant="outline"
                 size="md"
-                className="gap-2 font-medium border-slate-800 bg-[#0c121e] text-slate-200 hover:bg-slate-800"
+                className="gap-2 font-medium border-white/8 bg-[#12141a] text-zinc-200 hover:bg-white/6"
               >
-                <CreditCard className="h-4 w-4 text-teal-400" aria-hidden="true" />
+                <CreditCard className="h-4 w-4 text-[#22D3EE]" aria-hidden="true" />
                 <span>Kelola Kartu</span>
               </Button>
             </Link>
@@ -229,36 +229,36 @@ export function WalletOverview() {
         </div>
 
         {/* Financial Stat Sub-Cards */}
-        <div className="mt-7 pt-6 border-t border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+        <div className="mt-7 pt-6 border-t border-white/8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
           <div>
-            <span className="text-slate-400 block">Dana Tersedia</span>
+            <span className="text-zinc-400 block">Dana Tersedia</span>
             <span className="font-mono font-bold text-white mt-0.5 block tabular-nums text-sm">
               {isBalanceHidden ? '••••' : '$1,250.00'}
             </span>
           </div>
 
           <div>
-            <span className="text-slate-400 block">Pengeluaran Bulan Ini</span>
+            <span className="text-zinc-400 block">Pengeluaran Bulan Ini</span>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="font-mono font-bold text-white block tabular-nums text-sm">
                 {isBalanceHidden ? '••••' : '$105.50'}
               </span>
-              <span className="text-[11px] text-teal-400 font-mono">(-14%)</span>
+              <span className="text-[11px] text-[#22D3EE] font-mono">(-14%)</span>
             </div>
           </div>
 
           <div>
-            <span className="text-slate-400 block">Total Arus Masuk</span>
+            <span className="text-zinc-400 block">Total Arus Masuk</span>
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="font-mono font-bold text-teal-300 block tabular-nums text-sm">
+              <span className="font-mono font-bold text-[#67E8F9] block tabular-nums text-sm">
                 {isBalanceHidden ? '••••' : '+$620.00'}
               </span>
-              <TrendingUp className="h-3.5 w-3.5 text-teal-400" aria-hidden="true" />
+              <TrendingUp className="h-3.5 w-3.5 text-[#22D3EE]" aria-hidden="true" />
             </div>
           </div>
 
           <div>
-            <span className="text-slate-400 block">Verifikasi Identitas</span>
+            <span className="text-zinc-400 block">Verifikasi Identitas</span>
             <div className="mt-1">
               <KycStatusBadge status={kycStatus} />
             </div>
@@ -282,20 +282,20 @@ export function WalletOverview() {
       </div>
 
       {/* 4. Baris Keempat: Riwayat Transaksi & Buku Besar (Full Width 12-cols) */}
-      <div className="rounded-2xl border border-slate-800 bg-[#111726] p-6 sm:p-7 shadow-xl space-y-5">
+      <div className="rounded-2xl border border-white/8 bg-[#050507] p-6 sm:p-7 shadow-xl space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-bold tracking-tight text-white">
               Aktivitas Transaksi Terakhir
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-zinc-400 mt-0.5">
               Buku besar append-only tercatat dalam format waktu lokal Jakarta (WIB). Klik baris untuk melihat tanda terima kriptografis.
             </p>
           </div>
 
           <Link
             href="/transactions"
-            className="text-xs font-semibold text-teal-400 hover:text-teal-300 transition-colors inline-flex items-center gap-1 self-start sm:self-auto"
+            className="text-xs font-semibold text-[#1D9BF0] hover:text-[#22D3EE] transition-colors inline-flex items-center gap-1 self-start sm:self-auto"
           >
             <span>Semua Transaksi</span>
             <span>&rarr;</span>
@@ -305,25 +305,25 @@ export function WalletOverview() {
         {/* Search & Filter Controls */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" aria-hidden="true" />
             <input
               type="text"
               placeholder="Cari transaksi..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-slate-800 bg-[#0c121e] pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full rounded-lg border border-white/8 bg-[#12141a] pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:border-[#1D9BF0] focus:outline-none focus:ring-1 focus:ring-[#1D9BF0]"
             />
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex items-center gap-1 rounded-lg bg-slate-900 p-1 border border-slate-800 text-xs shrink-0">
+          <div className="flex items-center gap-1 rounded-lg bg-[#050507] p-1 border border-white/8 text-xs shrink-0">
             <button
               type="button"
               onClick={() => setActiveTab('all')}
               className={`rounded-md px-3 py-1 font-medium transition-colors cursor-pointer ${
                 activeTab === 'all'
-                  ? 'bg-slate-800 text-white font-semibold'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-white/10 text-white font-semibold'
+                  : 'text-zinc-400 hover:text-white'
               }`}
             >
               Semua
@@ -333,8 +333,8 @@ export function WalletOverview() {
               onClick={() => setActiveTab('topup')}
               className={`rounded-md px-3 py-1 font-medium transition-colors cursor-pointer ${
                 activeTab === 'topup'
-                  ? 'bg-slate-800 text-white font-semibold'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-white/10 text-white font-semibold'
+                  : 'text-zinc-400 hover:text-white'
               }`}
             >
               Isi Saldo
@@ -344,8 +344,8 @@ export function WalletOverview() {
               onClick={() => setActiveTab('card')}
               className={`rounded-md px-3 py-1 font-medium transition-colors cursor-pointer ${
                 activeTab === 'card'
-                  ? 'bg-slate-800 text-white font-semibold'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-white/10 text-white font-semibold'
+                  : 'text-zinc-400 hover:text-white'
               }`}
             >
               Kartu
@@ -355,8 +355,8 @@ export function WalletOverview() {
               onClick={() => setActiveTab('receive')}
               className={`rounded-md px-3 py-1 font-medium transition-colors cursor-pointer ${
                 activeTab === 'receive'
-                  ? 'bg-slate-800 text-white font-semibold'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-white/10 text-white font-semibold'
+                  : 'text-zinc-400 hover:text-white'
               }`}
             >
               Terima Dana
@@ -365,9 +365,9 @@ export function WalletOverview() {
         </div>
 
         {/* Transaction List */}
-        <div className="divide-y divide-slate-800/80 border-t border-slate-800 pt-1">
+        <div className="divide-y divide-white/6 border-t border-white/8 pt-1">
           {recentTransactions.length === 0 ? (
-            <div className="py-8 text-center text-xs text-slate-400">
+            <div className="py-8 text-center text-xs text-zinc-400">
               Tidak ada transaksi yang cocok dengan kriteria pencarian Anda.
             </div>
           ) : (
@@ -382,7 +382,7 @@ export function WalletOverview() {
                 <div
                   key={tx.id}
                   onClick={() => setSelectedTx(tx)}
-                  className="flex items-center justify-between p-3.5 sm:px-4 hover:bg-[#0c121e]/80 rounded-xl cursor-pointer transition-colors"
+                  className="flex items-center justify-between p-3.5 sm:px-4 hover:bg-[#12141a] rounded-xl cursor-pointer transition-colors"
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
@@ -394,8 +394,8 @@ export function WalletOverview() {
                     <div
                       className={`flex h-10 w-10 items-center justify-center rounded-xl shrink-0 ${
                         isCredit
-                          ? 'bg-teal-950 text-teal-400 border border-teal-800/40'
-                          : 'bg-slate-900 text-slate-300 border border-slate-800'
+                          ? 'bg-sky-950 text-[#22D3EE] border border-sky-800/40'
+                          : 'bg-[#12141a] text-zinc-300 border border-white/8'
                       }`}
                     >
                       <Icon className="h-5 w-5" aria-hidden="true" />
@@ -404,7 +404,7 @@ export function WalletOverview() {
                       <p className="font-semibold text-sm text-white truncate">
                         {tx.title}
                       </p>
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p className="text-xs text-zinc-400 mt-0.5">
                         {tx.category} &bull; {tx.timestampWib}
                       </p>
                     </div>
@@ -413,12 +413,12 @@ export function WalletOverview() {
                   <div className="text-right shrink-0">
                     <p
                       className={`font-mono text-sm font-bold tabular-nums ${
-                        isCredit ? 'text-teal-400' : 'text-white'
+                        isCredit ? 'text-[#7CE8C8]' : 'text-white'
                       }`}
                     >
                       {isBalanceHidden ? '••••••' : displayUsd}
                     </p>
-                    <p className="text-[11px] text-slate-400 font-mono tabular-nums mt-0.5">
+                    <p className="text-[11px] text-zinc-400 font-mono tabular-nums mt-0.5">
                       {isBalanceHidden ? '••••••' : displayIdr}
                     </p>
                   </div>

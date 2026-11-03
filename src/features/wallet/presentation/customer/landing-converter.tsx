@@ -50,10 +50,10 @@ export function LandingConverter() {
   }
 
   return (
-    <div className="rounded-3xl border border-slate-200/90 bg-white/95 p-6 sm:p-7 shadow-xl shadow-slate-200/40 dark:border-slate-800/90 dark:bg-[#111726]/95 dark:shadow-none text-left backdrop-blur-md">
-      <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-5">
+    <div className="rounded-3xl border border-slate-200/90 bg-white/95 p-6 sm:p-7 shadow-xl shadow-slate-200/40 dark:border-white/8 dark:bg-[#050507]/95 dark:shadow-none text-left backdrop-blur-md">
+      <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/8 pb-4 mb-5">
         <div className="flex items-center gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-400">
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-[#22D3EE]">
             <Zap className="h-3.5 w-3.5" aria-hidden="true" />
           </span>
           <span className="text-xs font-bold tracking-tight text-slate-900 dark:text-white uppercase">
@@ -61,7 +61,7 @@ export function LandingConverter() {
           </span>
         </div>
 
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-0.5 text-[11px] font-semibold text-teal-800 dark:bg-teal-950 dark:text-teal-300">
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-2.5 py-0.5 text-[11px] font-semibold text-sky-800 dark:bg-sky-950/60 dark:text-[#67E8F9]">
           <Clock className="h-3 w-3" aria-hidden="true" />
           <span>Kunci Kurs 15 Menit</span>
         </div>
@@ -71,10 +71,10 @@ export function LandingConverter() {
         {/* Top Field: Input Currency */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+            <label className="text-xs font-semibold text-slate-500 dark:text-zinc-400">
               {direction === 'usd_to_idr' ? 'Nominal Dollar (USD)' : 'Nominal Rupiah (IDR)'}
             </label>
-            <span className="text-[10px] text-teal-600 dark:text-teal-400 font-medium">
+            <span className="text-[10px] text-sky-600 dark:text-[#22D3EE] font-medium">
               {direction === 'usd_to_idr' ? 'USD ke IDR' : 'IDR ke USD'}
             </span>
           </div>
@@ -85,10 +85,10 @@ export function LandingConverter() {
               min="1"
               value={inputVal}
               onChange={(e) => setInputVal(e.target.value)}
-              className="w-full rounded-2xl border border-teal-600/40 bg-teal-50/30 pl-4 pr-16 py-3 font-mono text-lg sm:text-xl font-extrabold text-slate-950 focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600 dark:border-teal-500/40 dark:bg-teal-950/20 dark:text-white tabular-nums"
+              className="w-full rounded-2xl border border-sky-500/40 bg-sky-50/30 pl-4 pr-16 py-3 font-mono text-lg sm:text-xl font-extrabold text-slate-950 focus:border-sky-600 focus:outline-none focus:ring-1 focus:ring-sky-600 dark:border-[#1D9BF0]/40 dark:bg-sky-950/20 dark:text-white tabular-nums"
               placeholder={direction === 'usd_to_idr' ? '100' : '1500000'}
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 rounded-md bg-teal-700 px-2 py-1 font-mono text-xs font-bold text-white shadow-2xs">
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 rounded-md bg-[#1D9BF0] px-2 py-1 font-mono text-xs font-bold text-white shadow-2xs">
               {direction === 'usd_to_idr' ? 'USD' : 'IDR'}
             </span>
           </div>
@@ -99,7 +99,7 @@ export function LandingConverter() {
           <button
             type="button"
             onClick={handleSwapDirection}
-            className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm hover:border-teal-500 hover:text-teal-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-teal-400 dark:hover:text-teal-300 cursor-pointer transition-colors"
+            className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm hover:border-sky-500 hover:text-sky-600 dark:border-white/8 dark:bg-white/6 dark:text-zinc-300 dark:hover:border-[#1D9BF0] dark:hover:text-[#22D3EE] cursor-pointer transition-colors"
             title="Tukar arah konversi (USD ⇄ IDR)"
           >
             <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
@@ -109,26 +109,26 @@ export function LandingConverter() {
 
         {/* Bottom Field: Converted Target Currency */}
         <div>
-          <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 block mb-1.5">
+          <label className="text-xs font-semibold text-slate-500 dark:text-zinc-400 block mb-1.5">
             {direction === 'usd_to_idr' ? 'Total Bayar (IDR via VA / QRIS)' : 'Diterima di Dompet USD'}
           </label>
-          <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/60">
+          <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 dark:border-white/8 dark:bg-[#12141a]">
             <span className="font-mono text-lg sm:text-xl font-bold text-slate-900 dark:text-white tabular-nums">
               {direction === 'usd_to_idr'
                 ? `Rp ${totalPayableIdr.toLocaleString('id-ID')}`
                 : `$${calculatedUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             </span>
-            <span className="rounded-md bg-white px-2 py-1 font-mono text-xs font-bold text-slate-700 shadow-2xs dark:bg-slate-800 dark:text-slate-300">
+            <span className="rounded-md bg-white px-2 py-1 font-mono text-xs font-bold text-slate-700 shadow-2xs dark:bg-white/10 dark:text-zinc-300">
               {direction === 'usd_to_idr' ? 'IDR' : 'USD'}
             </span>
           </div>
         </div>
 
         {/* Breakdown details */}
-        <div className="space-y-1.5 px-1 text-[11px] text-slate-500 dark:text-slate-400">
+        <div className="space-y-1.5 px-1 text-[11px] text-slate-500 dark:text-zinc-400">
           <div className="flex justify-between">
             <span>Kurs Acuan Pasar</span>
-            <span className="font-mono font-semibold text-slate-700 dark:text-slate-300">
+            <span className="font-mono font-semibold text-slate-700 dark:text-zinc-300">
               {direction === 'usd_to_idr'
                 ? `1 USD = Rp ${fxRate.toLocaleString('id-ID')}`
                 : `1 IDR = $${inverseRate.toFixed(6)} USD`}
@@ -136,7 +136,7 @@ export function LandingConverter() {
           </div>
           <div className="flex justify-between">
             <span>Biaya Pemrosesan Transaksi</span>
-            <span className="font-mono text-teal-700 dark:text-teal-400 font-semibold">
+            <span className="font-mono text-sky-700 dark:text-[#22D3EE] font-semibold">
               Rp 4.500 flat (0% margin tersembunyi)
             </span>
           </div>

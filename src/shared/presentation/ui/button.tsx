@@ -1,10 +1,44 @@
 import React from 'react';
 import { cn } from '@/shared/utils/cn';
 
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
+export type ButtonSize = 'sm' | 'md' | 'lg';
+
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   isLoading?: boolean;
+}
+
+const baseStyles =
+  'inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-colors motion-reduce:transition-none min-h-[44px] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] select-none';
+
+const variants: Record<ButtonVariant, string> = {
+  primary:
+    'bg-[#1D9BF0] text-white hover:bg-[#1A8CD8] active:bg-[#177CC0] border border-transparent shadow-xs',
+  secondary: 'bg-muted text-foreground hover:bg-border border border-border',
+  outline: 'border border-border bg-transparent text-foreground hover:bg-muted',
+  danger: 'bg-destructive text-white hover:brightness-95 active:brightness-90 border border-transparent',
+  ghost: 'text-muted-foreground hover:bg-muted hover:text-foreground',
+};
+
+const sizes: Record<ButtonSize, string> = {
+  sm: 'px-3 py-1.5 text-xs',
+  md: 'px-4 py-2.5 text-sm',
+  lg: 'px-6 py-3 text-base',
+};
+
+/** Class names for Button styling on non-button elements, e.g. `<Link className={buttonVariants({ variant: 'primary' })}>`. */
+export function buttonVariants({
+  variant = 'primary',
+  size = 'md',
+  className,
+}: {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  className?: string;
+} = {}) {
+  return cn(baseStyles, variants[variant], sizes[size], className);
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -20,39 +54,17 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const baseStyles =
-      'inline-flex items-center justify-center font-medium rounded-lg transition-colors min-h-[44px] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 active:scale-[0.99] select-none';
-
-    const variants = {
-      primary:
-        'bg-teal-700 text-white hover:bg-teal-800 active:bg-teal-900 shadow-xs border border-teal-800',
-      secondary:
-        'bg-slate-100 text-slate-900 hover:bg-slate-200 active:bg-slate-300 border border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 dark:hover:bg-slate-700',
-      outline:
-        'border border-slate-300 bg-transparent text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-850',
-      danger:
-        'bg-rose-600 text-white hover:bg-rose-700 active:bg-rose-800 border border-rose-700 shadow-xs',
-      ghost:
-        'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white',
-    };
-
-    const sizes = {
-      sm: 'px-3 py-1.5 text-xs',
-      md: 'px-4 py-2.5 text-sm',
-      lg: 'px-6 py-3 text-base',
-    };
-
     return (
       <button
         ref={ref}
         disabled={disabled || isLoading}
         aria-busy={isLoading ? 'true' : undefined}
-        className={cn(baseStyles, variants[variant], sizes[size], className)}
+        className={buttonVariants({ variant, size, className })}
         {...props}
       >
         {isLoading && (
           <svg
-            className="animate-spin -ml-1 mr-2 h-4 w-4 text-current"
+            className="animate-spin h-4 w-4 text-current"
             fill="none"
             viewBox="0 0 24 24"
             aria-hidden="true"

@@ -21,10 +21,10 @@ export interface FxConversionResult {
 }
 
 const FRANKFURTER_BASE_URL = 'https://api.frankfurter.dev/v1';
-const FALLBACK_USD_IDR_RATE = 16250;
 
 /**
  * Fetches the latest USD to IDR exchange rate directly from Frankfurter API.
+ * Throws on network or API failure: callers must handle the error and never substitute a made-up rate.
  */
 export async function fetchFrankfurterRate(
   base: string = 'USD',
@@ -32,48 +32,35 @@ export async function fetchFrankfurterRate(
 ): Promise<FxConversionResult> {
   const url = `${FRANKFURTER_BASE_URL}/latest?base=${encodeURIComponent(base)}&symbols=${encodeURIComponent(symbols)}`;
 
-  try {
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
-    });
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
 
-    if (!res.ok) {
-      throw new Error(`Frankfurter API returned status: ${res.status}`);
-    }
-
-    const data: FrankfurterLatestResponse = await res.json();
-    const rate = data.rates[symbols];
-
-    if (!rate || typeof rate !== 'number') {
-      throw new Error(`Rate for ${symbols} not found in response`);
-    }
-
-    const inverseRate = rate > 0 ? 1 / rate : 0;
-
-    return {
-      rate,
-      inverseRate,
-      date: data.date,
-      base: data.base,
-      target: symbols,
-      source: 'frankfurter.dev',
-      fetchedAt: Date.now(),
-    };
-  } catch (error) {
-    console.warn('[Frankfurter API] Falling back to default rate due to error:', error);
-    return {
-      rate: FALLBACK_USD_IDR_RATE,
-      inverseRate: 1 / FALLBACK_USD_IDR_RATE,
-      date: new Date().toISOString().split('T')[0],
-      base,
-      target: symbols,
-      source: 'frankfurter.dev',
-      fetchedAt: Date.now(),
-    };
+  if (!res.ok) {
+    throw new Error(`Frankfurter API returned status: ${res.status}`);
   }
+
+  const data: FrankfurterLatestResponse = await res.json();
+  const rate = data.rates[symbols];
+
+  if (!rate || typeof rate !== 'number') {
+    throw new Error(`Rate for ${symbols} not found in response`);
+  }
+
+  const inverseRate = rate > 0 ? 1 / rate : 0;
+
+  return {
+    rate,
+    inverseRate,
+    date: data.date,
+    base: data.base,
+    target: symbols,
+    source: 'frankfurter.dev',
+    fetchedAt: Date.now(),
+  };
 }
 
 /**

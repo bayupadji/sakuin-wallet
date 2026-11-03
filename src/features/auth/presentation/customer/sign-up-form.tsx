@@ -101,7 +101,7 @@ export function SignUpForm() {
         Already have an account?{' '}
         <Link
           href="/signin"
-          className="font-medium text-teal-700 hover:text-teal-800 underline dark:text-teal-400"
+          className="font-medium text-[#1D9BF0] hover:text-[#1A8CD8] underline dark:text-[#1D9BF0]"
         >
           {messages.auth.signIn}
         </Link>

@@ -26,7 +26,7 @@ export default function AdminDashboardPage() {
       value: '1,428',
       change: '98.4% approval rate',
       icon: Users,
-      color: 'text-teal-400',
+      color: 'text-[#22D3EE]',
     },
     {
       label: 'Re-uploads Requested',
@@ -69,19 +69,19 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <div className="space-y-8 font-sans antialiased text-slate-100">
+    <div className="space-y-8 font-sans antialiased text-zinc-100">
       {/* 1. Admin Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/8 pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-950 text-teal-400 border border-teal-800">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-950/60 text-[#22D3EE] border border-sky-800/40">
               <Shield className="h-4 w-4" aria-hidden="true" />
             </span>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
               Compliance & Risk Console
             </h1>
           </div>
-          <p className="text-xs text-slate-400 mt-1.5">
+          <p className="text-xs text-zinc-400 mt-1.5">
             Strict Indonesian KYC compliance (KTP verification), audit logs, and ledger reconciliation.
           </p>
         </div>
@@ -103,16 +103,16 @@ export default function AdminDashboardPage() {
           return (
             <div
               key={stat.label}
-              className="rounded-2xl border border-slate-800/80 bg-slate-950/80 p-5 shadow-xs space-y-2"
+              className="rounded-2xl border border-white/8 bg-[#050507] p-5 shadow-xs space-y-2"
             >
-              <div className="flex items-center justify-between text-slate-400 text-xs">
+              <div className="flex items-center justify-between text-zinc-400 text-xs">
                 <span>{stat.label}</span>
                 <Icon className={`h-4 w-4 ${stat.color}`} aria-hidden="true" />
               </div>
               <p className="font-mono text-2xl font-bold tracking-tight text-white tabular-nums">
                 {stat.value}
               </p>
-              <p className="text-[11px] text-slate-500 font-medium">{stat.change}</p>
+              <p className="text-[11px] text-zinc-500 font-medium">{stat.change}</p>
             </div>
           );
         })}
@@ -124,23 +124,23 @@ export default function AdminDashboardPage() {
         <div className="lg:col-span-7 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <Clock className="h-4 w-4 text-teal-400" aria-hidden="true" />
+              <Clock className="h-4 w-4 text-[#22D3EE]" aria-hidden="true" />
               <span>Pending Customer Queue</span>
             </h2>
             <Link
               href="/admin/kyc"
-              className="text-xs font-semibold text-teal-400 hover:text-teal-300 flex items-center gap-1"
+              className="text-xs font-semibold text-[#1D9BF0] hover:text-[#22D3EE] flex items-center gap-1"
             >
               <span>Full Queue</span>
               <ArrowRight className="h-3 w-3" aria-hidden="true" />
             </Link>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/90 divide-y divide-slate-800/80 overflow-hidden shadow-xs text-xs">
-            <div className="p-4 flex items-center justify-between hover:bg-slate-900/50 transition-colors">
+          <div className="rounded-2xl border border-white/8 bg-[#050507] divide-y divide-white/6 overflow-hidden shadow-xs text-xs">
+            <div className="p-4 flex items-center justify-between hover:bg-white/4 transition-colors">
               <div>
                 <span className="font-mono font-bold text-white">3171••••••••0008</span>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className="text-[11px] text-zinc-400 mt-0.5">
                   Budi Santoso &bull; Attempt #1 &bull; 14 mins ago
                 </p>
               </div>
@@ -151,10 +151,10 @@ export default function AdminDashboardPage() {
               </Link>
             </div>
 
-            <div className="p-4 flex items-center justify-between hover:bg-slate-900/50 transition-colors">
+            <div className="p-4 flex items-center justify-between hover:bg-white/4 transition-colors">
               <div>
                 <span className="font-mono font-bold text-white">3275••••••••0012</span>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className="text-[11px] text-zinc-400 mt-0.5">
                   Dewi Lestari &bull; Attempt #2 &bull; 48 mins ago
                 </p>
               </div>
@@ -171,23 +171,23 @@ export default function AdminDashboardPage() {
         <div className="lg:col-span-5 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4 text-teal-400" aria-hidden="true" />
+              <ShieldAlert className="h-4 w-4 text-[#22D3EE]" aria-hidden="true" />
               <span>Immutable Audit Trail</span>
             </h2>
-            <span className="text-[11px] text-slate-500">Live UTC</span>
+            <span className="text-[11px] text-zinc-500">Live UTC</span>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/90 divide-y divide-slate-800/80 p-1 text-xs shadow-xs">
+          <div className="rounded-2xl border border-white/8 bg-[#050507] divide-y divide-white/6 p-1 text-xs shadow-xs">
             {recentAudits.map((item) => (
               <div key={item.id} className="p-3.5 space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono font-bold text-teal-400 text-[11px]">
+                  <span className="font-mono font-bold text-[#22D3EE] text-[11px]">
                     {item.action}
                   </span>
-                  <span className="text-[10px] text-slate-500 font-mono">{item.time}</span>
+                  <span className="text-[10px] text-zinc-500 font-mono">{item.time}</span>
                 </div>
-                <p className="text-slate-300 font-medium">{item.target}</p>
-                <p className="text-[10px] text-slate-500 font-mono">Actor: {item.actor}</p>
+                <p className="text-zinc-300 font-medium">{item.target}</p>
+                <p className="text-[10px] text-zinc-500 font-mono">Actor: {item.actor}</p>
               </div>
             ))}
           </div>

@@ -118,7 +118,7 @@ export function KycReviewQueue() {
               </p>
               <button
                 onClick={() => handleOpenModal(item, 'inspect')}
-                className="flex items-center gap-1.5 text-xs text-teal-400 hover:text-teal-300 cursor-pointer pt-1"
+                className="flex items-center gap-1.5 text-xs text-[#1D9BF0] hover:text-[#22D3EE] cursor-pointer pt-1"
               >
                 <Eye className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Inspect KTP ID Card Photo</span>
@@ -130,7 +130,7 @@ export function KycReviewQueue() {
                 variant="outline"
                 size="sm"
                 onClick={() => handleOpenModal(item, 'approve')}
-                className="gap-1 border-teal-700 text-teal-300 hover:bg-teal-950 font-medium"
+                className="gap-1 border-sky-700 text-[#67E8F9] hover:bg-sky-950/60 font-medium"
               >
                 <Check className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Approve</span>
@@ -170,17 +170,17 @@ export function KycReviewQueue() {
         >
           <div className="space-y-4 pt-2">
             {/* Simulated KTP Document Visual */}
-            <div className="relative aspect-[1.586/1] w-full rounded-2xl border-2 border-dashed border-teal-800/80 bg-slate-900 p-6 flex flex-col justify-between overflow-hidden text-slate-200">
-              <div className="flex justify-between items-start border-b border-slate-800 pb-3">
+            <div className="relative aspect-[1.586/1] w-full rounded-2xl border-2 border-dashed border-sky-800/80 bg-[#12141a] p-6 flex flex-col justify-between overflow-hidden text-zinc-200">
+              <div className="flex justify-between items-start border-b border-white/8 pb-3">
                 <div>
                   <span className="font-bold text-xs tracking-widest uppercase text-white block">
                     REPUBLIK INDONESIA
                   </span>
-                  <span className="text-[11px] text-slate-400 font-mono tracking-wider">
+                  <span className="text-[11px] text-zinc-400 font-mono tracking-wider">
                     KARTU TANDA PENDUDUK
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 rounded-full bg-teal-950 px-2 py-0.5 text-[10px] text-teal-400 border border-teal-800">
+                <div className="flex items-center gap-1.5 rounded-full bg-sky-950 px-2 py-0.5 text-[10px] text-[#22D3EE] border border-sky-800">
                   <ShieldCheck className="h-3 w-3" />
                   <span>Quality: High Clarity</span>
                 </div>
@@ -263,7 +263,7 @@ export function KycReviewQueue() {
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="e.g. Photo is blurry, corners of KTP are cut off..."
-                  className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 p-3 text-sm text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
+                  className="mt-1 w-full rounded-xl border border-white/10 bg-[#12141a] p-3 text-sm text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D9BF0]"
                   required
                 />
               </div>

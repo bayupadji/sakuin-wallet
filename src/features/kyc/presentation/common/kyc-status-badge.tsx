@@ -18,7 +18,7 @@ export function KycStatusBadge({ status, className }: KycStatusBadgeProps) {
       label: messages.kyc.status.approved,
       icon: CheckCircle2,
       classes:
-        'bg-teal-50 text-teal-800 border-teal-300 dark:bg-teal-950/70 dark:text-teal-300 dark:border-teal-800',
+        'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/70 dark:text-[#7CE8C8] dark:border-emerald-800',
     },
     in_review: {
       label: messages.kyc.status.inReview,

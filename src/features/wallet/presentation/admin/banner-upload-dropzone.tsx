@@ -94,8 +94,8 @@ export function BannerUploadDropzone({
         <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
           <span>Foto Banner Panorama</span>
           <span className="text-rose-400">*</span>
-          <span className="inline-flex items-center gap-1 rounded bg-teal-950/80 px-2 py-0.5 text-[10px] font-bold text-teal-300 border border-teal-800/60">
-            <Zap className="h-3 w-3 text-teal-400" aria-hidden="true" />
+          <span className="inline-flex items-center gap-1 rounded bg-sky-950/80 px-2 py-0.5 text-[10px] font-bold text-[#67E8F9] border border-sky-800/60">
+            <Zap className="h-3 w-3 text-[#22D3EE]" aria-hidden="true" />
             <span>Wajib Kompresi Otomatis</span>
           </span>
         </label>
@@ -123,17 +123,17 @@ export function BannerUploadDropzone({
         onClick={handleClickUpload}
         className={`relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-4 sm:p-6 transition-all cursor-pointer ${
           isDragging
-            ? 'border-teal-400 bg-teal-950/20'
+            ? 'border-[#1D9BF0] bg-sky-950/20'
             : error || localError
             ? 'border-rose-700/60 bg-rose-950/10 hover:border-rose-600'
             : activeImage
-            ? 'border-slate-700 bg-slate-900/60 hover:border-teal-500/60'
-            : 'border-slate-800 bg-[#090e18] hover:border-slate-700 hover:bg-slate-900/40'
+            ? 'border-slate-700 bg-slate-900/60 hover:border-[#1D9BF0]/60'
+            : 'border-white/8 bg-[#090e18] hover:border-slate-700 hover:bg-slate-900/40'
         }`}
       >
         {isCompressing ? (
           <div className="flex flex-col items-center py-6 space-y-2">
-            <RefreshCw className="h-8 w-8 text-teal-400 animate-spin" aria-hidden="true" />
+            <RefreshCw className="h-8 w-8 text-[#22D3EE] animate-spin" aria-hidden="true" />
             <p className="text-xs font-semibold text-slate-200">
               Sedang Mengompresi Foto Banner...
             </p>
@@ -152,8 +152,8 @@ export function BannerUploadDropzone({
                 unoptimized={activeImage.startsWith('data:')}
                 className="object-cover object-left sm:object-center"
               />
-              <div className="absolute top-2 right-2 flex items-center gap-1.5 rounded-full bg-slate-950/80 px-2.5 py-1 text-[10px] font-bold text-teal-300 border border-slate-700 backdrop-blur-md">
-                <CheckCircle2 className="h-3.5 w-3.5 text-teal-400" aria-hidden="true" />
+              <div className="absolute top-2 right-2 flex items-center gap-1.5 rounded-full bg-slate-950/80 px-2.5 py-1 text-[10px] font-bold text-[#67E8F9] border border-slate-700 backdrop-blur-md">
+                <CheckCircle2 className="h-3.5 w-3.5 text-[#22D3EE]" aria-hidden="true" />
                 <span>Terkompresi</span>
               </div>
             </div>
@@ -166,7 +166,7 @@ export function BannerUploadDropzone({
                   e.stopPropagation();
                   handleClickUpload();
                 }}
-                className="text-teal-400 hover:text-teal-300 font-semibold cursor-pointer underline"
+                className="text-[#1D9BF0] hover:text-[#22D3EE] font-semibold cursor-pointer underline"
               >
                 Unggah Ulang
               </button>
@@ -174,7 +174,7 @@ export function BannerUploadDropzone({
           </div>
         ) : (
           <div className="flex flex-col items-center text-center py-5 space-y-2">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-950/70 text-teal-400 border border-teal-800/40">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-950/70 text-[#22D3EE] border border-sky-800/40">
               <UploadCloud className="h-6 w-6" aria-hidden="true" />
             </div>
             <div>
@@ -202,40 +202,40 @@ export function BannerUploadDropzone({
 
       {/* Compression Result Report Widget (Wajib Tampil Ketika Berhasil Dikompresi) */}
       {compressionResult && (
-        <div className="rounded-xl border border-teal-800/50 bg-teal-950/30 p-3.5 space-y-2.5 animate-in fade-in duration-200">
+        <div className="rounded-xl border border-sky-800/50 bg-sky-950/30 p-3.5 space-y-2.5 animate-in fade-in duration-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <FileCheck className="h-4 w-4 text-teal-400" aria-hidden="true" />
-              <span className="text-xs font-bold text-teal-300">
+              <FileCheck className="h-4 w-4 text-[#22D3EE]" aria-hidden="true" />
+              <span className="text-xs font-bold text-[#67E8F9]">
                 Laporan Hasil Kompresi Wajib
               </span>
             </div>
-            <span className="inline-flex items-center gap-1 rounded-full bg-teal-500/20 px-2 py-0.5 text-[10px] font-bold text-teal-300 border border-teal-500/30">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#1D9BF0]/20 px-2 py-0.5 text-[10px] font-bold text-[#67E8F9] border border-[#1D9BF0]/30">
               <Sparkles className="h-3 w-3" aria-hidden="true" />
               <span>Hemat {compressionResult.savingsPercent}%</span>
             </span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] pt-1">
-            <div className="rounded-lg bg-[#0c1422] p-2 border border-slate-800">
+            <div className="rounded-lg bg-[#0c1422] p-2 border border-white/8">
               <span className="text-slate-500 block">Ukuran Awal</span>
               <span className="font-mono font-semibold text-slate-300">
                 {compressionResult.originalSizeFormatted}
               </span>
             </div>
-            <div className="rounded-lg bg-[#0c1422] p-2 border border-slate-800">
+            <div className="rounded-lg bg-[#0c1422] p-2 border border-white/8">
               <span className="text-slate-500 block">Ukuran Kompresi</span>
-              <span className="font-mono font-bold text-teal-400">
+              <span className="font-mono font-bold text-[#22D3EE]">
                 {compressionResult.compressedSizeFormatted}
               </span>
             </div>
-            <div className="rounded-lg bg-[#0c1422] p-2 border border-slate-800">
+            <div className="rounded-lg bg-[#0c1422] p-2 border border-white/8">
               <span className="text-slate-500 block">Dimensi Output</span>
               <span className="font-mono font-semibold text-slate-300">
                 {compressionResult.width} × {compressionResult.height} px
               </span>
             </div>
-            <div className="rounded-lg bg-[#0c1422] p-2 border border-slate-800">
+            <div className="rounded-lg bg-[#0c1422] p-2 border border-white/8">
               <span className="text-slate-500 block">Format Berkas</span>
               <span className="font-mono font-semibold text-slate-300">
                 {compressionResult.format}
